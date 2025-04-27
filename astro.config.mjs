@@ -6,6 +6,9 @@ import icon from 'astro-icon';
 // import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  server: {
+    host: '0.0.0.0'
+  },
   // Add other integrations or config options if you have them
 
   i18n: {
