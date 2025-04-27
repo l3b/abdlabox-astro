@@ -1,0 +1,158 @@
+---
+// src/pages/ar/contact.astro - Implemented Cal.com Popup Embed
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+// Make sure this path and extension (.ts, .yaml, .js) matches your data file!
+import socialLinks from '../../data/socialLinks.ts';
+
+const pageTitle = "أرسل إشارة";
+const pageDescription = "قد لا نعرف بعضنا، لكن إشاراتنا قد تتقاطع في لحظةٍ ما.";
+
+// Grouping and sorting logic for links (remains the same)
+const linkCategories = socialLinks.reduce((acc, link) => {
+  const category = link.category || 'Other';
+  if (!acc[category]) { acc[category] = []; }
+  acc[category].push(link);
+  return acc;
+}, {} as Record<string, typeof socialLinks>);
+
+const categoryOrder = ['Professional', 'Writing', 'Activity', 'Learning', 'Reading', 'Media', 'Other'];
+const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
+    const indexA = categoryOrder.indexOf(a);
+    const indexB = categoryOrder.indexOf(b);
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+});
+
+// const calComUrl = "https://cal.com/your-username"; // No longer needed for simple link
+---
+<BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
+  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
+
+    {/* Page Title */}
+    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
+      <span class="ms-3">📡</span>{pageTitle}
+    </h1>
+
+    {/* Intro content area */}
+    <div class="max-w-prose space-y-6 text-lg leading-relaxed mb-12 text-soft-charcoal">
+      <p>قد لا نعرف بعضنا،</p>
+      <p>
+        لكن إشاراتنا قد تتقاطع في لحظةٍ ما.
+        إن كنت تقرأ هذه السطور، فربما لديك ما يستحق أن يُشارك — فكرة، ملاحظة، أو حتى فضول صامت.
+      </p>
+      <p>
+        يمكنك أن ترسل إشارتك من خلال النموذج أدناه،
+        أو تجد وقتًا مناسبًا لنتحدث وجهًا لوجه (افتراضيًا)،
+        أو ببساطة، تلحق أثري الرقمي في إحدى الكثبان الكهربائية.
+      </p>
+    </div>
+
+    {/* Sections in a Grid */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+
+      {/* Left Column (Form & Scheduling) */}
+      <div class="space-y-10">
+        {/* Contact Form Placeholder */}
+        <section>
+          <h2 class="text-2xl font-semibold mb-4 text-electric-blue flex items-center gap-2">
+             <span class="text-2xl">✍️</span>نموذج الإشارة
+          </h2>
+          <p class="text-gray-600 mb-4">(الاسم – البريد – الرسالة)</p>
+           {/* Form implementation */}
+           <form action="https://formspree.io/f/xgvkewgp" method="POST" class="space-y-4">
+              <div>
+                <label for="name" class="block mb-1 font-medium text-gray-700 dark:text-gray-300">الاسم</label>
+                <input type="text" id="name" name="name" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-neon-yellow focus:border-transparent dark:bg-gray-700 dark:border-gray-600"/>
+              </div>
+              <div>
+                <label for="email" class="block mb-1 font-medium text-gray-700 dark:text-gray-300">البريد الإلكتروني</label>
+                <input type="email" id="email" name="_replyto" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-neon-yellow focus:border-transparent dark:bg-gray-700 dark:border-gray-600"/>
+              </div>
+              <div>
+                <label for="message" class="block mb-1 font-medium text-gray-700 dark:text-gray-300">الرسالة</label>
+                <textarea id="message" name="message" rows="5" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-neon-yellow focus:border-transparent dark:bg-gray-700 dark:border-gray-600"></textarea>
+              </div>
+              <div>
+                <button type="submit" class="px-6 py-2 bg-electric-blue text-white font-semibold rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-neon-yellow focus:ring-offset-2 transition-colors duration-200">
+                  أرسل الإشارة
+                </button>
+              </div>
+            </form>
+           <p class="text-sm text-gray-500 mt-3">فقط أرسل ما ترغب به، وسأعود لك حين ألتقط الإشارة.</p>
+        </section>
+
+        {/* Scheduling Section - UPDATED with Button Trigger */}
+        <section>
+           <h2 class="text-2xl font-semibold mb-4 text-electric-blue flex items-center gap-2">
+             <span class="text-2xl">🗓️</span>جدولة إشارة مباشرة
+          </h2>
+           <p class="mb-4 text-lg">
+             اضغط الزر أدناه لحجز وقت مناسب للحديث: {/* Updated Text */}
+           </p>
+           {/* Cal.com Trigger Button */}
+           <button
+             type="button"
+             data-cal-link="abdla/30min"  /* Use your specific Cal link ID */
+             data-cal-namespace="30min" /* Optional namespace */
+             data-cal-config='{"layout":"month_view"}' /* Optional config */
+             class="inline-flex items-center px-6 py-2 bg-neon-yellow text-soft-charcoal font-semibold rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-electric-blue focus:ring-offset-2 transition"
+           >
+             احجز موعدًا {/* Button Text */}
+           </button>
+           <p class="text-gray-600 mt-3">15 أو 30 دقيقة من الحديث — في الوقت الذي يناسبك.</p> {/* Adjusted spacing/wording */}
+        </section>
+      </div>
+
+      {/* Right Column (Other Signals / Links) */}
+      <section>
+         {/* ... Social links section remains the same as last version ... */}
+         <h2 class="text-2xl font-semibold mb-4 text-electric-blue flex items-center gap-2">
+            <span class="text-2xl">🌐</span>إشارات أخرى
+         </h2>
+         <p class="text-gray-600 mb-6">تفضل بمتابعتي أو التواصل عبر أماكني الأخرى على الإنترنت:</p>
+         {sortedCategories.map(category => (
+            <div class="mb-6">
+                <div class="flex flex-wrap gap-6 items-center justify-center">
+                    {linkCategories[category].map(link => (
+                        <a href={link.url} target="_blank" rel="noopener noreferrer me" aria-label={link.name} title={link.name} class="p-1 group social-icon-link text-lavender hover:text-electric-blue transition-colors duration-200">
+                            <Icon name={link.icon} class="w-6 h-6" />
+                        </a>
+                    ))}
+                </div>
+            </div>
+         ))}
+      </section>
+
+    </div> {/* End grid */}
+
+    {/* Closing Section */}
+    <section class="mt-16 pt-8 border-t border-gray-300 text-center max-w-prose mx-auto">
+        {/* ... closing content ... */}
+        <h2 class="text-xl font-semibold mb-3 text-electric-blue">
+            <span class="me-2">🛰️
+          </span> إلى أن تومض الإشارة من جديد
+          
+          </h2>
+          <p class="text-lg text-gray-600 leading-relaxed">
+              وجودك هنا يعني الكثير.<br/>
+              اقرأ، تواصل، أو مرّ مرور الكرام… الإشارة وصلت.
+          </p>
+    </section>
+
+  </div>
+
+  {/* Add Cal.com Embed Script Here (just before closing BaseLayout) */}
+  <script type="text/javascript" is:inline>
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+    Cal("init", "30min", {origin:"https://cal.com"});
+    // Set UI options for the '30min' namespace trigger if needed
+    Cal.ns["30min"]("ui", {"cssVarsPerTheme":{"light":{"cal-brand":"#1E2430"},"dark":{"cal-brand":"#cacabd"}},"hideEventTypeDetails":false,"layout":"month_view"});
+  </script>
+
+  
+
+
+</BaseLayout>

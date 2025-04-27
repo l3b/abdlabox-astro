@@ -1,0 +1,378 @@
+---
+// src/pages/ar/index.astro - Homepage v14 (Fetch 5 GitHub Events, Display 3)
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
+import { formatDistanceToNow } from 'date-fns'; // For relative time
+import { arSA } from 'date-fns/locale'; // For Arabic relative time
+
+const pageTitle = "الواجهة";
+const pageSubtitle = "لقطة حيّة من عالمي الرقمي";
+const pageDescription = "الواجهة الرقمية لـ عبدالله: استكشاف الأفكار والتجارب عبر مختلف الإشارات.";
+
+// --- Fetch Latest Blog Post ---
+let latestArPost = null;
+try {
+    latestArPost = (await getCollection('blog', ({ data, slug }) => {
+        return slug.startsWith('ar/') && data.isDraft !== true;
+    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
+} catch (e) { console.error("Error fetching blog post:", e); }
+
+
+// --- Fetch Goodreads Currently Reading ---
+interface ReadingBook { title: string; link: string; }
+let currentlyReadingBook: ReadingBook | null = null;
+const GOODREADS_RSS_URL = "https://www.goodreads.com/review/list_rss/4693662?shelf=currently-reading";
+const GOODREADS_PROFILE_URL = "https://www.goodreads.com/user/show/4693662-abdullah-althani";
+try {
+  // console.log(`Workspaceing Goodreads RSS: ${GOODREADS_RSS_URL}`); // Optional: uncomment for debugging
+  const response = await fetch(GOODREADS_RSS_URL);
+  if (response.ok) {
+     const xmlText = await response.text();
+     const firstItemMatch = xmlText.match(/<item>(.*?)<\/item>/s);
+     if (firstItemMatch && firstItemMatch[1]) {
+        const itemContent = firstItemMatch[1];
+        const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+        const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
+        const title = titleMatch ? titleMatch[1].trim() : null;
+        let link: string | null = null;
+        if (linkMatch && linkMatch[1]) { link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim(); }
+        if (title && link) { currentlyReadingBook = { title, link }; }
+     } // else { console.log("No <item> found in Goodreads RSS feed."); }
+  } else { console.error(`Goodreads RSS fetch failed: ${response.status}`); }
+} catch (error) { console.error("Error fetching Goodreads:", error); }
+
+
+// --- Fetch Trakt Recently Watched ---
+interface WatchedItem { id: number; title: string; link: string; type: 'movie' | 'episode' | 'unknown'; overview: string | null; }
+let recentlyWatchedItems: WatchedItem[] = [];
+const TRAKT_USERNAME = 'abdlabox';
+const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
+const TRAKT_PROFILE_URL = `https://trakt.tv/users/${TRAKT_USERNAME}`;
+if (TRAKT_API_KEY) { try {
+    const traktUrl = `https://api.trakt.tv/users/${TRAKT_USERNAME}/history?limit=3&extended=full`;
+    // console.log(`Workspaceing Trakt History: ${traktUrl}`); // Optional: uncomment for debugging
+    const traktResponse = await fetch(traktUrl, { headers: { 'Content-Type': 'application/json', 'trakt-api-version': '2', 'trakt-api-key': TRAKT_API_KEY }});
+    if (traktResponse.ok) {
+       const historyData = await traktResponse.json();
+       if (historyData && historyData.length > 0) {
+          recentlyWatchedItems = historyData.map((item: any): WatchedItem | null => {
+             let title = '', link = '#', overview: string | null = null; const type = item.type || 'unknown'; const id = item.id;
+             try {
+               if (type === 'movie' && item.movie?.ids?.slug) { title = item.movie.title || 'Unknown Movie'; link = `https://trakt.tv/movies/${item.movie.ids.slug}`; overview = item.movie.overview; }
+               else if (type === 'episode' && item.show?.ids?.slug && item.episode) { const showTitle = item.show.title || 'Unknown Show'; const season = item.episode.season; const number = item.episode.number; const epTitle = item.episode.title ? ` - ${item.episode.title}` : ''; title = `${showTitle} S${String(season).padStart(2, '0')}E${String(number).padStart(2, '0')}${epTitle}`; link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`; overview = item.episode.overview || item.show.overview; }
+             } catch (e) { return null; }
+             if (title && id) { return { id, title, link, type, overview }; } return null;
+          }).filter((item): item is WatchedItem => item !== null);
+       } // else { console.log("No items found in Trakt history."); }
+    } else { console.error(`Trakt fetch failed: ${traktResponse.status}`); }
+ } catch (error) { console.error("Error fetching Trakt:", error); }
+} else { console.warn("TRAKT_API_KEY not set in .env"); }
+
+
+// --- Fetch Latest Bluesky Posts (Arabic) ---
+interface BlueskyPost { text: string | null; uri: string; cid: string; embedImageUrl?: string; embedLinkUrl?: string; embedLinkTitle?: string; replyParent?: string; reason?: string; labels?: ComAtprotoLabelDefs.Label[]; }
+let latestBlueskyPosts: BlueskyPost[] = [];
+const BSKY_IDENTIFIER = import.meta.env.BLUESKY_IDENTIFIER;
+const BSKY_APP_PASSWORD = import.meta.env.BLUESKY_APP_PASSWORD;
+const TARGET_LANG = 'ar';
+
+if (BSKY_IDENTIFIER && BSKY_APP_PASSWORD) { try {
+    // console.log(`Attempting Bluesky login for: ${BSKY_IDENTIFIER}`); // Optional: uncomment for debugging
+    const agent = new BskyAgent({ service: 'https://bsky.social' });
+    await agent.login({ identifier: BSKY_IDENTIFIER, password: BSKY_APP_PASSWORD });
+    // console.log("Bluesky login successful. Fetching feed..."); // Optional: uncomment for debugging
+    const response = await agent.app.bsky.feed.getAuthorFeed({ actor: BSKY_IDENTIFIER, limit: 20 }); // Fetch more to filter
+
+    if (response.success && response.data.feed.length > 0) {
+      latestBlueskyPosts = response.data.feed
+        .map((feedItem): BlueskyPost | null => { /* ... (mapping logic from previous step) ... */
+            const post = feedItem.post; const reason = feedItem.reason;
+            if (!post?.record || !post.uri || !post.cid) return null;
+            const langs = post.record.langs as string[] | undefined;
+            if (!langs || !langs.includes(TARGET_LANG)) return null;
+            const labels = post.labels as ComAtprotoLabelDefs.Label[] | undefined;
+            const hazardousLabels = ['porn', 'sexual', 'nudity']; // Example filter
+            if (labels?.some(label => hazardousLabels.includes(label.val))) return null;
+            let embedImageUrl: string | undefined = undefined; let embedLinkUrl: string | undefined = undefined; let embedLinkTitle: string | undefined = undefined;
+            if (post.embed?.images && post.embed.$type === 'app.bsky.embed.images#view') { embedImageUrl = post.embed.images[0]?.thumb; }
+            else if (post.embed?.external && post.embed.$type === 'app.bsky.embed.external#view') { embedImageUrl = post.embed.external.thumb; embedLinkUrl = post.embed.external.uri; embedLinkTitle = post.embed.external.title;}
+            const replyParent = post.record.reply?.parent?.uri;
+            return { text: typeof post.record.text === 'string' ? post.record.text : null, uri: post.uri, cid: post.cid, embedImageUrl: embedImageUrl, embedLinkUrl: embedLinkUrl, embedLinkTitle: embedLinkTitle, replyParent: replyParent, reason: reason?.$type };
+        })
+        .filter((item): item is BlueskyPost => item !== null)
+        .filter(item => item.reason !== 'app.bsky.feed.defs#reasonRepost' || item.text) // Filter simple reposts
+        .slice(0, 3); // Take top 3
+    } // else { console.log("Bluesky feed is empty or fetch failed."); }
+  } catch (error) { console.error("Error fetching Bluesky:", error); }
+} else { console.warn("Bluesky credentials not set in .env"); }
+
+// --- Fetch Latest GitHub Events (Fetch 5, Process up to 3) ---
+interface GitHubEvent { id: string; display: string; link: string; timeAgo: string; }
+let latestGitHubEvents: GitHubEvent[] = []; // Now an array
+const GITHUB_USERNAME = 'l3b';
+const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
+
+try {
+  const githubUrl = `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=5`; // Fetch 5 events
+  console.log(`Fetching GitHub Events: ${githubUrl}`); // Log fetch URL
+  const githubResponse = await fetch(githubUrl, {
+    headers: { Accept: 'application/vnd.github.v3+json' }
+  });
+
+  if (githubResponse.ok) {
+    const events = await githubResponse.json();
+    if (events && events.length > 0) {
+      latestGitHubEvents = events
+        .map((event: any): GitHubEvent | null => { // Map each event
+          let display = ' قام بنشاط ما';
+          let link = GITHUB_PROFILE_URL;
+          let timeAgo = '';
+
+          if (event.created_at) {
+            try {
+              timeAgo = formatDistanceToNow(new Date(event.created_at), { addSuffix: true, locale: arSA });
+            } catch (dateError) { console.error("GitHub Date formatting error", dateError)}
+          }
+
+          const repoName = event.repo?.name;
+          const repoUrl = repoName ? `https://github.com/${repoName}` : GITHUB_PROFILE_URL;
+
+          switch (event.type) {
+            case 'PushEvent':
+              const commitCount = event.payload?.commits?.length || 0;
+              if (commitCount > 0) {
+                  const commitMsg = event.payload?.commits?.[0]?.message?.split('\n')[0] || 'تحديث';
+                  display = `دفع ${commitCount} ${commitCount === 1 ? 'تغيير' : 'تغييرات'} إلى ${repoName}: "${commitMsg}"`;
+                  link = commitCount === 1 && event.payload?.commits?.[0]?.sha ? `https://github.com/${repoName}/commit/${event.payload.commits[0].sha}` : repoUrl;
+              } else {
+                  display = `دفع إلى ${repoName}`; // Handle case with no commits listed?
+                  link = repoUrl;
+              }
+              break;
+            case 'CreateEvent':
+              const refType = event.payload?.ref_type;
+              if (refType === 'repository') { display = `أنشأ المستودع ${repoName}`; link = repoUrl; }
+              else if (refType === 'branch' && event.payload.ref) { display = `أنشأ الفرع ${event.payload.ref} في ${repoName}`; link = `https://github.com/${repoName}/tree/${event.payload.ref}`; }
+              else { display = `أنشأ ${refType || 'شيئًا'} في ${repoName}`; link = repoUrl; }
+              break;
+            case 'WatchEvent': // Event for starring
+              if (event.payload?.action === 'started') { display = `تابع المستودع ${repoName}`; link = repoUrl; }
+              else return null; // Ignore unstar events for this display
+              break;
+            case 'ForkEvent':
+               display = `أنشأ نسخة من ${repoName}`;
+               link = event.payload?.forkee?.html_url || repoUrl;
+               break;
+            case 'PublicEvent':
+               display = `جعل المستودع ${repoName} عامًا`;
+               link = repoUrl;
+               break;
+            // Add cases for IssuesEvent, PullRequestEvent etc. if desired
+            default:
+              console.log(`Unhandled GitHub event type: ${event.type} for ${repoName}`);
+              return null; // Don't display unhandled event types
+          }
+
+          return { id: event.id, display, link, timeAgo };
+
+        })
+        .filter((item): item is GitHubEvent => item !== null) // Filter out nulls (unhandled/ignored events)
+        .slice(0, 3); // Take the latest 3 valid events
+
+      console.log(`Found ${latestGitHubEvents.length} displayable GitHub events.`);
+
+    } else {
+      console.log("No public events returned for GitHub user.");
+    }
+  } else {
+    console.error(`GitHub API fetch failed: ${githubResponse.status} ${githubResponse.statusText}`);
+  }
+} catch (error) {
+  console.error("Error fetching GitHub events:", error);
+}
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
+  <div class="container mx-auto px-4 py-12 md:px-6 md:py-16">
+
+    {/* Page Title & Subtitle */}
+    <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-soft-charcoal">{pageTitle}</h1>
+    <p class="text-lg text-gray-600 text-center mb-12 md:mb-16">{pageSubtitle}</p>
+
+    {/* Grid for Signal Sections */}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+
+      {/* Section 1: Latest Blog Post */}
+      {latestArPost ? (
+        <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow flex flex-col"> {/* Use flex-col for structure */}
+          <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+            <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
+            أحدث ما في المدونة
+          </h2>
+          <div class="flex-grow space-y-2"> {/* Allow content to grow */}
+            <h3 class="text-lg font-semibold mt-1"> {/* Removed margins, rely on space-y */}
+              <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`}
+                 class="hover:text-teal-600 transition-colors duration-200">
+                <span class="text-soft-charcoal">
+                  {latestArPost.data.title}
+                </span>
+              </a>
+            </h3>
+            {latestArPost.data.description && (
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3"> {/* Line clamp */}
+                {latestArPost.data.description}
+              </p>
+            )}
+          </div>
+          <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0"> {/* mt-auto would push to bottom if height consistent */}
+            قراءة المزيد <span aria-hidden="true">&larr;</span>
+          </a>
+        </section>
+      ) : (
+         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">No blog posts found.</section>
+      )}
+
+      {/* Section 2: Goodreads Currently Reading */}
+       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
+           أقرأ الآن
+         </h2>
+         <div class="flex-grow"> {/* Allow content to grow */}
+           {currentlyReadingBook ? (
+              <div>
+                <a href={currentlyReadingBook.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">
+                   <p class="text-soft-charcoal text-lg font-semibold leading-snug mb-3">
+                      {currentlyReadingBook.title}
+                   </p>
+                </a>
+              </div>
+           ) : ( <p class="italic text-gray-400">(لا يوجد كتاب حاليًا أو تعذر جلب البيانات...)</p> )}
+         </div>
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start"> {/* Align link bottom-start */}
+            ملفي على Goodreads &larr;
+         </a>
+       </section>
+
+      {/* Section 3: Trakt Recently Watched */}
+       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+            <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
+            شاهدت مؤخرًا
+        </h2>
+         {recentlyWatchedItems.length > 0 ? (
+            <div class="flex-grow">
+              <ul class="space-y-4">
+                {recentlyWatchedItems.map(item => (
+                  <li key={item.id}>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
+                       <p class="text-soft-charcoal text-base font-medium leading-snug group-hover:text-teal-600">
+                          {item.type === 'movie' ? '🎬 ' : '📺 '}
+                          {item.title}
+                       </p>
+                    </a>
+                     {item.overview && (
+                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-2">
+                         {item.overview}
+                       </p>
+                     )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+         ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على سجل مشاهدة حديث أو تعذر جلب البيانات...)</p> )}
+           <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
+              ملفي على Trakt &larr;
+           </a>
+       </section>
+
+       {/* Section 4: Bluesky Posts */}
+       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
+           من Bluesky
+         </h2>
+         {latestBlueskyPosts.length > 0 ? (
+            <div class="flex-grow space-y-5">
+              {latestBlueskyPosts.map(post => {
+                 const postUrl = `https://bsky.app/profile/${BSKY_IDENTIFIER}/post/${post.uri?.split('/').pop() ?? ''}`;
+                 return (
+                    <div class="pb-5 border-b border-gray-100 last:border-b-0 last:pb-0" key={post.cid}>
+                      {post.embedImageUrl && (
+                        <a href={post.embedLinkUrl || postUrl} target="_blank" rel="noopener noreferrer" class="block mb-2">
+                          <img src={post.embedImageUrl} alt={post.embedLinkTitle || 'Bluesky Embed Image'} class="max-w-full h-auto rounded-md border border-gray-200" loading="lazy"/>
+                         </a>
+                      )}
+                      {post.text && (
+                        <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                           {post.text}
+                        </p>
+                      )}
+                      {!post.text && post.embedLinkTitle && post.embedLinkUrl && (
+                         <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                            <em class="text-gray-500">[رابط مشترك]:</em> {post.embedLinkTitle}
+                         </p>
+                      )}
+                      <a href={postUrl} target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-xs">
+                         عرض على Bluesky <span aria-hidden="true">←</span>
+                      </a>
+                    </div>
+                 )
+              })}
+            </div>
+         ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على منشورات حديثة باللغة العربية أو تعذر جلب البيانات...)</p> )}
+       </section>
+
+     {/* Section 5: Strava Activity - UPDATED with iframe Widget */}
+     <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col items-center"> {/* Added flex centering */}
+        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start"> {/* Align heading normally */}
+            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
+            آخر نشاط رياضي
+         </h2>
+         {/* Embed the Strava Widget */}
+         <iframe
+            height='454'
+            width='300'
+            frameborder='0'
+            allowtransparency='true'
+            scrolling='no'
+            src='https://www.strava.com/athletes/7746516/latest-rides/930be949cf2c3e5601bb81846be00cc7f1fd01ac'
+            class="mt-2" {/* Added some margin top */}
+         ></iframe>
+         {/* Removed placeholder <p> */}
+       </section>
+
+      {/* Section 6: GitHub Latest Events - UPDATED DISPLAY */}
+      <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
+           من GitHub
+        </h2>
+        <div class="flex-grow">
+          {latestGitHubEvents.length > 0 ? (
+             <ul class="space-y-3"> {/* Use list for multiple events */}
+               {latestGitHubEvents.map(event => (
+                 <li key={event.id}>
+                   <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
+                      <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600"> {/* Smaller text size */}
+                         {event.display}
+                      </p>
+                   </a>
+                   <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
+                 </li>
+               ))}
+             </ul>
+          ) : (
+             <p class="italic text-gray-400">(لا يوجد نشاط حديث أو تعذر جلب البيانات...)</p>
+          )}
+        </div>
+        <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
+           ملفي على GitHub &larr;
+        </a>
+      </section>
+
+    </div> {/* End Grid */}
+  </div> {/* End Container */}
+</BaseLayout>

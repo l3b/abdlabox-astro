@@ -1,0 +1,41 @@
+---
+// src/pages/ar/about.astro - Larger Font, Subtitle Removed
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+
+const pageTitle = "من وراء الكثبان؟";
+// Removed englishSubtitle variable
+// Optional: Use a description for meta tags
+const pageDescription = "في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.";
+---
+<BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
+  {/* Centered container with vertical padding */}
+  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
+
+    {/* Page Title - Adjusted margin */}
+    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow"> {/* Adjusted mb-4 to mb-8 */}
+      {pageTitle}
+    </h1>
+    {/* English subtitle <p> tag REMOVED */}
+
+    {/* Main content area - Added text-lg for larger paragraphs */}
+    <div class="space-y-6 max-w-prose leading-relaxed text-lg"> {/* <-- Added text-lg */}
+      <p>
+        في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.
+      </p>
+      <p>
+        لستُ هنا لأتحدث عن الاسم، بل عن الأفكار، والتجارب، والرؤية.
+      </p>
+      <p>
+        من خلف الشاشة وداخل أسطر الكود، أسافر عبر المعرفة، أبحث عن الحلول، وأشارك ما يملأ فراغي ويشعل شغفي.
+        أكتب لأنني أحتاج أحيانًا للبوح، ولأن بعض الأفكار لا تحتمل البقاء في رأسي وحدي. أشارك تجاربي وأدوّن ما أراه يستحق التدوين. لا أنتمي إلى مجال واحد، بل أتنقل بين اهتماماتي، فقد تجدني أكتب عن التقنية وآخر أخبارها، أو أروي قصةً بطلها ذكاءٌ اصطناعي، أو أتأمل في تجربة ريادية وتجارية.
+      </p>
+      <p>
+        أحيانًا أركض في الماراثونات بحذائي الحديث وأوثّق الرحلة، وأحيانًا أخرى أبحر في عالم جديد تمامًا لم يسبقني إليه أحدٌ أعرفه.
+      </p>
+      <p>
+        إن شعرت أن ما تقرأه هنا يلامسك، فربما يمكن أن نكون أصدقاء في هذا العالم الرقمي — على واحدة من وسائل التواصل المختلفة. {/* Links to profiles can be added here later */}
+      </p>
+    </div>
+
+  </div>
+</BaseLayout>

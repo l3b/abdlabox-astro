@@ -1,0 +1,79 @@
+---
+// src/components/Header.astro - Styled Version 1
+const siteTitle = "Abdla";
+
+// --- Language Switcher Logic ---
+const currentPath = Astro.url.pathname;
+const currentLocale = Astro.currentLocale || (currentPath.startsWith('/ar') ? 'ar' : 'en');
+let alternateLocale = '';
+let alternatePath = '';
+let alternateLocaleName = '';
+if (currentLocale === 'en') {
+  alternateLocale = 'ar';
+  alternateLocaleName = 'العربية';
+  alternatePath = currentPath.replace(/^\/en/, '/ar');
+} else if (currentLocale === 'ar') {
+  alternateLocale = 'en';
+  alternateLocaleName = 'English';
+  alternatePath = currentPath.replace(/^\/ar/, '/en');
+}
+if (!alternatePath || alternatePath === currentPath) {
+    if (alternateLocale) { alternatePath = `/${alternateLocale}/`; }
+}
+// --- End Language Switcher Logic ---
+
+// --- Define navigation links ---
+const navLinks = [
+    { name: currentLocale === 'en' ? 'Home' : 'الرئيسية', href: `/${currentLocale}/` },
+    { name: currentLocale === 'en' ? 'Blog' : 'المدونة', href: `/${currentLocale}/blog/` },
+    { name: currentLocale === 'en' ? 'Behind the Dunes?' : 'من وراء الكثبان؟', href: `/${currentLocale}/about/` },
+    { name: currentLocale === 'en' ? 'Send a Signal' : 'أرسل إشارة', href: `/${currentLocale}/contact/` },
+];
+// --- End NavLinks Definition ---
+---
+{/* Header with Electric Dunes styling */}
+<header class="bg-electric-blue text-cool-light-gray shadow-lg sticky top-0 z-50"> {/* Added shadow, sticky */}
+  {/* Container with padding, flex layout, controls alignment and spacing */}
+  <div class="container mx-auto flex flex-wrap items-center justify-between p-4 gap-x-6 gap-y-2">
+
+    {/* Site Title - Larger, bold, hover effect */}
+    <div class="site-title text-2xl font-bold tracking-tight"> {/* Adjusted size/tracking */}
+        <a href={`/${currentLocale}/`} class="hover:text-neon-yellow transition-colors duration-200">{siteTitle}</a>
+    </div>
+
+    {/* Navigation Links - Adjusted spacing, hover, active state (basic) */}
+    <nav class="flex gap-5 md:gap-8 text-base items-center"> {/* Adjusted gap */}
+        {navLinks.map(link => {
+            // Basic check if the current path starts with the link href (for active state)
+            const isActive = currentPath === link.href || (link.href !== `/${currentLocale}/` && currentPath.startsWith(link.href));
+            return (
+                <a
+                    href={link.href}
+                    class:list={[
+                        "pb-1 border-b-2 transition-colors duration-200",
+                        isActive
+                            ? "border-neon-yellow text-neon-yellow" // Active state style
+                            : "border-transparent hover:border-neon-yellow/70 hover:text-cool-light-gray/80" // Normal state + hover
+                    ]}
+                >
+                    {link.name}
+                </a>
+            );
+        })}
+    </nav>
+
+    {/* Language Switcher - Styled button */}
+    {alternateLocale && (
+      <div class="lang-switcher">
+        <a
+          href={alternatePath}
+          aria-label={`Switch to ${alternateLocaleName}`}
+          class="block bg-white/10 border border-transparent text-cool-light-gray px-4 py-1.5 text-sm rounded-md hover:bg-white/20 hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-neon-yellow focus:ring-offset-2 focus:ring-offset-electric-blue transition-colors duration-200" // Improved button style
+        >
+          {alternateLocaleName}
+        </a>
+      </div>
+    )}
+
+  </div>
+</header>

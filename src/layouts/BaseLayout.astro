@@ -1,0 +1,46 @@
+---
+// src/layouts/BaseLayout.astro - Final Version with Theme Base Colors
+import Header from '../components/Header.astro';
+import '@/styles/tailwind.css'; // Using alias path - change to '../styles/tailwind.css' if preferred
+
+export interface Props {
+  title: string;
+  description?: string;
+  lang?: string;
+  dir?: 'ltr' | 'rtl';
+}
+
+const { title, description, lang = 'en', dir = 'ltr' } = Astro.props;
+
+// Construct page title format
+const siteName = "Abdla"; // Consider making this global later
+const fullPageTitle = `${title} | ${siteName}`;
+---
+<html lang={lang} dir={dir} class="font-sans antialiased"> {/* Base font, improved rendering */}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>{fullPageTitle}</title>
+  {description && <meta name="description" content={description} />}
+
+  {/* Google Font Links */}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<!-- {/* UPDATED: Apply Near White background and Near Black text */} -->
+<body class="bg-cool-light-gray text-soft-charcoal">
+    <Header />
+    {/* Add some vertical padding to the main content area */}
+    <main class="py-8 md:py-12">
+      <slot /> {/* Page content will be injected here */}
+    </main>
+    {/* Styled Footer */}
+    <footer class="bg-gray-100 text-gray-600 text-center py-6 mt-12 text-sm border-t border-gray-200"> {/* Keep footer light gray for contrast or change later */}
+      <div class="container mx-auto">
+        Copyright &copy; {new Date().getFullYear()} {siteName}. All rights reserved.
+      </div>
+    </footer>
+</body>
+</html>

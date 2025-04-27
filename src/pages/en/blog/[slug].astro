@@ -1,0 +1,68 @@
+---
+// src/pages/en/blog/[slug].astro - Code Block Readability Fix
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro'; // Verify path
+
+export async function getStaticPaths() {
+  const allEnglishPosts = await getCollection('blog', ({ data }) => {
+    return data.language === 'en' && data.isDraft !== true;
+  });
+  return allEnglishPosts.map(post => ({
+    params: { slug: post.slug.replace(/^en\//, '') },
+    props: { post },
+  }));
+}
+
+type Props = { post: CollectionEntry<'blog'> };
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const pageTitle = post.data.title;
+const pageDescription = post.data.description;
+---
+<BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
+  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
+    <article>
+      {/* Post Header Section */}
+      <header class="mb-8 border-b border-gray-300 pb-6">
+        <h1 class="inline-block text-3xl md:text-4xl font-bold mb-3 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
+          {post.data.title}
+        </h1>
+        <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
+          <span>
+            Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </span>
+          {post.data.tags && post.data.tags.length > 0 && (
+            <span class="flex items-center gap-x-1.5 flex-wrap">
+              Tags:
+              {post.data.tags.map(tag => (
+                <span class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide">
+                  {tag}
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
+      </header>
+
+      {/* Main Post Content - Adjusted prose classes */}
+      <div
+        class="
+          prose prose-lg max-w-none mt-8
+          prose-headings:font-semibold prose-headings:text-soft-charcoal
+          prose-p:text-soft-charcoal prose-p:leading-relaxed
+          prose-a:text-teal-600 prose-a:underline hover:prose-a:text-lavender
+          prose-strong:text-soft-charcoal prose-strong:font-semibold
+          prose-blockquote:border-l-electric-blue prose-blockquote:pl-4 prose-blockquote:italic
+          prose-li:marker:text-electric-blue
+          prose-pre:bg-soft-charcoal prose-pre:text-gray-200 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
+          /* Removed prose-code:* utilities to avoid conflict with global CSS override */
+          dark:prose-invert dark:prose-headings:text-cool-light-gray dark:prose-p:text-gray-300 dark:prose-strong:text-cool-light-gray dark:prose-a:text-teal dark:hover:prose-a:text-lavender dark:prose-blockquote:border-l-teal dark:prose-li:marker:text-teal dark:prose-pre:bg-gray-800/80 dark:prose-pre:text-gray-200
+        "
+      >
+        <Content />
+      </div>
+
+    </article>
+  </div>
+</BaseLayout>

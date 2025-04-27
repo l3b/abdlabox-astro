@@ -1,0 +1,39 @@
+---
+// src/pages/en/about.astro - Styled with Content
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+
+const pageTitle = "Who's Behind the Dunes?";
+// Optional: Use a description for meta tags
+const pageDescription = "In a world where technology intersects with identity, I choose to be the voice behind the dunes.";
+---
+<BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
+  {/* Centered container with vertical padding */}
+  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
+
+    {/* Page Title - Near Black text, Neon Yellow bottom border */}
+    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
+      {pageTitle}
+    </h1>
+
+    {/* Main content area - Added text-lg for larger paragraphs */}
+    <div class="space-y-6 max-w-prose leading-relaxed text-lg"> {/* Added text-lg */}
+      <p>
+        In a world where technology intersects with identity, I choose to be the voice behind the dunes.
+      </p>
+      <p>
+        This space isn’t about a name — it’s about thoughts, experiences, and vision.
+      </p>
+      <p>
+        From behind a screen and within lines of code, I travel through knowledge, search for meaning, and share what fills my curiosity and passion.
+        I write because some thoughts are too loud to keep inside. I document fragments of my journey — stories, reflections, and ideas I believe are worth capturing.
+      </p>
+      <p>
+        In this vast digital space, I don't stick to one subject. You might find me exploring the latest tech trends or telling a story where artificial intelligence plays the lead. I may reflect on entrepreneurial ventures or document a marathon journey in my newest pair of running shoes. Sometimes, I dive into something completely different — a new experience that I may not even be the best person to go through, but one that’s worth the try.
+      </p>
+      <p>
+        And if something you read here resonates with you, maybe we could be digital friends — somewhere across this web of signals. {/* Links to profiles can be added here later */}
+      </p>
+    </div>
+
+  </div>
+</BaseLayout>

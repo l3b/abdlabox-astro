@@ -1,0 +1,45 @@
+/* src/styles/tailwind.css */
+@import "tailwindcss";
+@config "../../tailwind.config.cjs";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[dir="rtl"] body {
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* Add this rule to force light text in code blocks */
+.prose pre code span {
+    color: theme('colors.cool-light-gray'); /* Or try theme('colors.white') */
+  }
+
+/* Remove previous main a, h1, h2 styles if they exist */
+/* Add this for social icons */
+.social-icon-link svg {
+    fill: currentColor; /* Make SVG fill color inherit text color */
+  }
+/* NEW Base Heading Styles (within <main>) */
+main h1 {
+  @apply text-3xl font-bold mb-4 md:text-4xl; /* Size, Weight, Margin */
+  /* Color will be applied via utility class, e.g., text-lavender */
+}
+
+main h2 {
+  @apply text-2xl font-semibold mt-8 mb-3; /* Size, Weight, Margins */
+  /* Color will be applied via utility class, e.g., text-electric-blue */
+}
+
+main h3 {
+  @apply text-xl font-semibold mt-6 mb-2; /* Size, Weight, Margins */
+  /* Color will be applied via utility class */
+}
+
+/* You might want a base link style within main */
+main a {
+   @apply text-teal-600 hover:text-lavender; /* Using updated theme colors */
+   /* Add underline preferences here if desired, e.g., hover:underline */
+ }
+
+/* ... other custom base styles ... */
