@@ -35,7 +35,7 @@ main h3 {
 
 /* You might want a base link style within main */
 main a {
-   @apply text-teal-600 hover:text-lavender; /* Using updated theme colors */
+   @apply text-teal hover:text-lavender; /* Using our custom teal color */
    /* Add underline preferences here if desired, e.g., hover:underline */
 }
 
