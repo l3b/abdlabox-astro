@@ -1,7 +1,4 @@
 /* src/styles/tailwind.css */
-@import "tailwindcss";
-@config "../../tailwind.config.cjs";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,6 +37,6 @@ main h3 {
 main a {
    @apply text-teal-600 hover:text-lavender; /* Using updated theme colors */
    /* Add underline preferences here if desired, e.g., hover:underline */
- }
+}
 
 /* ... other custom base styles ... */
