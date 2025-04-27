@@ -5,10 +5,18 @@ import icon from 'astro-icon';
 
 // import tailwindcss from '@tailwindcss/vite';
 
+import { defineConfig } from 'astro/config';
 export default defineConfig({
   server: {
-    host: '0.0.0.0'
+    host: '0.0.0.0', // Allow connections from all hosts
+    port: 5000, // Set server port to 5000
   },
+
+
+  // export default defineConfig({
+  //   server: {
+  //     host: '0.0.0.0'
+  //   },
   // Add other integrations or config options if you have them
 
   i18n: {
@@ -21,7 +29,7 @@ export default defineConfig({
       // Set to true if you want URLs like /about instead of /en/about
       // Set to false (or omit) if you want all URLs prefixed, like /en/about, /ar/about
       // For clarity in multilingual sites, keeping prefixes is often good:
-      prefixDefaultLocale: true 
+      prefixDefaultLocale: true
     }
   },
 
