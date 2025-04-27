@@ -12,7 +12,8 @@
     "@atproto/api": "^0.15.4",
     "astro": "^5.7.1",
     "astro-icon": "^1.1.5",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "vite": "^6.3.3"
   },
   "devDependencies": {
     "@iconify-json/mdi": "^1.2.3",
