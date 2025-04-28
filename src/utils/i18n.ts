@@ -38,11 +38,11 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
 // Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
   const otherLang = post.data.language === 'en' ? 'ar' : 'en';
-  const slug = post.slug.split('/').pop();
   
   try {
     const translatedPost = await getCollection('blog', (entry) => 
-      entry.data.language === otherLang && entry.slug.endsWith(slug)
+      entry.data.language === otherLang && 
+      entry.data.translationKey === post.data.translationKey
     );
     return translatedPost[0] || null;
   } catch {
