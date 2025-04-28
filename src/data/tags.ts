@@ -27,10 +27,10 @@ export const tags: Record<string, TagTranslation> = {
   },
   'web-development': {
     en: 'Web Development',
-    ar: 'تطوير ويب',
+    ar: 'تطوير الويب',
     slug: {
       en: 'web-development',
-      ar: 'تطوير-ويب'
+      ar: 'تطوير-الويب'
     }
   },
   technology: {
@@ -39,6 +39,14 @@ export const tags: Record<string, TagTranslation> = {
     slug: {
       en: 'technology',
       ar: 'تقنية'
+    }
+  },
+  'artificial-intelligence': {
+    en: 'Artificial Intelligence',
+    ar: 'ذكاء إصطناعي',
+    slug: {
+      en: 'artificial-intelligence',
+      ar: 'ذكاء-إصطناعي'
     }
   }
 };

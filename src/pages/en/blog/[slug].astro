@@ -21,6 +21,14 @@ const translatedPost = await getBlogTranslation(post);
 
 const pageTitle = post.data.title;
 const pageDescription = post.data.description;
+
+// Assuming the existence of a tags object mapping tags to slugs.  This needs to be defined elsewhere.
+const tags = {
+  "web development": { en: "web development", ar: "تطوير الويب", slug: { en: "web-development", ar: " تطوير-الويب" } },
+  "javascript": { en: "javascript", ar: "جافا سكريبت", slug: { en: "javascript", ar: "جافا-سكريبت" } },
+  // Add more tags here...
+};
+
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -37,11 +45,19 @@ const pageDescription = post.data.description;
           {post.data.tags && post.data.tags.length > 0 && (
             <span class="flex items-center gap-x-1.5 flex-wrap">
               Tags:
-              {post.data.tags.map(tag => (
-                <a href={`/en/tags/${tag}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
-                  {tag}
-                </a>
-              ))}
+              {post.data.tags.map(tag => {
+                const tagConfig = Object.values(tags).find(t => 
+                  t.en.toLowerCase() === tag.toLowerCase() || // Case-insensitive match
+                  t.ar.toLowerCase() === tag.toLowerCase() ||
+                  t.slug.en.toLowerCase() === tag.toLowerCase() ||
+                  t.slug.ar.toLowerCase() === tag.toLowerCase()
+                );
+                return tagConfig && (
+                  <a href={`/en/tags/${tagConfig.slug.en}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
+                    {tagConfig.en}
+                  </a>
+                );
+              })}
             </span>
           )}
         </div>
