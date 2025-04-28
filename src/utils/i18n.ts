@@ -35,6 +35,8 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
   return currentMapping ? currentMapping[targetLang] : null;
 }
 
+import { getCollection } from 'astro:content';
+
 // Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
   const otherLang = post.data.language === 'en' ? 'ar' : 'en';

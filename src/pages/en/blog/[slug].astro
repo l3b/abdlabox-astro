@@ -28,7 +28,7 @@ const pageDescription = post.data.description;
       {/* Post Header Section */}
       <header class="mb-8 border-b border-gray-300 pb-6">
         {translatedPost && (
-          <a href={`/ar/blog/${translatedPost.slug.replace(/^ar\//, '')}`} class="mb-4 inline-block text-teal-600 hover:text-lavender">
+          <a href={`/ar/blog/${translatedPost.slug.split('/').pop()}`} class="mb-4 inline-block text-teal-600 hover:text-lavender">
             النسخة العربية
           </a>
         )}
