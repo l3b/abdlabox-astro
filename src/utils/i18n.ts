@@ -39,15 +39,15 @@ import { getCollection } from 'astro:content';
 
 // Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
-  const otherLang = post.data.language === 'en' ? 'ar' : 'en';
+  if (!post.data.translationKey) return null;
   
-  try {
-    const translatedPost = await getCollection('blog', (entry) => 
-      entry.data.language === otherLang && 
-      entry.data.translationKey === post.data.translationKey
-    );
-    return translatedPost[0] || null;
-  } catch {
-    return null;
-  }
+  const otherLang = post.data.language === 'en' ? 'ar' : 'en';
+  const posts = await getCollection('blog');
+  
+  const translatedPost = posts.find(entry => 
+    entry.data.language === otherLang && 
+    entry.data.translationKey === post.data.translationKey
+  );
+  
+  return translatedPost || null;
 }
