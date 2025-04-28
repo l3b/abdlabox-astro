@@ -46,11 +46,14 @@ const pageDescription = "أحدث المقالات والأفكار حول ال�
             {post.data.tags && post.data.tags.length > 0 && (
               <span>
                 تصنيفات:
-                {post.data.tags.map(tag => (
-                  <span class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide">
-                    {tag}
-                  </span>
-                ))}
+                {post.data.tags?.map(tag => (
+                <a 
+                  href={`/ar/tags/${tag}`}
+                  class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold hover:bg-electric-blue hover:text-white transition-colors duration-200"
+                >
+                  {tag}
+                </a>
+              ))}
               </span>
             )}
           </div>
