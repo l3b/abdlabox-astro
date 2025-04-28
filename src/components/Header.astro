@@ -3,22 +3,38 @@
 const siteTitle = "Abdla";
 
 // --- Language Switcher Logic ---
+import { getCollection } from 'astro:content';
+import { getBlogTranslation } from '../utils/i18n';
+
 const currentPath = Astro.url.pathname;
 const currentLocale = Astro.currentLocale || (currentPath.startsWith('/ar') ? 'ar' : 'en');
-let alternateLocale = '';
+let alternateLocale = currentLocale === 'en' ? 'ar' : 'en';
+let alternateLocaleName = currentLocale === 'en' ? 'العربية' : 'English';
 let alternatePath = '';
-let alternateLocaleName = '';
-if (currentLocale === 'en') {
-  alternateLocale = 'ar';
-  alternateLocaleName = 'العربية';
-  alternatePath = currentPath.replace(/^\/en/, '/ar');
-} else if (currentLocale === 'ar') {
-  alternateLocale = 'en';
-  alternateLocaleName = 'English';
-  alternatePath = currentPath.replace(/^\/ar/, '/en');
+
+// Check if we're on a blog post page
+const blogPostMatch = currentPath.match(new RegExp(`/${currentLocale}/blog/([^/]+)`));
+if (blogPostMatch) {
+  const slug = `${currentLocale}/${blogPostMatch[1]}`;
+  const allPosts = await getCollection('blog');
+  const currentPost = allPosts.find(post => post.slug === slug);
+  
+  if (currentPost) {
+    const translatedPost = await getBlogTranslation(currentPost);
+    if (translatedPost) {
+      alternatePath = `/${alternateLocale}/blog/${translatedPost.slug.split('/').pop()}`;
+    } else {
+      alternatePath = `/${alternateLocale}/blog/`;
+    }
+  }
+} else {
+  // For non-blog pages, just switch the language prefix
+  alternatePath = currentPath.replace(new RegExp(`^/${currentLocale}`), `/${alternateLocale}`);
 }
+
+// Fallback to homepage if path doesn't exist
 if (!alternatePath || alternatePath === currentPath) {
-    if (alternateLocale) { alternatePath = `/${alternateLocale}/`; }
+  alternatePath = `/${alternateLocale}/`;
 }
 // --- End Language Switcher Logic ---
 
