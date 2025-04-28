@@ -43,9 +43,9 @@ const pageDescription = post.data.description;
             <span class="flex items-center gap-x-1.5 flex-wrap">
               تصنيفات: {/* Arabic Label */}
               {post.data.tags.map(tag => (
-                <span class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide">
+                <a href={`/ar/tags/${tag}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
                   {tag}
-                </span>
+                </a>
               ))}
             </span>
           )}
