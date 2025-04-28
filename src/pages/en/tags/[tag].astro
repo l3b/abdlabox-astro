@@ -3,16 +3,23 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
+import { tags, normalizeTag } from '../../../data/tags';
+
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
     return data.language === 'en' && !data.isDraft;
   });
 
-  const uniqueTags = [...new Set(posts.flatMap(post => post.data.tags || []))];
-
-  return uniqueTags.map(tag => ({
-    params: { tag },
-    props: { posts: posts.filter(post => post.data.tags?.includes(tag)) }
+  // Get all English tag slugs from our tags configuration
+  const validTagSlugs = Object.values(tags).map(tag => tag.slug.en);
+  
+  return validTagSlugs.map(tagSlug => ({
+    params: { tag: tagSlug },
+    props: { 
+      posts: posts.filter(post => 
+        post.data.tags?.some(t => normalizeTag(t) === normalizeTag(tagSlug))
+      )
+    }
   }));
 }
 
