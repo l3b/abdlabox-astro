@@ -18,10 +18,8 @@ export async function getStaticPaths() {
     props: { 
       posts: posts.filter(post => 
         post.data.tags?.some(t => {
-          const tagEntry = Object.values(tags).find(
-            entry => entry[post.data.language] === t
-          );
-          return tagEntry?.slug.en === tagConfig.slug.en;
+          const matchedTag = findTagByValue(t);
+          return matchedTag?.slug.en === tagConfig.slug.en;
         })
       ),
       tagConfig

@@ -1,4 +1,3 @@
-
 import { z } from 'astro:content';
 
 export interface TagTranslation {
@@ -10,14 +9,13 @@ export interface TagTranslation {
   };
 }
 
-// Base tags that are known and have translations
 const baseTagTranslations: Record<string, TagTranslation> = {
   astro: {
     en: 'Astro',
     ar: 'أسترو',
     slug: {
       en: 'astro',
-      ar: 'أسترو'
+      ar: 'استرو'
     }
   },
   learning: {
@@ -41,7 +39,7 @@ const baseTagTranslations: Record<string, TagTranslation> = {
     ar: 'ذكاء إصطناعي',
     slug: {
       en: 'artificial-intelligence',
-      ar: 'ذكاء-إصطناعي'
+      ar: 'ذكاء-اصطناعي'
     }
   },
   'web-development': {
@@ -54,42 +52,18 @@ const baseTagTranslations: Record<string, TagTranslation> = {
   }
 };
 
+// Helper function to find tag by any property
+export function findTagByValue(value: string): TagTranslation | undefined {
+  return Object.values(baseTagTranslations).find(tag => 
+    tag.en === value || 
+    tag.ar === value || 
+    tag.slug.en === value || 
+    tag.slug.ar === value
+  );
+}
+
 export function normalizeTag(tag: string): string {
   return tag.toLowerCase().replace(/\s+/g, '-');
 }
 
-// Dynamic tag handling
-export function createTagTranslation(tag: string, lang: 'en' | 'ar'): TagTranslation {
-  const normalizedTag = normalizeTag(tag);
-  
-  // If tag exists in base translations, return it
-  if (normalizedTag in baseTagTranslations) {
-    return baseTagTranslations[normalizedTag];
-  }
-
-  // Create new tag translation
-  return {
-    en: lang === 'en' ? tag : normalizedTag,
-    ar: lang === 'ar' ? tag : normalizedTag,
-    slug: {
-      en: normalizedTag,
-      ar: lang === 'ar' ? tag.replace(/\s+/g, '-') : normalizedTag
-    }
-  };
-}
-
-// Export tags and add dynamic tag handling
-export const tags = new Proxy(baseTagTranslations, {
-  get(target, prop: string) {
-    if (prop in target) {
-      return target[prop];
-    }
-    // Try to find by normalized version
-    const normalized = normalizeTag(prop);
-    if (normalized in target) {
-      return target[normalized];
-    }
-    // Create new tag translation (default to English)
-    return createTagTranslation(prop, 'en');
-  }
-});
+export const tags = baseTagTranslations;
