@@ -1,5 +1,6 @@
 
 import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 
 export interface TranslationMapping {
   en: string;
@@ -8,45 +9,48 @@ export interface TranslationMapping {
 
 // Maps URLs between languages
 export const pageTranslations: Record<string, TranslationMapping> = {
-  'home': {
-    en: '/en',
-    ar: '/ar'
-  },
-  'about': {
-    en: '/en/about',
-    ar: '/ar/about'
-  },
-  'blog': {
-    en: '/en/blog',
-    ar: '/ar/blog'
-  },
-  'contact': {
-    en: '/en/contact',
-    ar: '/ar/contact'
-  }
+  'home': { en: '/en', ar: '/ar' },
+  'about': { en: '/en/about', ar: '/ar/about' },
+  'blog': { en: '/en/blog', ar: '/ar/blog' },
+  'contact': { en: '/en/contact', ar: '/ar/contact' }
 };
+
+// Tag translations mapping
+export const tagTranslations: Record<string, TranslationMapping> = {
+  'astro': { en: 'astro', ar: 'أسترو' },
+  'أسترو': { en: 'astro', ar: 'أسترو' },
+  'learning': { en: 'learning', ar: 'تعلم' },
+  'تعلم': { en: 'learning', ar: 'تعلم' },
+  'web development': { en: 'web-development', ar: 'تطوير-ويب' },
+  'تطوير-ويب': { en: 'web-development', ar: 'تطوير-ويب' },
+  'technology': { en: 'technology', ar: 'تقنية' },
+  'تقنية': { en: 'technology', ar: 'تقنية' },
+  'ai': { en: 'ai', ar: 'ذكاء-إصطناعي' },
+  'ذكاء-إصطناعي': { en: 'ai', ar: 'ذكاء-إصطناعي' }
+};
+
+// Function to normalize tags for URLs
+function normalizeTag(tag: string): string {
+  return tag.toLowerCase().replace(/\s+/g, '-');
+}
 
 // Function to get corresponding translation URL
 export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
   // Check if it's a tag page
   const tagMatch = currentPath.match(/\/(en|ar)\/tags\/(.+)/);
   if (tagMatch) {
-    const tag = tagMatch[2];
-    // Here you can add tag translations if needed
-    const tagTranslations: Record<string, TranslationMapping> = {
-      'learning': { en: 'learning', ar: 'تعلم' },
-      'تعلم': { en: 'learning', ar: 'تعلم' },
-      'web development': { en: 'web development', ar: 'تطوير-ويب' },
-      'تطوير-ويب': { en: 'web development', ar: 'تطوير-ويب' },
-      'astro': { en: 'astro', ar: 'أسترو' },
-      'أسترو': { en: 'astro', ar: 'أسترو' }
-    };
+    const currentTag = decodeURIComponent(tagMatch[2]);
     
-    if (tagTranslations[tag]) {
-      return `/${targetLang}/tags/${tagTranslations[tag][targetLang]}`;
+    // Find translation mapping
+    let translatedTag = currentTag;
+    for (const [key, mapping] of Object.entries(tagTranslations)) {
+      if (normalizeTag(key) === normalizeTag(currentTag)) {
+        translatedTag = mapping[targetLang];
+        break;
+      }
     }
-    // If no translation exists, use the same tag
-    return `/${targetLang}/tags/${tag}`;
+    
+    return `/${targetLang}/tags/${encodeURIComponent(translatedTag)}`;
   }
 
   // Handle regular pages
@@ -56,8 +60,6 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
   );
   return currentMapping ? currentMapping[targetLang] : null;
 }
-
-import { getCollection } from 'astro:content';
 
 // Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
