@@ -1,4 +1,6 @@
 
+import { z } from 'astro:content';
+
 export interface TagTranslation {
   en: string;
   ar: string;
@@ -8,7 +10,8 @@ export interface TagTranslation {
   };
 }
 
-export const tags: Record<string, TagTranslation> = {
+// Base tags that are known and have translations
+const baseTagTranslations: Record<string, TagTranslation> = {
   astro: {
     en: 'Astro',
     ar: 'أسترو',
@@ -23,14 +26,6 @@ export const tags: Record<string, TagTranslation> = {
     slug: {
       en: 'learning',
       ar: 'تعلم'
-    }
-  },
-  'web-development': {
-    en: 'Web Development',
-    ar: 'تطوير الويب',
-    slug: {
-      en: 'web-development',
-      ar: 'تطوير-الويب'
     }
   },
   technology: {
@@ -48,16 +43,53 @@ export const tags: Record<string, TagTranslation> = {
       en: 'artificial-intelligence',
       ar: 'ذكاء-إصطناعي'
     }
+  },
+  'web-development': {
+    en: 'Web Development',
+    ar: 'تطوير الويب',
+    slug: {
+      en: 'web-development',
+      ar: 'تطوير-الويب'
+    }
   }
 };
-
-export function getTagTranslation(tagSlug: string, fromLang: 'en' | 'ar', toLang: 'en' | 'ar'): string | null {
-  // Find tag by slug
-  const tag = Object.values(tags).find(t => t.slug[fromLang] === tagSlug);
-  if (!tag) return null;
-  return tag.slug[toLang];
-}
 
 export function normalizeTag(tag: string): string {
   return tag.toLowerCase().replace(/\s+/g, '-');
 }
+
+// Dynamic tag handling
+export function createTagTranslation(tag: string, lang: 'en' | 'ar'): TagTranslation {
+  const normalizedTag = normalizeTag(tag);
+  
+  // If tag exists in base translations, return it
+  if (normalizedTag in baseTagTranslations) {
+    return baseTagTranslations[normalizedTag];
+  }
+
+  // Create new tag translation
+  return {
+    en: lang === 'en' ? tag : normalizedTag,
+    ar: lang === 'ar' ? tag : normalizedTag,
+    slug: {
+      en: normalizedTag,
+      ar: lang === 'ar' ? tag.replace(/\s+/g, '-') : normalizedTag
+    }
+  };
+}
+
+// Export tags and add dynamic tag handling
+export const tags = new Proxy(baseTagTranslations, {
+  get(target, prop: string) {
+    if (prop in target) {
+      return target[prop];
+    }
+    // Try to find by normalized version
+    const normalized = normalizeTag(prop);
+    if (normalized in target) {
+      return target[normalized];
+    }
+    // Create new tag translation (default to English)
+    return createTagTranslation(prop, 'en');
+  }
+});
