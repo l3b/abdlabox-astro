@@ -24,11 +24,7 @@ const pageTitle = post.data.title;
 const pageDescription = post.data.description;
 
 // Sample tags data -  Replace with your actual data source
-const tags = {
-  "web development": { en: "web development", ar: "تطوير الويب", slug: { en: "web-development", ar: "تطوير-الويب" } },
-  "javascript": { en: "javascript", ar: "جافا سكريبت", slug: { en: "javascript", ar: "جافا-سكريبت" } },
-  "react": { en: "react", ar: "رياكت", slug: { en: "react", ar: "رياكت" } }
-};
+import { tags } from '../../../data/tags';
 
 
 ---
@@ -52,13 +48,13 @@ const tags = {
             <span class="flex items-center gap-x-1.5 flex-wrap">
               تصنيفات: {/* Arabic Label */}
               {post.data.tags.map(tag => {
-                const tagConfig = Object.values(tags).find(t => 
-                  t.en.toLowerCase() === tag.toLowerCase() || t.ar.toLowerCase() === tag.toLowerCase() ||
-                  t.slug.en.toLowerCase() === tag.toLowerCase() || t.slug.ar.toLowerCase() === tag.toLowerCase()
+                const normalizedTag = tag.toLowerCase().replace(/\s+/g, '-');
+                const tagConfig = Object.entries(tags).find(([_, t]) => 
+                  t.slug.en === normalizedTag || t.slug.ar === normalizedTag
                 );
                 return tagConfig && (
-                  <a href={`/ar/tags/${tagConfig.slug.ar}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
-                    {tagConfig.ar}
+                  <a href={`/ar/tags/${tagConfig[1].slug.ar}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
+                    {tagConfig[1].ar}
                   </a>
                 );
               })}
