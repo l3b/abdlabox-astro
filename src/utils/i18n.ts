@@ -15,40 +15,18 @@ export const pageTranslations: Record<string, TranslationMapping> = {
   'contact': { en: '/en/contact', ar: '/ar/contact' }
 };
 
-// Tag translations mapping
-export const tagTranslations: Record<string, TranslationMapping> = {
-  'astro': { en: 'astro', ar: 'أسترو' },
-  'أسترو': { en: 'astro', ar: 'أسترو' },
-  'learning': { en: 'learning', ar: 'تعلم' },
-  'تعلم': { en: 'learning', ar: 'تعلم' },
-  'web development': { en: 'web-development', ar: 'تطوير-ويب' },
-  'تطوير-ويب': { en: 'web-development', ar: 'تطوير-ويب' },
-  'technology': { en: 'technology', ar: 'تقنية' },
-  'تقنية': { en: 'technology', ar: 'تقنية' },
-  'ai': { en: 'ai', ar: 'ذكاء-إصطناعي' },
-  'ذكاء-إصطناعي': { en: 'ai', ar: 'ذكاء-إصطناعي' }
-};
-
-// Function to normalize tags for URLs
-function normalizeTag(tag: string): string {
-  return tag.toLowerCase().replace(/\s+/g, '-');
-}
+import { getTagTranslation } from '../data/tags';
 
 // Function to get corresponding translation URL
 export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
   // Check if it's a tag page
   const tagMatch = currentPath.match(/\/(en|ar)\/tags\/(.+)/);
   if (tagMatch) {
+    const sourceLang = tagMatch[1] as 'en' | 'ar';
     const currentTag = decodeURIComponent(tagMatch[2]);
     
-    // Find translation mapping
-    let translatedTag = currentTag;
-    for (const [key, mapping] of Object.entries(tagTranslations)) {
-      if (normalizeTag(key) === normalizeTag(currentTag)) {
-        translatedTag = mapping[targetLang];
-        break;
-      }
-    }
+    const translatedTag = getTagTranslation(currentTag, sourceLang, targetLang);
+    if (!translatedTag) return null; // Return null if no translation exists
     
     return `/${targetLang}/tags/${encodeURIComponent(translatedTag)}`;
   }

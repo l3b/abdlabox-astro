@@ -22,9 +22,10 @@ const { posts } = Astro.props;
 
 <BaseLayout title={`Posts tagged with "${tag}"`} description={`All posts tagged with ${tag}`} lang="en" dir="ltr">
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4 text-soft-charcoal border-b-2 border-b-neon-yellow pb-4">
+    <h1 class="text-4xl md:text-5xl font-bold mb-2 text-soft-charcoal">
       {tag}
     </h1>
+    <div class="w-24 h-1 bg-neon-yellow mb-8"></div>
     <p class="text-lg text-gray-600 mb-8">
       Browse all posts tagged under {tag}
     </p>
