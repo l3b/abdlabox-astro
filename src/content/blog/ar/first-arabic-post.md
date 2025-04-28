@@ -3,6 +3,7 @@ title: "أول تدوينة باللغة العربية"
 description: "استكشاف مجموعات المحتوى في أسترو للمرة الأولى."
 pubDate: 2025-04-17 # Use YYYY-MM-DD format
 language: "ar"
+translationKey: "first-post"
 tags: ["أسترو", "تعلم", "تطوير ويب"]
 isDraft: false
 ---
