@@ -3,7 +3,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
-import { tags, normalizeTag } from '../../../data/tags';
+import { tags, normalizeTag, findTagByValue } from '../../../data/tags';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
