@@ -2,39 +2,33 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-
-import { tags, normalizeTag, findTagByValue } from '../../../data/tags';
+import { normalizeTag } from '../../../data/tags';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => {
     return data.language === 'ar' && !data.isDraft;
   });
 
-  // Get all tag configurations
-  const tagConfigs = Object.values(tags);
+  // Get unique tags from posts
+  const tags = [...new Set(posts.flatMap(post => post.data.tags || []))];
   
-  return tagConfigs.map(tagConfig => ({
-    params: { tag: tagConfig.slug.ar },
+  return tags.map(tag => ({
+    params: { tag: normalizeTag(tag) },
     props: { 
-      posts: posts.filter(post => 
-        post.data.tags?.some(t => {
-          const matchedTag = findTagByValue(t);
-          return matchedTag?.slug.ar === tagConfig.slug.ar;
-        })
-      ),
-      tagConfig
+      posts: posts.filter(post => post.data.tags?.includes(tag)),
+      tag
     }
   }));
 }
 
-const { tag } = Astro.params;
+const { tag } = Astro.props;
 const { posts } = Astro.props;
 ---
 
 <BaseLayout title={`المواضيع في "${tag}"`} description={`جميع المواضيع في ${tag}`} lang="ar" dir="rtl">
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
     <h1 class="text-4xl md:text-5xl font-bold mb-2 text-soft-charcoal">
-      {Object.values(tags).find(t => t.slug.ar === tag)?.ar || tag}
+      {tag}
     </h1>
     <div class="w-24 h-1 bg-neon-yellow mb-8"></div>
     <p class="text-lg text-gray-600 mb-8">
