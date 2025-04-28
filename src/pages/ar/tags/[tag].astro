@@ -10,15 +10,21 @@ export async function getStaticPaths() {
     return data.language === 'ar' && !data.isDraft;
   });
 
-  // Get all Arabic tag slugs from our tags configuration
-  const validTagSlugs = Object.values(tags).map(tag => tag.slug.ar);
+  // Get all tag configurations
+  const tagConfigs = Object.values(tags);
   
-  return validTagSlugs.map(tagSlug => ({
-    params: { tag: tagSlug },
+  return tagConfigs.map(tagConfig => ({
+    params: { tag: tagConfig.slug.ar },
     props: { 
       posts: posts.filter(post => 
-        post.data.tags?.some(t => normalizeTag(t) === normalizeTag(tagSlug))
-      )
+        post.data.tags?.some(t => {
+          const tagEntry = Object.values(tags).find(
+            entry => entry[post.data.language] === t
+          );
+          return tagEntry?.slug.ar === tagConfig.slug.ar;
+        })
+      ),
+      tagConfig
     }
   }));
 }

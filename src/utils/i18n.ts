@@ -25,10 +25,13 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
     const sourceLang = tagMatch[1] as 'en' | 'ar';
     const currentTag = decodeURIComponent(tagMatch[2]);
     
-    const translatedTag = getTagTranslation(currentTag, sourceLang, targetLang);
-    if (!translatedTag) return null; // Return null if no translation exists
+    // Find tag entry by current slug
+    const tagEntry = Object.values(tags).find(
+      tag => tag.slug[sourceLang] === currentTag
+    );
     
-    return `/${targetLang}/tags/${encodeURIComponent(translatedTag)}`;
+    if (!tagEntry) return null;
+    return `/${targetLang}/tags/${encodeURIComponent(tagEntry.slug[targetLang])}`;
   }
 
   // Handle regular pages
