@@ -5,15 +5,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { findTagByValue, normalizeTag } from '../../../data/tags';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => {
-    return data.language === 'ar' && !data.isDraft;
-  });
-
-  const uniqueTags = [...new Set(posts.flatMap(post => post.data.tags || []))];
-  
-  return uniqueTags.map(tag => ({
-    params: { tag: normalizeTag(tag) },
-    props: { tag }
+  const tags = Object.values(baseTagTranslations);
+  return tags.map(tagTranslation => ({
+    params: { tag: tagTranslation.slug.ar },
+    props: { tag: tagTranslation.slug.ar }
   }));
 }
 
