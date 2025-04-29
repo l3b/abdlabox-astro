@@ -23,7 +23,7 @@ const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'ar' && !data.isDraft && 
          (data.tags || []).some(t => {
            const foundTag = findTagByValue(t);
-           return foundTag && (foundTag.slug.ar === tagTranslation.slug.ar);
+           return foundTag && (foundTag.ar === tagTranslation.ar);
          });
 });
 

@@ -44,10 +44,10 @@ const baseTagTranslations: Record<string, TagTranslation> = {
   },
   'web-development': {
     en: 'Web Development',
-    ar: 'تطوير الويب',
+    ar: 'تطوير ويب',
     slug: {
       en: 'web-development',
-      ar: 'تطوير-الويب'
+      ar: 'تطوير-ويب'
     }
   }
 };
