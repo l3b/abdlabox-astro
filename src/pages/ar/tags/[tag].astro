@@ -22,7 +22,7 @@ const normalizedTag = normalizeTag(tag);
 
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'ar' && !data.isDraft && 
-         (data.tags || []).some(t => normalizeTag(t) === normalizedTag);
+         (data.tags || []).map(t => normalizeTag(t)).includes(normalizedTag);
 });
 
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
