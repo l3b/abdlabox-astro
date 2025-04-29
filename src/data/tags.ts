@@ -39,7 +39,7 @@ const baseTagTranslations: Record<string, TagTranslation> = {
     ar: 'ذكاء إصطناعي',
     slug: {
       en: 'artificial-intelligence',
-      ar: 'ذكاء-اصطناعي'
+      ar: 'ذكاء-إصطناعي'
     }
   },
   'web-development': {
