@@ -11,18 +11,29 @@ export async function getStaticPaths() {
 
   const uniqueTags = [...new Set(posts.flatMap(post => post.data.tags || []))];
   
-  return uniqueTags.map(tag => ({
-    params: { tag: normalizeTag(tag) },
-    props: { tag }
-  }));
+  return uniqueTags.map(tag => {
+    const tagTranslation = findTagByValue(tag);
+    if (!tagTranslation) return null;
+    return {
+      params: { tag: tagTranslation.slug.en },
+      props: { tag: tagTranslation.slug.en }
+    };
+  }).filter(Boolean);
 }
 
 const { tag } = Astro.props;
-const normalizedTag = normalizeTag(tag);
+const tagTranslation = findTagByValue(tag);
+
+if (!tagTranslation) {
+  return Astro.redirect('/en/blog');
+}
 
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'en' && !data.isDraft && 
-         (data.tags || []).some(t => normalizeTag(t) === normalizedTag);
+         (data.tags || []).some(t => {
+           const foundTag = findTagByValue(t);
+           return foundTag && (foundTag.slug.en === tagTranslation.slug.en);
+         });
 });
 
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
