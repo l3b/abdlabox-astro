@@ -17,7 +17,7 @@ export const pageTranslations: Record<string, TranslationMapping> = {
 // Function to get corresponding translation URL
 export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
   // For tag pages, redirect to blog page
-  if (currentPath.includes('/tags/')) {
+  if (currentPath.match(/\/(en|ar)\/tags\/.+/)) {
     return `/${targetLang}/blog`;
   }
 
