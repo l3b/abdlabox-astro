@@ -22,8 +22,8 @@ if (!tagTranslation) {
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'en' && !data.isDraft && 
          (data.tags || []).some(t => {
-           const foundTag = findTagByValue(t);
-           return foundTag && (foundTag.en.toLowerCase() === tagTranslation.en.toLowerCase() || t.toLowerCase() === tagTranslation.en.toLowerCase());
+           const normalizedTag = t.toLowerCase().replace(/-/g, ' ');
+           return normalizedTag === tagTranslation.en.toLowerCase();
          });
 });
 
