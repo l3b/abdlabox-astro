@@ -28,5 +28,10 @@ import icon from 'astro-icon';
       wrap: true,
     },
   },
-  integrations: [icon()]
+  integrations: [icon({
+    include: {
+      mdi: ['*'],
+      'simple-icons': ['*']
+    }
+  })]
 });
