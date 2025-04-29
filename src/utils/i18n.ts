@@ -25,11 +25,16 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
     const sourceLang = tagMatch[1] as 'en' | 'ar';
     const currentTag = decodeURIComponent(tagMatch[2]);
     
+    // Find tag by normalized value in current language
     const tagEntry = Object.values(tags).find(tag => 
+      normalizeTag(tag[sourceLang]) === normalizeTag(currentTag) ||
       tag.slug[sourceLang] === currentTag
     );
     
-    return tagEntry ? `/${targetLang}/tags/${tagEntry.slug[targetLang]}` : `/${targetLang}/blog`;
+    if (tagEntry) {
+      return `/${targetLang}/tags/${tagEntry.slug[targetLang]}`;
+    }
+    return `/${targetLang}/blog`;
   }
 
   // Handle regular pages

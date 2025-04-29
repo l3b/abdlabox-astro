@@ -48,13 +48,12 @@ import { tags } from '../../../data/tags';
             <span class="flex items-center gap-x-1.5 flex-wrap">
               تصنيفات: {/* Arabic Label */}
               {post.data.tags.map(tag => {
-                const normalizedTag = tag.toLowerCase().replace(/\s+/g, '-');
-                const tagConfig = Object.entries(tags).find(([_, t]) => 
-                  t.slug.en === normalizedTag || t.slug.ar === normalizedTag
-                );
-                return tagConfig && (
-                  <a href={`/ar/tags/${tagConfig[1].slug.ar}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
-                    {tagConfig[1].ar}
+                const tagInData = tags[tag.toLowerCase().replace(/\s+/g, '-')]; //Simplified lookup
+                const tagLink = `/ar/tags/${tagInData ? tagInData.slug.ar : tag}`; //Fallback if tag not found
+
+                return (
+                  <a href={tagLink} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold ms-1.5 tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
+                    {tagInData ? tagInData.ar : tag}
                   </a>
                 );
               })}
