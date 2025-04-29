@@ -15,7 +15,7 @@ const baseTagTranslations: Record<string, TagTranslation> = {
     ar: 'أسترو',
     slug: {
       en: 'astro',
-      ar: 'استرو'
+      ar: 'أسترو'
     }
   },
   learning: {
