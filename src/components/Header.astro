@@ -78,8 +78,8 @@ const navLinks = [
         })}
     </nav>
 
-    {/* Language Switcher - Styled button */}
-    {alternateLocale && (
+    {/* Language Switcher - Hidden on tag pages */}
+    {alternateLocale && !currentPath.includes('/tags/') && (
       <div class="lang-switcher">
         <a
           href={alternatePath}
