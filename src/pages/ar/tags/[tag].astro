@@ -2,10 +2,10 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { findTagByValue, normalizeTag } from '../../../data/tags';
+import { findTagByValue, normalizeTag, tags } from '../../../data/tags';
 
 export async function getStaticPaths() {
-  const tags = Object.values(baseTagTranslations);
+  const tags = Object.values(tags);
   return tags.map(tagTranslation => ({
     params: { tag: tagTranslation.slug.ar },
     props: { tag: tagTranslation.slug.ar }
