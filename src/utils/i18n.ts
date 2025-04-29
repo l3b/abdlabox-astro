@@ -14,24 +14,11 @@ export const pageTranslations: Record<string, TranslationMapping> = {
   'contact': { en: '/en/contact', ar: '/ar/contact' }
 };
 
-import { getTagTranslation } from '../data/tags';
-
 // Function to get corresponding translation URL
 export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
-  // For tag pages, map between corresponding tag slugs
-  const tagMatch = currentPath.match(/\/(en|ar)\/tags\/(.+)/);
-  if (tagMatch) {
-    const [, currentLang, tagSlug] = tagMatch;
-    const tagData = findTagByValue(tagSlug.replace(/-/g, ' '));
-    
-    if (!tagData) {
-      // If no matching tag found, redirect to blog
-      return `/${targetLang}/blog`;
-    }
-    
-    // Use the appropriate slug for the target language
-    const targetSlug = tagData.slug[targetLang];
-    return `/${targetLang}/tags/${targetSlug}`;
+  // For tag pages, redirect to blog page
+  if (currentPath.includes('/tags/')) {
+    return `/${targetLang}/blog`;
   }
 
   // Handle regular pages
