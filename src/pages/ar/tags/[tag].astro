@@ -18,11 +18,18 @@ export async function getStaticPaths() {
 }
 
 const { tag } = Astro.props;
-const normalizedTag = normalizeTag(tag);
+const tagTranslation = findTagByValue(tag);
+
+if (!tagTranslation) {
+  return Astro.redirect('/ar/blog');
+}
 
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'ar' && !data.isDraft && 
-         (data.tags || []).map(t => normalizeTag(t)).includes(normalizedTag);
+         (data.tags || []).some(t => {
+           const foundTag = findTagByValue(t);
+           return foundTag && (foundTag.slug.ar === tagTranslation.slug.ar);
+         });
 });
 
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
