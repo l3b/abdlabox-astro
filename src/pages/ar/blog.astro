@@ -1,7 +1,8 @@
 ---
 // src/pages/ar/blog.astro - Styled Version 6 (Near Black H1)
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { normalizeTag } from '../../data/tags';
 
 // 1. Fetch Arabic posts, filter drafts
 const allArabicPosts = await getCollection('blog', ({ data }) => {

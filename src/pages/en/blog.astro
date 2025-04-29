@@ -1,7 +1,8 @@
 ---
 // src/pages/en/blog.astro - Styled Version 6 (Final Refinements)
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { normalizeTag } from '../../data/tags';
 
 // 1. Fetch English posts, filter drafts
 const allEnglishPosts = await getCollection('blog', ({ data }) => {
