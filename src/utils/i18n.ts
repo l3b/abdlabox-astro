@@ -1,4 +1,3 @@
-
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 
@@ -35,14 +34,14 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
 // Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
   if (!post.data.translationKey) return null;
-  
+
   const otherLang = post.data.language === 'en' ? 'ar' : 'en';
   const posts = await getCollection('blog');
-  
+
   const translatedPost = posts.find(entry => 
     entry.data.language === otherLang && 
     entry.data.translationKey === post.data.translationKey
   );
-  
+
   return translatedPost || null;
 }
