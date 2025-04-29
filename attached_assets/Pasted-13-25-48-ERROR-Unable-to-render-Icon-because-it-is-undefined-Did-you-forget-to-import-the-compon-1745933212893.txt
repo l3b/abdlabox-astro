@@ -1,0 +1,54 @@
+13:25:48 [ERROR] Unable to render Icon because it is undefined!
+Did you forget to import the component or is it possible there is a typo?
+  Stack trace:
+    at /home/runner/workspace/node_modules/astro/dist/runtime/server/render/component.js:60:11
+    [...] See full stack trace in the browser, or rerun with --verbose.
+Error fetching Bluesky: XRPCError: Profile not found
+    at BskyAgent.call (/home/runner/workspace/node_modules/@atproto/xrpc/dist/xrpc-client.js:75:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async eval (/home/runner/workspace/src/pages/ar/index.astro:113:24)
+    at async callComponentAsTemplateResultOrResponse (file:///home/runner/workspace/node_modules/astro/dist/runtime/server/render/astro/render.js:91:25)
+    at async renderToAsyncIterable (file:///home/runner/workspace/node_modules/astro/dist/runtime/server/render/astro/render.js:133:26)
+    at async renderPage (file:///home/runner/workspace/node_modules/astro/dist/runtime/server/render/page.js:31:24)
+    at async lastNext (file:///home/runner/workspace/node_modules/astro/dist/core/render-context.js:185:25)
+    at async file:///home/runner/workspace/node_modules/astro/dist/i18n/middleware.js:49:22
+    at async callMiddleware (file:///home/runner/workspace/node_modules/astro/dist/core/middleware/callMiddleware.js:11:10)
+    at async RenderContext.render (file:///home/runner/workspace/node_modules/astro/dist/core/render-context.js:219:22) {
+  error: 'InvalidRequest',
+  headers: {
+    'access-control-allow-origin': '*',
+    'cache-control': 'private',
+    'content-length': '56',
+    'content-type': 'application/json; charset=utf-8',
+    date: 'Tue, 29 Apr 2025 13:25:50 GMT',
+    etag: 'W/"38-tAZLZU2ZqXXtTINJ8yohUtX3PCk"',
+    'keep-alive': 'timeout=90',
+    'ratelimit-limit': '3000',
+    'ratelimit-policy': '3000;w=300',
+    'ratelimit-remaining': '2994',
+    'ratelimit-reset': '1745933219',
+    'strict-transport-security': 'max-age=63072000',
+    vary: 'Authorization, Accept-Encoding',
+    'x-powered-by': 'Express'
+  },
+  success: false,
+  status: 400
+}
+Fetching GitHub Events: https://api.github.com/users/l3b/events/public?per_page=5
+Found 1 displayable GitHub events.
+13:25:50 [200] /ar/ 1738ms
+13:25:50 [ERROR] Unable to render Icon because it is undefined!
+Did you forget to import the component or is it possible there is a typo?
+  Stack trace:
+    at /home/runner/workspace/node_modules/astro/dist/runtime/server/render/component.js:60:11
+    [...] See full stack trace in the browser, or rerun with --verbose.
+13:26:17 [302] / 8ms
+Fetching GitHub Events: https://api.github.com/users/l3b/events/public?per_page=5
+Found 1 displayable GitHub events.
+13:26:21 [200] /ar/ 3723ms
+13:26:21 [ERROR] Unable to render Icon because it is undefined!
+Did you forget to import the component or is it possible there is a typo?
+  Stack trace:
+    at renderFrameworkComponent (/home/runner/workspace/node_modules/astro/dist/runtime/server/render/component.js:60:11)
+    at /home/runner/workspace/src/components/Header.astro:1:1
+    [...] See full stack trace in the browser, or rerun with --verbose.
