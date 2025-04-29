@@ -16,9 +16,33 @@
     @apply bg-inherit text-inherit min-h-screen;
   }
 
+  /* Base card styles */
+  .card {
+    @apply bg-white border-gray-200 transition-colors duration-200;
+  }
+
+  .dark .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  /* Dark mode text styles */
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark .text-soft-charcoal {
+    @apply text-cool-light-gray;
+  }
+
+  .dark .text-gray-600,
+  .dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+
   /* Dark mode form inputs */
-  .dark input, .dark textarea {
-    @apply bg-gray-800 border-gray-700 text-white;
+  .dark input, 
+  .dark textarea {
+    @apply bg-gray-800 border-gray-700 text-cool-light-gray;
   }
 
   /* Dark mode blog post styles */
@@ -36,6 +60,11 @@
   .dark .prose p,
   .dark .prose li {
     @apply text-gray-300;
+  }
+
+  /* Footer dark mode */
+  .dark footer {
+    @apply bg-gray-800 border-gray-700 text-gray-300;
   }
 }
 

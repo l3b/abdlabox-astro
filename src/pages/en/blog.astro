@@ -28,7 +28,7 @@ const pageDescription = "Latest articles and thoughts on Technology, Knowledge M
     {/* List of Blog Posts */}
     <div class="space-y-8 md:space-y-10">
       {sortedPosts.map(post => (
-        <article class="block p-6 bg-white border border-gray-200 rounded-lg hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow"> {/* Neon Yellow top border */}
+        <article class="block p-6 card border rounded-lg hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow"> {/* Neon Yellow top border */}
 
           {/* Post Title as a Link - Reverted to hover underline only */}
           <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
