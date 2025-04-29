@@ -18,9 +18,20 @@ import { getTagTranslation } from '../data/tags';
 
 // Function to get corresponding translation URL
 export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
-  // For tag pages, always redirect to blog page as per requirement
-  if (currentPath.includes('/tags/')) {
-    return `/${targetLang}/blog`;
+  // For tag pages, map between corresponding tag slugs
+  const tagMatch = currentPath.match(/\/(en|ar)\/tags\/(.+)/);
+  if (tagMatch) {
+    const [, currentLang, tagSlug] = tagMatch;
+    const tagData = findTagByValue(tagSlug.replace(/-/g, ' '));
+    
+    if (!tagData) {
+      // If no matching tag found, redirect to blog
+      return `/${targetLang}/blog`;
+    }
+    
+    // Use the appropriate slug for the target language
+    const targetSlug = tagData.slug[targetLang];
+    return `/${targetLang}/tags/${targetSlug}`;
   }
 
   // Handle regular pages
