@@ -18,11 +18,11 @@
 
   /* Base card styles */
   .card {
-    @apply bg-cool-light-gray border-gray-200 transition-colors duration-200;
+    @apply bg-white border-gray-200 transition-colors duration-200;
   }
 
   .dark .card {
-    @apply bg-soft-charcoal border-gray-700;
+    @apply bg-gray-800 border-gray-700;
   }
 
   /* Dark mode text styles */
