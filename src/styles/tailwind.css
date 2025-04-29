@@ -3,6 +3,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    @apply bg-cool-light-gray text-soft-charcoal;
+  }
+  
+  .dark {
+    @apply bg-soft-charcoal text-cool-light-gray;
+  }
+}
+
 [dir="rtl"] body {
   font-family: 'Tajawal', sans-serif;
 }
