@@ -20,7 +20,8 @@ export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'):
   console.log('Target language:', targetLang);
 
   // For tag pages, redirect to blog page
-  if (currentPath.includes('/tags/')) {
+  const tagPageRegex = /\/(en|ar)\/tags\/[^/]+$/;
+  if (tagPageRegex.test(currentPath)) {
     console.log('Tag page detected, redirecting to:', `/${targetLang}/blog`);
     return `/${targetLang}/blog`;
   }
