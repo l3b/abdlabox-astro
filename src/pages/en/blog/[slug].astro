@@ -25,6 +25,17 @@ const pageDescription = post.data.description;
 // Assuming the existence of a tags object mapping tags to slugs.  This needs to be defined elsewhere.
 import { tags } from '../../../data/tags';
 
+// Added to calculate reading time
+const wordCount = Content.split(/\s+/).length;
+const readingTime = Math.ceil(wordCount / 200);
+
+
+// Added to get previous and next posts.  This requires additional logic to determine order.
+const allPosts = await getCollection('blog', ({ data }) => data.language === 'en' && data.isDraft !== true);
+const currentIndex = allPosts.findIndex(p => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
@@ -54,10 +65,26 @@ import { tags } from '../../../data/tags';
               })}
             </span>
           )}
+          <div class="text-sm text-gray-600 mt-2">
+            {readingTime} min read
+          </div>
         </div>
       </header>
 
-      {/* Main Post Content - Adjusted prose classes */}
+      <nav class="flex justify-between mb-8 text-sm">
+        {prevPost && (
+          <a href={`/en/blog/${prevPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender">
+            ← {prevPost.data.title}
+          </a>
+        )}
+        {nextPost && (
+          <a href={`/en/blog/${nextPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender ml-auto">
+            {nextPost.data.title} →
+          </a>
+        )}
+      </nav>
+
+      {/* Main Post Content - Apply 'prose' classes here */}
       <div
         class="
           prose prose-lg max-w-none mt-8

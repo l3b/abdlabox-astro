@@ -19,6 +19,14 @@ type Props = { post: CollectionEntry<'blog'> };
 const { post } = Astro.props;
 const { Content } = await post.render();
 const translatedPost = await getBlogTranslation(post);
+const allPosts = await getCollection('blog', ({ data }) => data.language === 'ar' && !data.isDraft);
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = sortedPosts.findIndex(p => p.slug === post.slug);
+const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+
+import { getReadingTime } from '../../../utils/readingTime';
+const readingTime = getReadingTime(post.body);
 
 const pageTitle = post.data.title;
 const pageDescription = post.data.description;
@@ -59,8 +67,24 @@ import { tags } from '../../../data/tags';
               })}
             </span>
           )}
+        <div class="text-sm text-gray-600 mt-2">
+            وقت القراءة: {readingTime} دقيقة
+          </div>
         </div>
       </header>
+
+      <nav class="flex justify-between mb-8 text-sm">
+        {nextPost && (
+          <a href={`/ar/blog/${nextPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender">
+            ← {nextPost.data.title}
+          </a>
+        )}
+        {prevPost && (
+          <a href={`/ar/blog/${prevPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender mr-auto">
+            {prevPost.data.title} →
+          </a>
+        )}
+      </nav>
 
       {/* Main Post Content - Apply 'prose' classes here */}
       {/* Ensure these classes match the English version */}
