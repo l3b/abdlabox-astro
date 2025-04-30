@@ -1,0 +1,82 @@
+2025-04-30T17:41:07.833669Z	Cloning repository...
+2025-04-30T17:41:08.836799Z	From https://github.com/l3b/abdlabox-astro
+2025-04-30T17:41:08.837242Z	 * branch            fa8e3c237e50cc7eb4d0bbd81b44316c69b67f31 -> FETCH_HEAD
+2025-04-30T17:41:08.837357Z	
+2025-04-30T17:41:08.867751Z	HEAD is now at fa8e3c2 Assistant checkpoint: Restore working Astro configuration
+2025-04-30T17:41:08.868215Z	
+2025-04-30T17:41:08.946841Z	
+2025-04-30T17:41:08.947333Z	Using v2 root directory strategy
+2025-04-30T17:41:08.967624Z	Success: Finished cloning repository files
+2025-04-30T17:41:10.684625Z	Checking for configuration in a Wrangler configuration file (BETA)
+2025-04-30T17:41:10.685521Z	
+2025-04-30T17:41:11.806062Z	No wrangler.toml file found. Continuing.
+2025-04-30T17:41:11.870781Z	Detected the following tools from environment: npm@9.6.7, nodejs@18.17.1
+2025-04-30T17:41:11.871544Z	Installing project dependencies: npm clean-install --progress=false
+2025-04-30T17:41:13.209Z	npm WARN EBADENGINE Unsupported engine {
+2025-04-30T17:41:13.209258Z	npm WARN EBADENGINE   package: 'yocto-spinner@0.2.1',
+2025-04-30T17:41:13.209589Z	npm WARN EBADENGINE   required: { node: '>=18.19' },
+2025-04-30T17:41:13.210026Z	npm WARN EBADENGINE   current: { node: 'v18.17.1', npm: '9.6.7' }
+2025-04-30T17:41:13.210186Z	npm WARN EBADENGINE }
+2025-04-30T17:41:20.868768Z	
+2025-04-30T17:41:20.869018Z	added 514 packages, and audited 515 packages in 8s
+2025-04-30T17:41:20.869174Z	
+2025-04-30T17:41:20.869346Z	204 packages are looking for funding
+2025-04-30T17:41:20.869458Z	  run `npm fund` for details
+2025-04-30T17:41:20.8706Z	
+2025-04-30T17:41:20.870696Z	found 0 vulnerabilities
+2025-04-30T17:41:20.886614Z	Executing user command: npm run build
+2025-04-30T17:41:21.443916Z	
+2025-04-30T17:41:21.444134Z	> personal-website@0.0.1 build
+2025-04-30T17:41:21.444213Z	> astro build
+2025-04-30T17:41:21.444314Z	
+2025-04-30T17:41:23.628464Z	17:41:23 [content] Syncing content
+2025-04-30T17:41:23.893029Z	17:41:23 [content] Synced content
+2025-04-30T17:41:23.893938Z	17:41:23 [types] Generated 991ms
+2025-04-30T17:41:23.894322Z	17:41:23 [build] output: "static"
+2025-04-30T17:41:23.894564Z	17:41:23 [build] mode: "static"
+2025-04-30T17:41:23.894662Z	17:41:23 [build] directory: /opt/buildhome/repo/dist/
+2025-04-30T17:41:23.894786Z	17:41:23 [build] Collecting build info...
+2025-04-30T17:41:23.895374Z	17:41:23 [build] ✓ Completed in 1.01s.
+2025-04-30T17:41:23.896592Z	17:41:23 [build] Building static entrypoints...
+2025-04-30T17:41:26.582601Z	17:41:26 [vite] [32m✓ built in 2.65s[39m
+2025-04-30T17:41:26.582895Z	17:41:26 [build] ✓ Completed in 2.69s.
+2025-04-30T17:41:26.58328Z	
+2025-04-30T17:41:26.583421Z	 building client (vite) 
+2025-04-30T17:41:26.595713Z	17:41:26 [vite] transforming...
+2025-04-30T17:41:26.597697Z	17:41:26 [vite] [32m✓[39m 1 modules transformed.
+2025-04-30T17:41:26.600452Z	17:41:26 [vite] rendering chunks...
+2025-04-30T17:41:26.601403Z	17:41:26 [vite] [32m✓ built in 15ms[39m
+2025-04-30T17:41:26.60692Z	
+2025-04-30T17:41:26.607129Z	 generating static routes 
+2025-04-30T17:41:26.695755Z	17:41:26 ▶ src/pages/ar/about.astro
+2025-04-30T17:41:26.706489Z	17:41:26   └─ /ar/about/index.html (+10ms) 
+2025-04-30T17:41:26.708046Z	17:41:26 ▶ src/pages/ar/blog/[slug].astro
+2025-04-30T17:41:26.739196Z	17:41:26   ├─ /ar/blog/second-temp-post/index.html (+28ms) 
+2025-04-30T17:41:26.742729Z	17:41:26   └─ /ar/blog/first-arabic-post/index.html (+4ms) 
+2025-04-30T17:41:26.744611Z	17:41:26 ▶ src/pages/ar/blog.astro
+2025-04-30T17:41:26.747824Z	17:41:26   └─ /ar/blog/index.html (+3ms) 
+2025-04-30T17:41:26.749897Z	17:41:26 ▶ src/pages/ar/contact.astro
+2025-04-30T17:41:26.753756Z	17:41:26   └─ /ar/contact/index.html (+4ms) 
+2025-04-30T17:41:26.755183Z	17:41:26 ▶ src/pages/ar/tags/[tag].astro
+2025-04-30T17:41:26.759057Z	17:41:26   ├─ /ar/tags/أسترو/index.html (+3ms) 
+2025-04-30T17:41:26.761472Z	17:41:26   ├─ /ar/tags/تعلم/index.html (+2ms) 
+2025-04-30T17:41:26.763611Z	17:41:26   ├─ /ar/tags/تقنية/index.html (+2ms) 
+2025-04-30T17:41:26.765903Z	17:41:26   ├─ /ar/tags/ذكاء-إصطناعي/index.html (+2ms) 
+2025-04-30T17:41:26.768359Z	17:41:26   └─ /ar/tags/تطوير-ويب/index.html (+2ms) 
+2025-04-30T17:41:27.211705Z	17:41:27 ▶ src/pages/ar/index.astro
+2025-04-30T17:41:28.227319Z	17:41:27   └─ /ar/index.htmlFetching GitHub Events: https://api.github.com/users/l3b/events/public?per_page=5
+2025-04-30T17:41:28.356846Z	Found 1 displayable GitHub events.
+2025-04-30T17:41:28.359432Z	 (+1.15s) 
+2025-04-30T17:41:28.360959Z	17:41:28 ▶ src/pages/en/about.astro
+2025-04-30T17:41:28.363138Z	17:41:28   └─ /en/about/index.html (+2ms) 
+2025-04-30T17:41:28.36466Z	17:41:28 ▶ src/pages/en/blog/[slug].astro
+2025-04-30T17:41:28.711854Z	17:41:28   └─ /en/blog/first-english-post/index.htmlContent.split is not a function
+2025-04-30T17:41:28.712151Z	  Stack trace:
+2025-04-30T17:41:28.712311Z	    at file:///opt/buildhome/repo/dist/pages/en/blog/_slug_.astro.mjs?time=1746034888363:26:29
+2025-04-30T17:41:28.712432Z	    at async renderToString (file:///opt/buildhome/repo/node_modules/astro/dist/runtime/server/render/astro/render.js:9:26)
+2025-04-30T17:41:28.712539Z	    at async lastNext (file:///opt/buildhome/repo/node_modules/astro/dist/core/render-context.js:185:25)
+2025-04-30T17:41:28.712651Z	    at async file:///opt/buildhome/repo/node_modules/astro/dist/i18n/middleware.js:49:22
+2025-04-30T17:41:28.71276Z	    at async RenderContext.render (file:///opt/buildhome/repo/node_modules/astro/dist/core/render-context.js:219:22)
+2025-04-30T17:41:28.752822Z	Failed: Error while executing user command. Exited with error code: 1
+2025-04-30T17:41:28.761571Z	Failed: build command exited with code: 1
+2025-04-30T17:41:29.852119Z	Failed: error occurred while running build command
