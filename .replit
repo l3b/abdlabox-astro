@@ -8,6 +8,7 @@ channel = "stable-24_05"
 build = ["sh", "-c", "npm run build"]
 deploymentTarget = "static"
 publicDir = "dist"
+run = ["sh", "-c", ""]
 
 [[ports]]
 localPort = 4321
@@ -19,4 +20,16 @@ externalPort = 5000
 [[ports]]
 localPort = 5001
 externalPort = 80
+
+[workflows]
+runButton = "Dev"
+
+[[workflows.workflow]]
+name = "Dev"
+author = 39620836
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 

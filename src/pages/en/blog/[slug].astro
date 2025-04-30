@@ -25,9 +25,9 @@ const pageDescription = post.data.description;
 // Assuming the existence of a tags object mapping tags to slugs.  This needs to be defined elsewhere.
 import { tags } from '../../../data/tags';
 
-// Added to calculate reading time
-const wordCount = Content.split(/\s+/).length;
-const readingTime = Math.ceil(wordCount / 200);
+// Use the readingTime utility
+import { getReadingTime } from '../../../utils/readingTime';
+const readingTime = getReadingTime(post.body);
 
 
 // Added to get previous and next posts.  This requires additional logic to determine order.
