@@ -12,6 +12,7 @@ export default defineConfig({
     },
     watch: {
       usePolling: true
-    }
+    },
+    allowedHosts: ["f8bcf973-494c-455a-995f-846331ae66de-00-uyvd18bso6i1.pike.replit.dev"]
   }
 });
