@@ -206,7 +206,7 @@ try {
 
       {/* Section 1: Latest Blog Post */}
       {latestArPost ? (
-        <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow flex flex-col"> {/* Use flex-col for structure */}
+        <section class="card"> {/* Use flex-col for structure */}
           <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
             أحدث ما في المدونة
@@ -235,7 +235,7 @@ try {
       )}
 
       {/* Section 2: Goodreads Currently Reading */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
            أقرأ الآن
@@ -257,7 +257,7 @@ try {
        </section>
 
       {/* Section 3: Trakt Recently Watched */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
             <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
             شاهدت مؤخرًا
@@ -289,7 +289,7 @@ try {
        </section>
 
        {/* Section 4: Bluesky Posts */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
            من Bluesky
@@ -326,7 +326,7 @@ try {
        </section>
 
      {/* Section 5: Strava Activity - UPDATED with iframe Widget */}
-     <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col items-center"> {/* Added flex centering */}
+     <section class="card"> {/* Added flex centering */}
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start"> {/* Align heading normally */}
             <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
             آخر نشاط رياضي
@@ -338,6 +338,7 @@ try {
             frameborder='0'
             allowtransparency='true'
             scrolling='no'
+            background-color='red'
             src='https://www.strava.com/athletes/7746516/latest-rides/930be949cf2c3e5601bb81846be00cc7f1fd01ac'
             class="mt-2" {/* Added some margin top */}
          ></iframe>
@@ -345,7 +346,7 @@ try {
        </section>
 
       {/* Section 6: GitHub Latest Events - UPDATED DISPLAY */}
-      <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+      <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
            من GitHub

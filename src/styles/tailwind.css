@@ -7,7 +7,7 @@
   :root {
     @apply bg-cool-light-gray text-soft-charcoal transition-colors duration-200;
   }
-  
+
   :root.dark {
     @apply bg-soft-charcoal text-cool-light-gray;
   }
@@ -18,20 +18,23 @@
 
   /* Base card styles */
   .card {
-    @apply bg-white border-gray-200 transition-colors duration-200;
+    @apply bg-white block p-6 border rounded-lg hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow;
   }
 
   .dark .card {
-    @apply bg-gray-800 border-gray-700;
+    @apply bg-gray-900 border-gray-700 hover:shadow-lg hover:shadow-neon-yellow border-t-neon-yellow;
   }
 
   /* Dark mode text styles */
   .dark h1,
-  .dark h2,
   .dark h3,
   .dark h4,
   .dark .text-soft-charcoal {
     @apply text-cool-light-gray;
+  }
+
+  .dark h2 {
+    @apply text-lavender;
   }
 
   .dark .text-gray-600,
@@ -40,7 +43,7 @@
   }
 
   /* Dark mode form inputs */
-  .dark input, 
+  .dark input,
   .dark textarea {
     @apply bg-gray-800 border-gray-700 text-cool-light-gray;
   }
@@ -49,14 +52,14 @@
   .dark .prose {
     @apply text-cool-light-gray;
   }
-  
-  .dark .prose h1, 
-  .dark .prose h2, 
-  .dark .prose h3, 
+
+  .dark .prose h1,
+  .dark .prose h2,
+  .dark .prose h3,
   .dark .prose h4 {
     @apply text-cool-light-gray;
   }
-  
+
   .dark .prose p,
   .dark .prose li {
     @apply text-gray-300;
@@ -74,34 +77,49 @@
 
 /* Add this rule to force light text in code blocks */
 .prose pre code span {
-    color: theme('colors.cool-light-gray'); /* Or try theme('colors.white') */
-  }
+  color: theme('colors.cool-light-gray');
+  /* Or try theme('colors.white') */
+}
 
 /* Remove previous main a, h1, h2 styles if they exist */
 /* Add this for social icons */
 .social-icon-link svg {
-    fill: currentColor; /* Make SVG fill color inherit text color */
-  }
+  fill: currentColor;
+  /* Make SVG fill color inherit text color */
+}
+
 /* NEW Base Heading Styles (within <main>) */
 main h1 {
-  @apply text-3xl font-bold mb-4 md:text-4xl; /* Size, Weight, Margin */
+  @apply text-3xl font-bold mb-4 md:text-4xl;
+  /* Size, Weight, Margin */
   /* Color will be applied via utility class, e.g., text-lavender */
 }
 
 main h2 {
-  @apply text-2xl font-semibold mt-8 mb-3; /* Size, Weight, Margins */
+  @apply text-2xl font-semibold mt-8 mb-3;
+  /* Size, Weight, Margins */
   /* Color will be applied via utility class, e.g., text-electric-blue */
 }
 
 main h3 {
-  @apply text-xl font-semibold mt-6 mb-2; /* Size, Weight, Margins */
+  @apply text-xl font-semibold mt-6 mb-2;
+  /* Size, Weight, Margins */
   /* Color will be applied via utility class */
 }
 
 /* You might want a base link style within main */
 main a {
-   @apply text-teal hover:text-lavender; /* Using our custom teal color */
-   /* Add underline preferences here if desired, e.g., hover:underline */
+  @apply text-teal hover:text-lavender;
+  /* Using our custom teal color */
+  /* Add underline preferences here if desired, e.g., hover:underline */
 }
 
 /* ... other custom base styles ... */
+
+.header {
+  @apply bg-electric-blue text-cool-light-gray shadow-lg sticky top-0 z-50;
+}
+
+.dark header {
+  @apply bg-lavender;
+}

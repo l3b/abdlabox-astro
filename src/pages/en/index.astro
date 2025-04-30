@@ -181,7 +181,7 @@ try {
 
       {/* Section 1: Latest Blog Post */}
       {latestEnPost ? ( // Use English post variable
-        <section class="p-6 card rounded-lg border shadow-sm hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow flex flex-col">
+        <section class="card">
           <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
             Latest from the Blog {/* English Heading */}
@@ -212,7 +212,7 @@ try {
       )}
 
       {/* Section 2: Goodreads Currently Reading (Template is language-agnostic) */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
            Currently Reading {/* English Heading */}
@@ -234,7 +234,7 @@ try {
        </section>
 
       {/* Section 3: Trakt Recently Watched (Template is language-agnostic) */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
             <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
             Recently Watched {/* English Heading */}
@@ -266,7 +266,7 @@ try {
        </section>
 
        {/* Section 4: Bluesky Posts */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+       <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
            From Bluesky {/* English Heading */}
@@ -291,7 +291,7 @@ try {
        </section>
 
        {/* Section 5: Strava Activity Widget (iframe src is language-agnostic) */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col items-center">
+       <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start">
            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
            Latest Activity {/* English Heading */}
@@ -300,7 +300,7 @@ try {
        </section>
 
       {/* Section 6: GitHub Latest Events (Display logic is language-agnostic, but time uses locale) */}
-      <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-xl transition duration-300 ease-in-out flex flex-col">
+      <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
            From GitHub {/* English Heading */}
@@ -326,14 +326,6 @@ try {
         </a>
       </section>
 
-      {/* Section 7: Placeholder for Coursera */}
-       <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 hover:shadow-xl transition">
-         <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2">
-            <Icon name="simple-icons:coursera" class="w-6 h-6 flex-shrink-0"/>
-             Currently Learning {/* English Heading */}
-         </h2>
-         <p class="italic">(Current course will appear here...)</p> {/* English Placeholder */}
-       </section>
 
     </div> {/* End Grid */}
   </div> {/* End Container */}
