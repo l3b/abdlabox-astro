@@ -79,8 +79,8 @@ const navLinks = [
         })}
         {/* Language Switcher Button */}
         {alternateLocale && !currentPath.includes('/tags/') && (
-          <a href={alternatePath} class="text-white hover:text-neon-yellow ml-4 flex items-center gap-1">
-            <Icon name="mdi:translate" class="w-5 h-5" />
+          <a href={alternatePath} class="text-white hover:text-neon-yellow ml-4 flex items-center gap-1 font-bold">
+            {currentLocale === 'en' ? 'ع' : 'E'}
             <span class="sr-only">{currentLocale === 'en' ? 'عربي' : 'English'}</span>
           </a>
         )}
