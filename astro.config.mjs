@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
 export default defineConfig({
+  site: 'https://personal-website.repl.co',
   server: {
     host: '0.0.0.0',
     port: 4321
