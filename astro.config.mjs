@@ -7,7 +7,7 @@ import icon from 'astro-icon';
                                 port: 5000
                               },
                               output: 'server',
-                              adapter: 'node',
+                              adapter: { name: 'node' },
   i18n: {
     defaultLocale: 'ar',
     locales: ['en', 'ar'],
