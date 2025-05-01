@@ -116,10 +116,30 @@ main a {
 
 /* ... other custom base styles ... */
 
-.header {
+.header-top {
   @apply bg-electric-blue text-cool-light-gray shadow-lg sticky top-0 z-50;
 }
 
-.dark header {
+.dark .header-top {
   @apply bg-lavender;
+}
+
+::selection {
+  @apply bg-neon-yellow text-soft-charcoal;
+}
+
+.tag {
+  @apply inline-block bg-electric-blue text-cool-light-gray px-2.5 py-0.5 rounded-full text-xs font-semibold hover:bg-neon-yellow hover:text-soft-charcoal transition-colors duration-200 mr-2 mb-1;
+}
+
+.dark .tag {
+  @apply bg-lavender;
+}
+
+.button {
+  @apply px-6 py-2 bg-electric-blue text-cool-light-gray font-semibold rounded-md hover:bg-neon-yellow hover:text-soft-charcoal focus:outline-none focus:ring-2 focus:ring-neon-yellow focus:ring-offset-2 transition-colors duration-200;
+}
+
+.dark .button {
+  @apply bg-lavender text-cool-light-gray;
 }

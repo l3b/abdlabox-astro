@@ -36,13 +36,13 @@ if (!alternatePath || alternatePath === currentPath) {
 }
 
 const navLinks = [
-    { name: currentLocale === 'en' ? 'Home' : 'الرئيسية', href: `/${currentLocale}/` },
+    { name: currentLocale === 'en' ? 'Base' : 'الواجهة', href: `/${currentLocale}/` },
     { name: currentLocale === 'en' ? 'Blog' : 'المدونة', href: `/${currentLocale}/blog/` },
     { name: currentLocale === 'en' ? 'Behind the Dunes?' : 'من وراء الكثبان؟', href: `/${currentLocale}/about/` },
     { name: currentLocale === 'en' ? 'Send a Signal' : 'أرسل إشارة', href: `/${currentLocale}/contact/` },
 ];
 ---
-<header class="header">
+<header class="header-top">
   <div class="container mx-auto flex flex-wrap items-center justify-between p-4 gap-x-6 gap-y-2">
     <div class="site-title text-2xl font-bold tracking-tight">
       <a href={`/${currentLocale}/`} class="hover:text-neon-yellow transition-colors duration-200">{siteTitle}</a>

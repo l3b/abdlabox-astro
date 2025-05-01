@@ -58,7 +58,7 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
                   t.slug.en === normalizedTag || t.slug.ar === normalizedTag
                 );
                 return tagConfig && (
-                  <a href={`/en/tags/${tagConfig[1].slug.en}`} class="inline-block bg-neon-yellow text-gray-800 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide hover:bg-electric-blue hover:text-white transition-colors duration-200">
+                  <a href={`/en/tags/${tagConfig[1].slug.en}`} class="tag">
                     {tagConfig[1].en}
                   </a>
                 );
