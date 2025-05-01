@@ -127,6 +127,9 @@ main a {
 ::selection {
   @apply bg-neon-yellow text-soft-charcoal;
 }
+.dark ::selection{
+  @apply bg-teal;
+}
 
 .tag {
   @apply inline-block bg-electric-blue text-cool-light-gray px-2.5 py-0.5 rounded-full text-xs font-semibold hover:bg-neon-yellow hover:text-soft-charcoal transition-colors duration-200 mr-2 mb-1;
