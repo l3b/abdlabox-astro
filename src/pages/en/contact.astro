@@ -121,7 +121,7 @@ const calComUrl = "https://cal.com/your-username"; // !! Replace with your actua
                 {/* <h3 class="text-sm font-semibold uppercase text-gray-500 tracking-wider mb-3">{category}</h3> */}
 
                 {/* Centered Flexbox layout for icons */}
-                <div class="flex flex-wrap gap-6 items-center justify-center">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 items-center justify-items-center">
                     {linkCategories[category].map(link => (
                         <a
                             href={link.url}
@@ -129,12 +129,13 @@ const calComUrl = "https://cal.com/your-username"; // !! Replace with your actua
                             rel="noopener noreferrer me"
                             aria-label={link.name}
                             title={link.name}
-                            class="p-1 group social-icon-link text-lavender hover:text-electric-blue transition-colors duration-200"
+                            class="p-3 group social-icon-link text-lavender hover:text-electric-blue transition-all duration-200 hover:scale-110 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                         >
                             <Icon
                                 name={link.icon}
-                                class="w-6 h-6" {/* Icon inherits color via CSS */}
+                                class="w-8 h-8"
                              />
+                            <span class="sr-only">{link.name}</span>
                         </a>
                     ))}
                 </div>
