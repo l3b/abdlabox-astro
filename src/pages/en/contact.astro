@@ -124,13 +124,13 @@ const calComUrl = "https://cal.com/your-username"; // !! Replace with your actua
                 <h3 class="text-sm font-semibold uppercase text-gray-500 tracking-wider mb-4">{category}</h3>
                 
                 {/* Social links grid */}
-                <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {linkCategories[category].map(link => (
                         <a
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer me"
-                            class="flex items-center gap-3 p-4 min-w-[200px] bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group border border-gray-100 dark:border-gray-700"
+                            class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group border border-gray-100 dark:border-gray-700"
                         >
                             <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 group-hover:bg-lavender/10 dark:group-hover:bg-lavender/20 transition-colors duration-200">
                                 <Icon
