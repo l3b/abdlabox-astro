@@ -115,7 +115,7 @@ const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
          <p class="text-gray-600 mb-6">تفضل بمتابعتي أو التواصل عبر أماكني الأخرى على الإنترنت:</p>
          {sortedCategories.map(category => (
             <div class="mb-6">
-                <div class="flex flex-wrap gap-4 items-center justify-center">
+                <div class="flex gap-2 items-center">
                     {linkCategories[category].map(link => (
                         <a
                             href={link.url}
