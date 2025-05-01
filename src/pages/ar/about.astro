@@ -1,20 +1,24 @@
-
 ---
-// src/pages/ar/about.astro - Larger Font, Social Icons
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { Icon } from 'astro-icon';
-import socialLinks from '../../data/socialLinks';
+// src/pages/ar/about.astro - Larger Font, Subtitle Removed
+import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
 
 const pageTitle = "من وراء الكثبان؟";
+// Removed englishSubtitle variable
+// Optional: Use a description for meta tags
 const pageDescription = "في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.";
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
+  {/* Centered container with vertical padding */}
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
-    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
+
+    {/* Page Title - Adjusted margin */}
+    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow"> {/* Adjusted mb-4 to mb-8 */}
       {pageTitle}
     </h1>
+    {/* English subtitle <p> tag REMOVED */}
 
-    <div class="space-y-6 max-w-prose leading-relaxed text-lg">
+    {/* Main content area - Added text-lg for larger paragraphs */}
+    <div class="space-y-6 max-w-prose leading-relaxed text-lg"> {/* <-- Added text-lg */}
       <p>
         في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.
       </p>
@@ -29,31 +33,9 @@ const pageDescription = "في عالمٍ تتقاطع فيه التكنولوج�
         أحيانًا أركض في الماراثونات بحذائي الحديث وأوثّق الرحلة، وأحيانًا أخرى أبحر في عالم جديد تمامًا لم يسبقني إليه أحدٌ أعرفه.
       </p>
       <p>
-        إن شعرت أن ما تقرأه هنا يلامسك، فربما يمكن أن نكون أصدقاء في هذا العالم الرقمي — على واحدة من وسائل التواصل المختلفة.
+        إن شعرت أن ما تقرأه هنا يلامسك، فربما يمكن أن نكون أصدقاء في هذا العالم الرقمي — على واحدة من وسائل التواصل المختلفة. {/* Links to profiles can be added here later */}
       </p>
-
-      <!-- Social Links Section -->
-      <div class="mt-12">
-        <h2 class="text-2xl font-semibold mb-6 text-electric-blue">تواصل معي</h2>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {socialLinks.map((link) => (
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 dark:bg-gray-800"
-            >
-              {link.icon && (
-                <Icon
-                  name={link.icon}
-                  class="w-6 h-6 text-electric-blue dark:text-lavender"
-                />
-              )}
-              <span class="mr-3 text-soft-charcoal dark:text-cool-light-gray">{link.name}</span>
-            </a>
-          ))}
-        </div>
-      </div>
     </div>
+
   </div>
 </BaseLayout>
