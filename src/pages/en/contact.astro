@@ -120,23 +120,27 @@ const calComUrl = "https://cal.com/your-username"; // !! Replace with your actua
                 {/* Optional: Category Name */}
                 {/* <h3 class="text-sm font-semibold uppercase text-gray-500 tracking-wider mb-3">{category}</h3> */}
 
-                {/* Centered Flexbox layout for icons */}
-                <div class="grid grid-cols-4 sm:grid-cols-5 gap-4 justify-items-center">
+                {/* Category label */}
+                <h3 class="text-sm font-semibold uppercase text-gray-500 tracking-wider mb-4">{category}</h3>
+                
+                {/* Social links grid */}
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {linkCategories[category].map(link => (
                         <a
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer me"
-                            aria-label={link.name}
-                            title={link.name}
-                            class="p-3 group social-icon-link text-lavender hover:text-electric-blue transition-all duration-200 hover:scale-110 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                            class="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group border border-gray-100 dark:border-gray-700"
                         >
-                            <Icon
-                                name={link.icon}
-                                class="w-8 h-8"
-                             />
-                            <span class="sr-only">{link.name}</span>
-                        </a>
+                            <div class="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 group-hover:bg-lavender/10 dark:group-hover:bg-lavender/20 transition-colors duration-200">
+                                <Icon
+                                    name={link.icon}
+                                    class="w-6 h-6 text-lavender group-hover:text-electric-blue transition-colors duration-200"
+                                />
+                            </div>
+                            <span class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-electric-blue dark:group-hover:text-lavender transition-colors duration-200">
+                                {link.name}
+                            </span>
                     ))}
                 </div>
             </div>
