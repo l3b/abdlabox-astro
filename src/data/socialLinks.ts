@@ -1,15 +1,27 @@
+
 // src/data/socialLinks.ts
+
+// Define category translations
+const categoryTranslations = {
+  'Professional': 'مهني',
+  'Writing': 'كتابة',
+  'Activity': 'نشاط',
+  'Learning': 'تعلم',
+  'Reading': 'قراءة',
+  'Media': 'وسائط',
+  'Other': 'أخرى'
+};
 
 // Define a type for the link object for type safety
 export interface SocialLink {
     name: string;
     url: string;
-    icon?: string; // Icon name (e.g., 'simple-icons:github'), optional
+    icon?: string;
     category: string;
-  }
+}
   
-  // Define the array of links with the SocialLink type
-  const socialLinks: SocialLink[] = [
+// Define the array of links with the SocialLink type
+const socialLinks: SocialLink[] = [
     // Professional Links
     {
       name: "LinkedIn",
@@ -48,7 +60,6 @@ export interface SocialLink {
     {
       name: "Coursera",
       url: "https://www.coursera.org/learner/abdullahalthani",
-      // icon was missing, let's add it (or remove the icon property if none exists)
       icon: "simple-icons:coursera",
       category: "Learning"
     },
@@ -67,11 +78,11 @@ export interface SocialLink {
     },
     {
       name: "IMDb",
-      url: "https://www.imdb.com/user/ur54816740", // NOTE: Replace placeholder ID
+      url: "https://www.imdb.com/user/ur54816740",
       icon: "simple-icons:imdb",
       category: "Media"
     }
-    // Add Farcaster, Lens etc. here when ready
-  ];
-  
-  export default socialLinks; // Export the array
+];
+
+export { categoryTranslations };
+export default socialLinks;
