@@ -29,50 +29,56 @@ const pageDescription = "Latest articles and thoughts on Technology, Knowledge M
     <div class="space-y-8 md:space-y-10">
       {sortedPosts.map(post => (
         <article class="card"> {/* Neon Yellow top border */}
-
-          {/* Post Title as a Link - Reverted to hover underline only */}
-          <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
-             class="block mb-2 no-underline" {/* No underline by default */}
-          >
-            <h2 class="text-xl md:text-2xl font-semibold text-electric-blue hover:text-teal-600 hover:underline transition-colors duration-200"> {/* Underline on hover */}
-              {post.data.title}
-            </h2>
-          </a>
-
-          {/* Post Metadata */}
-          <div class="text-sm text-gray-600 mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span>
-              Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
-            {post.data.tags && post.data.tags.length > 0 && (
-              <span>
-                Tags:
-                {post.data.tags?.map(tag => (
-                <a 
-                  href={`/en/tags/${normalizeTag(tag)}`}
-                  class="tag"
-                >
-                  {tag}
-                </a>
-              ))}
-              </span>
+          <div class="flex"> {/* Added div for image and title */}
+            {post.data.featuredImage && (
+              <img src={post.data.featuredImage} alt={`Featured image for ${post.data.title}`} class="w-24 h-24 mr-4 rounded-lg object-cover" />
             )}
+            <div>
+              {/* Post Title as a Link - Reverted to hover underline only */}
+              <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
+                 class="block mb-2 no-underline" {/* No underline by default */}
+              >
+                <h2 class="text-xl md:text-2xl font-semibold text-electric-blue hover:text-teal-600 hover:underline transition-colors duration-200"> {/* Underline on hover */}
+                  {post.data.title}
+                </h2>
+              </a>
+
+              {/* Post Metadata */}
+              <div class="text-sm text-gray-600 mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span>
+                  Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+                {post.data.tags && post.data.tags.length > 0 && (
+                  <span>
+                    Tags:
+                    {post.data.tags?.map(tag => (
+                    <a 
+                      href={`/en/tags/${normalizeTag(tag)}`}
+                      class="tag"
+                    >
+                      {tag}
+                    </a>
+                  ))}
+                  </span>
+                )}
+              </div>
+
+              {/* Post Description */}
+              {post.data.description && (
+                <p class="text-gray-700 leading-relaxed mt-2">
+                  {post.data.description}
+                </p>
+              )}
+
+              {/* Read More Link - Reverted to Teal underline default */}
+              <a
+                 href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
+                 class="inline-block mt-4 text-teal-600 font-medium underline decoration-teal-600 hover:text-neon-yellow hover:decoration-neon-yellow transition-colors duration-200"
+              >
+                 Read more &rarr;
+              </a>
+            </div>
           </div>
-
-          {/* Post Description */}
-          {post.data.description && (
-            <p class="text-gray-700 leading-relaxed mt-2">
-              {post.data.description}
-            </p>
-          )}
-
-          {/* Read More Link - Reverted to Teal underline default */}
-          <a
-             href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
-             class="inline-block mt-4 text-teal-600 font-medium underline decoration-teal-600 hover:text-neon-yellow hover:decoration-neon-yellow transition-colors duration-200"
-          >
-             Read more &rarr;
-          </a>
         </article>
       ))}
     </div> {/* End space-y div */}
