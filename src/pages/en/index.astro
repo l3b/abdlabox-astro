@@ -57,7 +57,7 @@ try {
 // --- Fetch Trakt Recently Watched (Logic is language-agnostic) ---
 interface WatchedItem { id: number; title: string; link: string; type: 'movie' | 'episode' | 'unknown'; overview: string | null; }
 let recentlyWatchedItems: WatchedItem[] = [];
-const TRAKT_USERNAME = 'abdlabox';
+const TRAKT_USERNAME = 'althani';
 const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
 const TRAKT_PROFILE_URL = `https://trakt.tv/users/${TRAKT_USERNAME}`;
 if (TRAKT_API_KEY) { try {
