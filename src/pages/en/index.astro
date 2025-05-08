@@ -179,44 +179,48 @@ try {
     {/* Grid for Signal Sections */}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
 
-      {/* Section 1: Latest Blog Post */}
-      {latestEnPost ? ( // Use English post variable
-        <section class="card">
+      {/* Section 1: Latest Blog Posts */}
+      <section class="card">
+        <a href="/en/blog" class="text-electric-blue">
           <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
-            Latest from the Blog {/* English Heading */}
+            Latest from the Blog
           </h2>
-          <div class="flex-grow space-y-2">
-            <h3 class="text-lg font-semibold mt-1">
-              {/* Use English post link */}
-              <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`}
-                 class="hover:text-teal-600 transition-colors duration-200">
-                <span class="text-soft-charcoal">
-                  {latestEnPost.data.title}
-                </span>
+        </a>
+        <div class="flex-grow space-y-4">
+          {latestEnPost ? (
+            <div>
+              <h3 class="text-lg font-semibold mt-1">
+                <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`}
+                   class="hover:text-teal-600 transition-colors duration-200">
+                  <span class="text-soft-charcoal">
+                    {latestEnPost.data.title}
+                  </span>
+                </a>
+              </h3>
+              {latestEnPost.data.description && (
+                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                  {latestEnPost.data.description}
+                </p>
+              )}
+              <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-2 flex-shrink-0">
+                Read more <span aria-hidden="true">&rarr;</span>
               </a>
-            </h3>
-            {latestEnPost.data.description && (
-              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                {latestEnPost.data.description}
-              </p>
-            )}
-          </div>
-           {/* Use English read more & arrow */}
-          <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0">
-            Read more <span aria-hidden="true">&rarr;</span>
-          </a>
-        </section>
-      ) : (
-         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">No English blog posts found.</section>
-      )}
+            </div>
+          ) : (
+            <p class="italic text-gray-400">No English blog posts found.</p>
+          )}
+        </div>
+      </section>
 
-      {/* Section 2: Goodreads Currently Reading (Template is language-agnostic) */}
+      {/* Section 2: Goodreads Currently Reading */}
        <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
-           Currently Reading {/* English Heading */}
-         </h2>
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-electric-blue">
+           <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+             <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
+             Currently Reading
+           </h2>
+         </a>
          <div class="flex-grow">
            {currentlyReadingBook ? (
               <div>
@@ -226,19 +230,21 @@ try {
                    </p>
                 </a>
               </div>
-           ) : ( <p class="italic text-gray-400">(No book currently reading or failed to fetch...)</p> )} {/* English Fallback */}
+           ) : ( <p class="italic text-gray-400">(No book currently reading or failed to fetch...)</p> )}
          </div>
          <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-            My Goodreads Profile &rarr; {/* English Link Text */}
+            My Goodreads Profile &rarr;
          </a>
        </section>
 
-      {/* Section 3: Trakt Recently Watched (Template is language-agnostic) */}
+      {/* Section 3: Trakt Recently Watched */}
        <section class="card">
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-            <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
-            Recently Watched {/* English Heading */}
-        </h2>
+        <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-electric-blue">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+              <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
+              Recently Watched
+          </h2>
+        </a>
          {recentlyWatchedItems.length > 0 ? (
             <div class="flex-grow">
               <ul class="space-y-4">
