@@ -28,12 +28,18 @@ const pageDescription = "Latest articles and thoughts on Technology, Knowledge M
     {/* List of Blog Posts */}
     <div class="space-y-8 md:space-y-10">
       {sortedPosts.map(post => (
-        <article class="card"> {/* Neon Yellow top border */}
-          <div class="flex"> {/* Added div for image and title */}
+        <article class="card relative overflow-hidden"> {/* Neon Yellow top border */}
+          <div class="flex flex-col md:flex-row gap-6"> {/* Changed to column on mobile, row on desktop */}
             {post.data.featuredImage && (
-              <img src={post.data.featuredImage.url} alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} class="w-24 h-24 mr-4 rounded-lg object-cover" />
+              <div class="md:w-1/4 min-w-[200px]">
+                <img 
+                  src={post.data.featuredImage.url} 
+                  alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} 
+                  class="w-full h-48 md:h-32 rounded-lg object-cover shadow-md" 
+                />
+              </div>
             )}
-            <div>
+            <div class="flex-1">
               {/* Post Title as a Link - Reverted to hover underline only */}
               <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
                  class="block mb-2 no-underline" {/* No underline by default */}

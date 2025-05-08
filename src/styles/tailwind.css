@@ -18,7 +18,7 @@
 
   /* Base card styles */
   .card {
-    @apply bg-white block p-6 border rounded-lg hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow;
+    @apply bg-white block p-6 border rounded-lg hover:shadow-xl transition duration-300 ease-in-out border-t-4 border-t-neon-yellow mb-6;
   }
 
   .dark .card {
