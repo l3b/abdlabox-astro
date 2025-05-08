@@ -12,11 +12,11 @@ const pageSubtitle = "لقطة حيّة من عالمي الرقمي";
 const pageDescription = "الواجهة الرقمية لـ عبدالله: استكشاف الأفكار والتجارب عبر مختلف الإشارات.";
 
 // --- Fetch Latest Blog Post ---
-let latestArPosts = null;
+let latestArPost = null;
 try {
-    latestArPosts = (await getCollection('blog', ({ data, slug }) => {
+    latestArPost = (await getCollection('blog', ({ data, slug }) => {
         return slug.startsWith('ar/') && data.isDraft !== true;
-    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0,3);
+    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
 } catch (e) { console.error("Error fetching blog post:", e); }
 
 
@@ -205,44 +205,40 @@ try {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
 
       {/* Section 1: Latest Blog Post */}
-      {latestArPosts.length > 0 ? (
-        <section class="card">
-          <h2 class="text-xl font-semibold mb-3 flex items-center gap-2 flex-shrink-0">
+      {latestArPost ? (
+        <section class="card"> {/* Use flex-col for structure */}
+          <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
-            <a href="/ar/blog" class="text-electric-blue hover:text-teal-600 transition-colors duration-200">أحدث ما في المدونة</a>
+            أحدث ما في المدونة
           </h2>
-          <div class="flex-grow space-y-4">
-            {latestArPosts.map(post => (
-              <div class="border-b last:border-b-0 pb-4 last:pb-0">
-                <h3 class="text-lg font-semibold">
-                  <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`}
-                     class="hover:text-teal-600 transition-colors duration-200">
-                    <span class="text-soft-charcoal">
-                      {post.data.title}
-                    </span>
-                  </a>
-                </h3>
-                {post.data.description && (
-                  <p class="text-gray-600 text-sm leading-relaxed line-clamp-2 mt-1">
-                    {post.data.description}
-                  </p>
-                )}
-              </div>
-            ))}
+          <div class="flex-grow space-y-2"> {/* Allow content to grow */}
+            <h3 class="text-lg font-semibold mt-1"> {/* Removed margins, rely on space-y */}
+              <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`}
+                 class="hover:text-teal-600 transition-colors duration-200">
+                <span class="text-soft-charcoal">
+                  {latestArPost.data.title}
+                </span>
+              </a>
+            </h3>
+            {latestArPost.data.description && (
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3"> {/* Line clamp */}
+                {latestArPost.data.description}
+              </p>
+            )}
           </div>
-          <a href="/ar/blog" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0">
-            المزيد من المقالات <span aria-hidden="true">&larr;</span>
+          <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0"> {/* mt-auto would push to bottom if height consistent */}
+            قراءة المزيد <span aria-hidden="true">&larr;</span>
           </a>
         </section>
       ) : (
-         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">لا توجد مقالات في المدونة.</section>
+         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">No blog posts found.</section>
       )}
 
       {/* Section 2: Goodreads Currently Reading */}
        <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
-           <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">أقرأ الآن</a>
+           أقرأ الآن
          </h2>
          <div class="flex-grow"> {/* Allow content to grow */}
            {currentlyReadingBook ? (
@@ -255,14 +251,16 @@ try {
               </div>
            ) : ( <p class="italic text-gray-400">(لا يوجد كتاب حاليًا أو تعذر جلب البيانات...)</p> )}
          </div>
-
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start"> {/* Align link bottom-start */}
+            ملفي على Goodreads &larr;
+         </a>
        </section>
 
       {/* Section 3: Trakt Recently Watched */}
        <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
             <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
-            <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">شاهدت مؤخرًا</a>
+            شاهدت مؤخرًا
         </h2>
          {recentlyWatchedItems.length > 0 ? (
             <div class="flex-grow">
@@ -285,7 +283,9 @@ try {
               </ul>
             </div>
          ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على سجل مشاهدة حديث أو تعذر جلب البيانات...)</p> )}
-
+           <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
+              ملفي على Trakt &larr;
+           </a>
        </section>
 
        {/* Section 4: Bluesky Posts */}
@@ -349,7 +349,7 @@ try {
       <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
-           <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">من GitHub</a>
+           من GitHub
         </h2>
         <div class="flex-grow">
           {latestGitHubEvents.length > 0 ? (
@@ -369,7 +369,9 @@ try {
              <p class="italic text-gray-400">(لا يوجد نشاط حديث أو تعذر جلب البيانات...)</p>
           )}
         </div>
-
+        <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
+           ملفي على GitHub &larr;
+        </a>
       </section>
 
     </div> {/* End Grid */}
