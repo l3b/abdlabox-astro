@@ -6,6 +6,11 @@ const blogCollection = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
+    featuredImage: z.object({
+      url: z.string(),
+      alt: z.string(),
+      caption: z.string().optional()
+    }).optional(),
     pubDate: z.date(),
     updatedDate: z.date().optional(),
     author: z.string().default('Abdla'),

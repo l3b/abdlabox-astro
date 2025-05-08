@@ -42,6 +42,20 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
     <article>
       {/* Post Header Section */}
       <header class="mb-8 border-b border-gray-300 pb-6">
+        {post.data.featuredImage && (
+          <figure class="mb-6">
+            <img 
+              src={post.data.featuredImage.url} 
+              alt={post.data.featuredImage.alt}
+              class="w-full h-auto rounded-lg shadow-lg"
+            />
+            {post.data.featuredImage.caption && (
+              <figcaption class="text-center text-gray-600 mt-2 text-sm">
+                {post.data.featuredImage.caption}
+              </figcaption>
+            )}
+          </figure>
+        )}
         <h1 class="inline-block text-3xl md:text-4xl font-bold mb-3 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
           {post.data.title}
         </h1>
