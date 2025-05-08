@@ -222,15 +222,17 @@ try {
            </h2>
          </a>
          <div class="flex-grow">
-           {currentlyReadingBook ? (
-              <div>
-                <a href={currentlyReadingBook.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">
-                   <p class="text-soft-charcoal text-lg font-semibold leading-snug mb-3">
-                      {currentlyReadingBook.title}
-                   </p>
-                </a>
+           {currentlyReadingBooks.length > 0 ? (
+              <div class="space-y-3">
+                {currentlyReadingBooks.map(book => (
+                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
+                     <p class="text-soft-charcoal text-lg font-semibold leading-snug">
+                        {book.title}
+                     </p>
+                  </a>
+                ))}
               </div>
-           ) : ( <p class="italic text-gray-400">(No book currently reading or failed to fetch...)</p> )}
+           ) : ( <p class="italic text-gray-400">(No books currently reading or failed to fetch...)</p> )}
          </div>
          <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
             My Goodreads Profile &rarr;
