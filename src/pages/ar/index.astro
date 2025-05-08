@@ -22,24 +22,27 @@ try {
 
 // --- Fetch Goodreads Currently Reading ---
 interface ReadingBook { title: string; link: string; }
-let currentlyReadingBook: ReadingBook | null = null;
+let currentlyReadingBooks: ReadingBook[] = []; // Changed to array
 const GOODREADS_RSS_URL = "https://www.goodreads.com/review/list_rss/4693662?shelf=currently-reading";
 const GOODREADS_PROFILE_URL = "https://www.goodreads.com/user/show/4693662-abdullah-althani";
 try {
-  // console.log(`Workspaceing Goodreads RSS: ${GOODREADS_RSS_URL}`); // Optional: uncomment for debugging
   const response = await fetch(GOODREADS_RSS_URL);
   if (response.ok) {
      const xmlText = await response.text();
-     const firstItemMatch = xmlText.match(/<item>(.*?)<\/item>/s);
-     if (firstItemMatch && firstItemMatch[1]) {
-        const itemContent = firstItemMatch[1];
-        const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
-        const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
-        const title = titleMatch ? titleMatch[1].trim() : null;
-        let link: string | null = null;
-        if (linkMatch && linkMatch[1]) { link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim(); }
-        if (title && link) { currentlyReadingBook = { title, link }; }
-     } // else { console.log("No <item> found in Goodreads RSS feed."); }
+     const itemMatches = xmlText.matchAll(/<item>(.*?)<\/item>/gs); // Find all items
+     for (const match of itemMatches) {
+       if (match && match[1]) {
+         const itemContent = match[1];
+         const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+         const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
+         const title = titleMatch ? titleMatch[1].trim() : null;
+         let link: string | null = null;
+         if (linkMatch && linkMatch[1]) { link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim(); }
+         if (title && link) { currentlyReadingBooks.push({ title, link }); } // Push to array
+       }
+     }
+     currentlyReadingBooks = currentlyReadingBooks.slice(0,3); // Limit to 3 books
+
   } else { console.error(`Goodreads RSS fetch failed: ${response.status}`); }
 } catch (error) { console.error("Error fetching Goodreads:", error); }
 
@@ -52,7 +55,6 @@ const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
 const TRAKT_PROFILE_URL = `https://trakt.tv/users/${TRAKT_USERNAME}`;
 if (TRAKT_API_KEY) { try {
     const traktUrl = `https://api.trakt.tv/users/${TRAKT_USERNAME}/history?limit=3&extended=full`;
-    // console.log(`Workspaceing Trakt History: ${traktUrl}`); // Optional: uncomment for debugging
     const traktResponse = await fetch(traktUrl, { headers: { 'Content-Type': 'application/json', 'trakt-api-version': '2', 'trakt-api-key': TRAKT_API_KEY }});
     if (traktResponse.ok) {
        const historyData = await traktResponse.json();
@@ -65,7 +67,7 @@ if (TRAKT_API_KEY) { try {
              } catch (e) { return null; }
              if (title && id) { return { id, title, link, type, overview }; } return null;
           }).filter((item): item is WatchedItem => item !== null);
-       } // else { console.log("No items found in Trakt history."); }
+       }
     } else { console.error(`Trakt fetch failed: ${traktResponse.status}`); }
  } catch (error) { console.error("Error fetching Trakt:", error); }
 } else { console.warn("TRAKT_API_KEY not set in .env"); }
@@ -79,21 +81,19 @@ const BSKY_APP_PASSWORD = import.meta.env.BLUESKY_APP_PASSWORD;
 const TARGET_LANG = 'ar';
 
 if (BSKY_IDENTIFIER && BSKY_APP_PASSWORD) { try {
-    // console.log(`Attempting Bluesky login for: ${BSKY_IDENTIFIER}`); // Optional: uncomment for debugging
     const agent = new BskyAgent({ service: 'https://bsky.social' });
     await agent.login({ identifier: BSKY_IDENTIFIER, password: BSKY_APP_PASSWORD });
-    // console.log("Bluesky login successful. Fetching feed..."); // Optional: uncomment for debugging
-    const response = await agent.app.bsky.feed.getAuthorFeed({ actor: BSKY_IDENTIFIER, limit: 20 }); // Fetch more to filter
+    const response = await agent.app.bsky.feed.getAuthorFeed({ actor: BSKY_IDENTIFIER, limit: 20 });
 
     if (response.success && response.data.feed.length > 0) {
       latestBlueskyPosts = response.data.feed
-        .map((feedItem): BlueskyPost | null => { /* ... (mapping logic from previous step) ... */
+        .map((feedItem): BlueskyPost | null => {
             const post = feedItem.post; const reason = feedItem.reason;
             if (!post?.record || !post.uri || !post.cid) return null;
             const langs = post.record.langs as string[] | undefined;
             if (!langs || !langs.includes(TARGET_LANG)) return null;
             const labels = post.labels as ComAtprotoLabelDefs.Label[] | undefined;
-            const hazardousLabels = ['porn', 'sexual', 'nudity']; // Example filter
+            const hazardousLabels = ['porn', 'sexual', 'nudity'];
             if (labels?.some(label => hazardousLabels.includes(label.val))) return null;
             let embedImageUrl: string | undefined = undefined; let embedLinkUrl: string | undefined = undefined; let embedLinkTitle: string | undefined = undefined;
             if (post.embed?.images && post.embed.$type === 'app.bsky.embed.images#view') { embedImageUrl = post.embed.images[0]?.thumb; }
@@ -102,21 +102,21 @@ if (BSKY_IDENTIFIER && BSKY_APP_PASSWORD) { try {
             return { text: typeof post.record.text === 'string' ? post.record.text : null, uri: post.uri, cid: post.cid, embedImageUrl: embedImageUrl, embedLinkUrl: embedLinkUrl, embedLinkTitle: embedLinkTitle, replyParent: replyParent, reason: reason?.$type };
         })
         .filter((item): item is BlueskyPost => item !== null)
-        .filter(item => item.reason !== 'app.bsky.feed.defs#reasonRepost' || item.text) // Filter simple reposts
-        .slice(0, 3); // Take top 3
-    } // else { console.log("Bluesky feed is empty or fetch failed."); }
+        .filter(item => item.reason !== 'app.bsky.feed.defs#reasonRepost' || item.text)
+        .slice(0, 3);
+    }
   } catch (error) { console.error("Error fetching Bluesky:", error); }
 } else { console.warn("Bluesky credentials not set in .env"); }
 
 // --- Fetch Latest GitHub Events (Fetch 5, Process up to 3) ---
 interface GitHubEvent { id: string; display: string; link: string; timeAgo: string; }
-let latestGitHubEvents: GitHubEvent[] = []; // Now an array
+let latestGitHubEvents: GitHubEvent[] = [];
 const GITHUB_USERNAME = 'l3b';
 const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 
 try {
-  const githubUrl = `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=5`; // Fetch 5 events
-  console.log(`Fetching GitHub Events: ${githubUrl}`); // Log fetch URL
+  const githubUrl = `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=5`;
+  console.log(`Fetching GitHub Events: ${githubUrl}`);
   const githubResponse = await fetch(githubUrl, {
     headers: { Accept: 'application/vnd.github.v3+json' }
   });
@@ -125,7 +125,7 @@ try {
     const events = await githubResponse.json();
     if (events && events.length > 0) {
       latestGitHubEvents = events
-        .map((event: any): GitHubEvent | null => { // Map each event
+        .map((event: any): GitHubEvent | null => {
           let display = ' قام بنشاط ما';
           let link = GITHUB_PROFILE_URL;
           let timeAgo = '';
@@ -147,7 +147,7 @@ try {
                   display = `دفع ${commitCount} ${commitCount === 1 ? 'تغيير' : 'تغييرات'} إلى ${repoName}: "${commitMsg}"`;
                   link = commitCount === 1 && event.payload?.commits?.[0]?.sha ? `https://github.com/${repoName}/commit/${event.payload.commits[0].sha}` : repoUrl;
               } else {
-                  display = `دفع إلى ${repoName}`; // Handle case with no commits listed?
+                  display = `دفع إلى ${repoName}`;
                   link = repoUrl;
               }
               break;
@@ -157,9 +157,9 @@ try {
               else if (refType === 'branch' && event.payload.ref) { display = `أنشأ الفرع ${event.payload.ref} في ${repoName}`; link = `https://github.com/${repoName}/tree/${event.payload.ref}`; }
               else { display = `أنشأ ${refType || 'شيئًا'} في ${repoName}`; link = repoUrl; }
               break;
-            case 'WatchEvent': // Event for starring
+            case 'WatchEvent':
               if (event.payload?.action === 'started') { display = `تابع المستودع ${repoName}`; link = repoUrl; }
-              else return null; // Ignore unstar events for this display
+              else return null;
               break;
             case 'ForkEvent':
                display = `أنشأ نسخة من ${repoName}`;
@@ -169,17 +169,16 @@ try {
                display = `جعل المستودع ${repoName} عامًا`;
                link = repoUrl;
                break;
-            // Add cases for IssuesEvent, PullRequestEvent etc. if desired
             default:
               console.log(`Unhandled GitHub event type: ${event.type} for ${repoName}`);
-              return null; // Don't display unhandled event types
+              return null;
           }
 
           return { id: event.id, display, link, timeAgo };
 
         })
-        .filter((item): item is GitHubEvent => item !== null) // Filter out nulls (unhandled/ignored events)
-        .slice(0, 3); // Take the latest 3 valid events
+        .filter((item): item is GitHubEvent => item !== null)
+        .slice(0, 3);
 
       console.log(`Found ${latestGitHubEvents.length} displayable GitHub events.`);
 
@@ -197,22 +196,19 @@ try {
 <BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
   <div class="container mx-auto px-4 py-12 md:px-6 md:py-16">
 
-    {/* Page Title & Subtitle */}
     <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-soft-charcoal">{pageTitle}</h1>
     <p class="text-lg text-gray-600 text-center mb-12 md:mb-16">{pageSubtitle}</p>
 
-    {/* Grid for Signal Sections */}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
 
-      {/* Section 1: Latest Blog Post */}
       {latestArPost ? (
-        <section class="card"> {/* Use flex-col for structure */}
-          <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+        <section class="card">
+          <h2 class="text-xl font-semibold mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
             أحدث ما في المدونة
           </h2>
-          <div class="flex-grow space-y-2"> {/* Allow content to grow */}
-            <h3 class="text-lg font-semibold mt-1"> {/* Removed margins, rely on space-y */}
+          <div class="flex-grow space-y-2">
+            <h3 class="text-lg font-semibold mt-1">
               <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`}
                  class="hover:text-teal-600 transition-colors duration-200">
                 <span class="text-soft-charcoal">
@@ -221,12 +217,12 @@ try {
               </a>
             </h3>
             {latestArPost.data.description && (
-              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3"> {/* Line clamp */}
+              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">
                 {latestArPost.data.description}
               </p>
             )}
           </div>
-          <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0"> {/* mt-auto would push to bottom if height consistent */}
+          <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0">
             قراءة المزيد <span aria-hidden="true">&larr;</span>
           </a>
         </section>
@@ -234,29 +230,33 @@ try {
          <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">No blog posts found.</section>
       )}
 
-      {/* Section 2: Goodreads Currently Reading */}
        <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
-           أقرأ الآن
+         <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 flex-shrink-0">
+           <a href={GOODREADS_PROFILE_URL} class="text-electric-blue">
+             <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
+             أقرأ الآن
+           </a>
          </h2>
-         <div class="flex-grow"> {/* Allow content to grow */}
-           {currentlyReadingBook ? (
-              <div>
-                <a href={currentlyReadingBook.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">
-                   <p class="text-soft-charcoal text-lg font-semibold leading-snug mb-3">
-                      {currentlyReadingBook.title}
-                   </p>
-                </a>
-              </div>
+         <div class="flex-grow">
+           {currentlyReadingBooks.length > 0 ? ( // Check if there are books
+             <ul class="space-y-2"> {/* Use a list to display multiple books */}
+               {currentlyReadingBooks.map((book, index) => (
+                 <li key={index}> {/* Added key prop */}
+                   <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">
+                     <p class="text-soft-charcoal text-lg font-semibold leading-snug mb-3">
+                       {book.title}
+                     </p>
+                   </a>
+                 </li>
+               ))}
+             </ul>
            ) : ( <p class="italic text-gray-400">(لا يوجد كتاب حاليًا أو تعذر جلب البيانات...)</p> )}
          </div>
-         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start"> {/* Align link bottom-start */}
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
             ملفي على Goodreads &larr;
          </a>
        </section>
 
-      {/* Section 3: Trakt Recently Watched */}
        <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
             <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
@@ -288,7 +288,6 @@ try {
            </a>
        </section>
 
-       {/* Section 4: Bluesky Posts */}
        <section class="card">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
@@ -325,13 +324,11 @@ try {
          ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على منشورات حديثة باللغة العربية أو تعذر جلب البيانات...)</p> )}
        </section>
 
-     {/* Section 5: Strava Activity - UPDATED with iframe Widget */}
-     <section class="card"> {/* Added flex centering */}
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start"> {/* Align heading normally */}
+     <section class="card">
+        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start">
             <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
             آخر نشاط رياضي
          </h2>
-         {/* Embed the Strava Widget */}
          <iframe
             height='454'
             width='300'
@@ -340,12 +337,10 @@ try {
             scrolling='no'
             background-color='red'
             src='https://www.strava.com/athletes/7746516/latest-rides/930be949cf2c3e5601bb81846be00cc7f1fd01ac'
-            class="mt-2" {/* Added some margin top */}
+            class="mt-2"
          ></iframe>
-         {/* Removed placeholder <p> */}
        </section>
 
-      {/* Section 6: GitHub Latest Events - UPDATED DISPLAY */}
       <section class="card">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
@@ -353,11 +348,11 @@ try {
         </h2>
         <div class="flex-grow">
           {latestGitHubEvents.length > 0 ? (
-             <ul class="space-y-3"> {/* Use list for multiple events */}
+             <ul class="space-y-3">
                {latestGitHubEvents.map(event => (
                  <li key={event.id}>
                    <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
-                      <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600"> {/* Smaller text size */}
+                      <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
                          {event.display}
                       </p>
                    </a>
@@ -374,6 +369,6 @@ try {
         </a>
       </section>
 
-    </div> {/* End Grid */}
-  </div> {/* End Container */}
+    </div>
+  </div>
 </BaseLayout>
