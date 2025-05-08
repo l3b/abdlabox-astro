@@ -22,7 +22,8 @@ export default defineConfig({
     locales: ['en', 'ar'],
     routing: {
       prefixDefaultLocale: true
-    }
+    },
+    redirectToDefaultLocale: true
   },
   markdown: {
     shikiConfig: {
