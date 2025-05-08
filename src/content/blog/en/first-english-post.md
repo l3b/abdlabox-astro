@@ -3,11 +3,10 @@
 title: "My First English Post"
 description: "Exploring Astro Content Collections for the first time."
 featuredImage: 
-  url: "/images/blog/example-featured.jpg"
+  url: "/images/blog/new-eng-post.jpg"
   alt: "Featured image example"
   caption: "Example featured image caption"
 pubDate: 2025-04-17
-author: "Abdla"
 language: "en"
 translationKey: "first-post"
 tags: ["astro", "learning", "web development"]
@@ -18,7 +17,7 @@ isDraft: false
 
 This is the content of my first post in English, written using Markdown.
 
-![An example inline image](/images/blog/example-inline.jpg)
+![An example inline image](/images/blog/in-line.jpg)
 
 You can also include images with captions using HTML:
 
