@@ -31,7 +31,7 @@ const pageDescription = "Latest articles and thoughts on Technology, Knowledge M
         <article class="card"> {/* Neon Yellow top border */}
           <div class="flex"> {/* Added div for image and title */}
             {post.data.featuredImage && (
-              <img src={post.data.featuredImage} alt={`Featured image for ${post.data.title}`} class="w-24 h-24 mr-4 rounded-lg object-cover" />
+              <img src={post.data.featuredImage.url} alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} class="w-24 h-24 mr-4 rounded-lg object-cover" />
             )}
             <div>
               {/* Post Title as a Link - Reverted to hover underline only */}
