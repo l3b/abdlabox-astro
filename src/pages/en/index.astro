@@ -199,6 +199,15 @@ try {
         <div class="flex-grow space-y-4">
           {latestEnPost ? (
             <div>
+              {latestEnPost.data.featuredImage && (
+                <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="block mb-4">
+                  <img 
+                    src={latestEnPost.data.featuredImage.url} 
+                    alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`} 
+                    class="w-full h-48 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                  />
+                </a>
+              )}
               <h3 class="text-lg font-semibold mt-1">
                 <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`}
                    class="hover:text-teal-600 transition-colors duration-200">
