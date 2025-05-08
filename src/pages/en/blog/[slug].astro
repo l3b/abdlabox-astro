@@ -45,20 +45,6 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
         <h1 class="inline-block text-3xl md:text-4xl font-bold mb-3 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
           {post.data.title}
         </h1>
-        {post.data.featuredImage && (
-          <figure class="my-6">
-            <img 
-              src={post.data.featuredImage.url} 
-              alt={post.data.featuredImage.alt}
-              class="w-full h-auto rounded-lg shadow-lg"
-            />
-            {post.data.featuredImage.caption && (
-              <figcaption class="text-center text-gray-600 mt-2 text-sm">
-                {post.data.featuredImage.caption}
-              </figcaption>
-            )}
-          </figure>
-        )}
         <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
           <span>
             Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -83,6 +69,20 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
             {readingTime} min read
           </div>
         </div>
+        {post.data.featuredImage && (
+          <figure class="mt-6">
+            <img 
+              src={post.data.featuredImage.url} 
+              alt={post.data.featuredImage.alt}
+              class="w-full h-auto rounded-lg shadow-lg"
+            />
+            {post.data.featuredImage.caption && (
+              <figcaption class="text-center text-gray-600 mt-2 text-sm">
+                {post.data.featuredImage.caption}
+              </figcaption>
+            )}
+          </figure>
+        )}
       </header>
 
       <nav class="flex justify-between mb-8 text-sm">
