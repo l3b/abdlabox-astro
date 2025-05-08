@@ -12,34 +12,34 @@ const pageSubtitle = "لقطة حيّة من عالمي الرقمي";
 const pageDescription = "الواجهة الرقمية لـ عبدالله: استكشاف الأفكار والتجارب عبر مختلف الإشارات.";
 
 // --- Fetch Latest Blog Post ---
-let latestArPost = null;
+let latestArPosts = [];
 try {
-    latestArPost = (await getCollection('blog', ({ data, slug }) => {
+    latestArPosts = (await getCollection('blog', ({ data, slug }) => {
         return slug.startsWith('ar/') && data.isDraft !== true;
-    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
-} catch (e) { console.error("Error fetching blog post:", e); }
+    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3);
+} catch (e) { console.error("Error fetching blog posts:", e); }
 
 
 // --- Fetch Goodreads Currently Reading ---
 interface ReadingBook { title: string; link: string; }
-let currentlyReadingBook: ReadingBook | null = null;
+let currentlyReadingBooks: ReadingBook[] = [];
 const GOODREADS_RSS_URL = "https://www.goodreads.com/review/list_rss/4693662?shelf=currently-reading";
 const GOODREADS_PROFILE_URL = "https://www.goodreads.com/user/show/4693662-abdullah-althani";
 try {
-  // console.log(`Workspaceing Goodreads RSS: ${GOODREADS_RSS_URL}`); // Optional: uncomment for debugging
   const response = await fetch(GOODREADS_RSS_URL);
   if (response.ok) {
      const xmlText = await response.text();
-     const firstItemMatch = xmlText.match(/<item>(.*?)<\/item>/s);
-     if (firstItemMatch && firstItemMatch[1]) {
-        const itemContent = firstItemMatch[1];
+     const itemMatches = xmlText.matchAll(/<item>(.*?)<\/item>/gs);
+     for (const match of itemMatches) {
+        const itemContent = match[1];
         const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
         const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
         const title = titleMatch ? titleMatch[1].trim() : null;
         let link: string | null = null;
         if (linkMatch && linkMatch[1]) { link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim(); }
-        if (title && link) { currentlyReadingBook = { title, link }; }
-     } // else { console.log("No <item> found in Goodreads RSS feed."); }
+        if (title && link) { currentlyReadingBooks.push({ title, link }); }
+        if (currentlyReadingBooks.length >= 3) break;
+     }
   } else { console.error(`Goodreads RSS fetch failed: ${response.status}`); }
 } catch (error) { console.error("Error fetching Goodreads:", error); }
 
@@ -205,33 +205,37 @@ try {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
 
       {/* Section 1: Latest Blog Post */}
-      {latestArPost ? (
-        <section class="card"> {/* Use flex-col for structure */}
+      {latestArPosts.length > 0 ? (
+        <section class="card">
           <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
             <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
             أحدث ما في المدونة
           </h2>
-          <div class="flex-grow space-y-2"> {/* Allow content to grow */}
-            <h3 class="text-lg font-semibold mt-1"> {/* Removed margins, rely on space-y */}
-              <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`}
-                 class="hover:text-teal-600 transition-colors duration-200">
-                <span class="text-soft-charcoal">
-                  {latestArPost.data.title}
-                </span>
-              </a>
-            </h3>
-            {latestArPost.data.description && (
-              <p class="text-gray-600 text-sm leading-relaxed line-clamp-3"> {/* Line clamp */}
-                {latestArPost.data.description}
-              </p>
-            )}
+          <div class="flex-grow space-y-4">
+            {latestArPosts.map(post => (
+              <div class="space-y-2">
+                <h3 class="text-lg font-semibold">
+                  <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`}
+                     class="hover:text-teal-600 transition-colors duration-200">
+                    <span class="text-soft-charcoal">
+                      {post.data.title}
+                    </span>
+                  </a>
+                </h3>
+                {post.data.description && (
+                  <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                    {post.data.description}
+                  </p>
+                )}
+              </div>
+            ))}
           </div>
-          <a href={`/ar/blog/${latestArPost.slug.replace(/^ar\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0"> {/* mt-auto would push to bottom if height consistent */}
-            قراءة المزيد <span aria-hidden="true">&larr;</span>
+          <a href="/ar/blog" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0">
+            كل المقالات <span aria-hidden="true">&larr;</span>
           </a>
         </section>
       ) : (
-         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">No blog posts found.</section>
+         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">لا توجد مقالات.</section>
       )}
 
       {/* Section 2: Goodreads Currently Reading */}
@@ -241,15 +245,17 @@ try {
            أقرأ الآن
          </h2>
          <div class="flex-grow"> {/* Allow content to grow */}
-           {currentlyReadingBook ? (
-              <div>
-                <a href={currentlyReadingBook.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200">
-                   <p class="text-soft-charcoal text-lg font-semibold leading-snug mb-3">
-                      {currentlyReadingBook.title}
-                   </p>
-                </a>
+           {currentlyReadingBooks.length > 0 ? (
+              <div class="space-y-3">
+                {currentlyReadingBooks.map(book => (
+                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
+                     <p class="text-soft-charcoal text-lg font-semibold leading-snug">
+                        {book.title}
+                     </p>
+                  </a>
+                ))}
               </div>
-           ) : ( <p class="italic text-gray-400">(لا يوجد كتاب حاليًا أو تعذر جلب البيانات...)</p> )}
+           ) : ( <p class="italic text-gray-400">(لا يوجد كتب حاليًا أو تعذر جلب البيانات...)</p> )}
          </div>
          <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start"> {/* Align link bottom-start */}
             ملفي على Goodreads &larr;
