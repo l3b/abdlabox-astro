@@ -24,25 +24,34 @@ try {
 
 // --- Fetch Goodreads Currently Reading (Logic is language-agnostic) ---
 interface ReadingBook { title: string; link: string; }
-let currentlyReadingBook: ReadingBook | null = null;
+let currentlyReadingBooks: ReadingBook[] = [];
 const GOODREADS_RSS_URL = "https://www.goodreads.com/review/list_rss/4693662?shelf=currently-reading";
 const GOODREADS_PROFILE_URL = "https://www.goodreads.com/user/show/4693662-abdullah-althani";
 try {
   const response = await fetch(GOODREADS_RSS_URL);
   if (response.ok) {
-     const xmlText = await response.text();
-     const firstItemMatch = xmlText.match(/<item>(.*?)<\/item>/s);
-     if (firstItemMatch && firstItemMatch[1]) {
-        const itemContent = firstItemMatch[1];
-        const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
-        const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
-        const title = titleMatch ? titleMatch[1].trim() : null;
-        let link: string | null = null;
-        if (linkMatch && linkMatch[1]) { link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim(); }
-        if (title && link) { currentlyReadingBook = { title, link }; }
-     }
-  } else { console.error(`Goodreads RSS fetch failed: ${response.status}`); }
-} catch (error) { console.error("Error fetching Goodreads:", error); }
+    const xmlText = await response.text();
+    const itemMatches = xmlText.matchAll(/<item>(.*?)<\/item>/gs);
+    for (const match of itemMatches) {
+      const itemContent = match[1];
+      const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
+      const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
+      const title = titleMatch ? titleMatch[1].trim() : null;
+      let link: string | null = null;
+      if (linkMatch && linkMatch[1]) {
+        link = linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim();
+      }
+      if (title && link) {
+        currentlyReadingBooks.push({ title, link });
+      }
+      if (currentlyReadingBooks.length >= 3) break; // Limit to 3 books
+    }
+  } else {
+    console.error(`Goodreads RSS fetch failed: ${response.status}`);
+  }
+} catch (error) {
+  console.error("Error fetching Goodreads:", error);
+}
 
 
 // --- Fetch Trakt Recently Watched (Logic is language-agnostic) ---
