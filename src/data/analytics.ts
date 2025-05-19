@@ -1,3 +1,4 @@
+
 interface AnalyticsConfig {
   googleAnalytics: {
     id: string;
@@ -18,6 +19,6 @@ export const analyticsConfig: AnalyticsConfig = {
     token: "0df4e7563753bb31d3c1799662244a07",
   },
   clarity: {
-    projectId: "rcrw6ep32i", // Replace with your actual Clarity Project ID
+    projectId: "rcrw6ep32i",
   },
 };
