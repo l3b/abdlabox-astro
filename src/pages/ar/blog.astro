@@ -28,9 +28,18 @@ const pageDescription = "أحدث المقالات والأفكار حول ال�
     {/* List of Blog Posts */}
     <div class="space-y-8 md:space-y-10">
       {sortedPosts.map(post => (
-        <article class="card"> {/* Neon Yellow top border */}
-
-          {/* Post Title as a Link - Hover underline only */}
+        <article class="card relative overflow-hidden">
+          <div class="flex flex-col md:flex-row gap-4">
+            {post.data.featuredImage && (
+              <div class="w-full md:w-1/4 md:max-w-[200px] md:pt-[5%]">
+                <img 
+                  src={post.data.featuredImage.url} 
+                  alt={post.data.featuredImage.alt || `صورة توضيحية لـ ${post.data.title}`} 
+                  class="w-full h-48 md:h-32 rounded-lg object-cover shadow-sm"
+                />
+              </div>
+            )}
+            <div class="flex-1">
           <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`}
              class="block mb-2 no-underline"
           >

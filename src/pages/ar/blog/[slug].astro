@@ -71,6 +71,20 @@ import { tags } from '../../../data/tags';
             وقت القراءة: {readingTime} دقيقة
           </div>
         </div>
+        {post.data.featuredImage && (
+          <figure class="mt-6">
+            <img 
+              src={post.data.featuredImage.url} 
+              alt={post.data.featuredImage.alt}
+              class="w-full h-auto rounded-lg shadow-lg"
+            />
+            {post.data.featuredImage.caption && (
+              <figcaption class="text-center text-gray-600 mt-2 text-sm">
+                {post.data.featuredImage.caption}
+              </figcaption>
+            )}
+          </figure>
+        )}
       </header>
 
       <nav class="flex justify-between mb-8 text-sm">
