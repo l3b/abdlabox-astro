@@ -1,4 +1,9 @@
 
 ---
-export { default } from './ar/index.astro';
+import { getCollection } from 'astro:content';
+import ArabicIndex from './ar/index.astro';
+
+const props = Astro.props;
 ---
+
+<ArabicIndex {...props} />
