@@ -214,6 +214,15 @@ try {
           <div class="flex-grow space-y-4">
             {latestArPosts.map(post => (
               <div class="space-y-2">
+                {post.data.featuredImage && (
+                  <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`} class="block mb-4">
+                    <img 
+                      src={post.data.featuredImage.url} 
+                      alt={post.data.featuredImage.alt || `صورة توضيحية لـ ${post.data.title}`} 
+                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                    />
+                  </a>
+                )}
                 <h3 class="text-lg font-semibold">
                   <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`}
                      class="hover:text-teal-600 transition-colors duration-200">
