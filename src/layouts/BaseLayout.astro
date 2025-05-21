@@ -34,17 +34,6 @@ const fullPageTitle = `${title} | ${siteName}`;
     gtag('config', analyticsConfig.googleAnalytics.id);
   </script>
 
-  {/* Mixpanel */}
-  <script async src="https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js"></script>
-  <script define:vars={{ token: analyticsConfig.mixpanel.token }}>
-    window.mixpanel = window.mixpanel || [];
-    mixpanel.init(token, { debug: true });
-    mixpanel.track('Page View', {
-      'page': window.location.pathname,
-      'url': window.location.href
-    });
-  </script>
-
   {/* Google Font Links */}
   {/* Microsoft Clarity */}
   <script type="text/javascript">
