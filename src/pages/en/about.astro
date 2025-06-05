@@ -1,12 +1,19 @@
 ---
 // src/pages/en/about.astro - Styled with Content
 import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+import { generatePersonSchema } from '../../utils/structuredData';
 
 const pageTitle = "Who's Behind the Dunes?";
 // Optional: Use a description for meta tags
 const pageDescription = "In a world where technology intersects with identity, I choose to be the voice behind the dunes.";
+
+// Generate structured data for person
+const personSchema = generatePersonSchema();
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
+  <!-- JSON-LD Structured Data for Person -->
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
+  
   {/* Centered container with vertical padding */}
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
 

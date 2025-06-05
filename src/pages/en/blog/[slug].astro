@@ -3,6 +3,7 @@
 import { type CollectionEntry, getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getBlogTranslation } from '../../../utils/i18n';
+import { generateBlogPostSchema } from '../../../utils/structuredData';
 
 export async function getStaticPaths() {
   const allEnglishPosts = await getCollection('blog', ({ data }) => {
@@ -22,6 +23,16 @@ const translatedPost = await getBlogTranslation(post);
 const pageTitle = post.data.title;
 const pageDescription = post.data.description;
 
+// Generate structured data for blog post
+const blogPostSchema = generateBlogPostSchema(
+  post.data.title,
+  post.data.description,
+  post.data.pubDate,
+  post.data.updatedDate,
+  post.slug.replace(/^en\//, ''),
+  post.data.featuredImage?.url
+);
+
 // Assuming the existence of a tags object mapping tags to slugs.  This needs to be defined elsewhere.
 import { tags } from '../../../data/tags';
 
@@ -38,6 +49,9 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
 
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
+  <!-- JSON-LD Structured Data for Blog Post -->
+  <script type="application/ld+json" set:html={JSON.stringify(blogPostSchema)}></script>
+  
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
     <article>
       {/* Post Header Section */}
