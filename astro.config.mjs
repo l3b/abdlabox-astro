@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
 export default defineConfig({
-  site: 'https://abdlabox.repl.app',
+  site: 'https://abdla.box',
   server: {
     host: '0.0.0.0',
     port: 4321

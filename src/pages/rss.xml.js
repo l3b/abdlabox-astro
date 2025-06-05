@@ -6,7 +6,7 @@ export async function GET(context) {
   const blog = await getCollection('blog', ({ data }) => data.language === 'en');
   return rss({
     title: 'Abdla\'s Blog',
-    description: 'Personal blog about technology and web development',
+    description: 'Technology insights from a consultant and runner - covering tech trends, productivity, and personal growth',
     site: context.site,
     items: blog.map((post) => ({
       title: post.data.title,

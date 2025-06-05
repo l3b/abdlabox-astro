@@ -1,0 +1,10 @@
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://abdla.box/sitemap.xml
+Sitemap: https://abdla.box/rss.xml
+
+# Disallow admin or private areas if any exist
+# Disallow: /admin/

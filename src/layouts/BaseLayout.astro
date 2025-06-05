@@ -14,16 +14,57 @@ export interface Props {
 const { title, description, lang = 'en', dir = 'ltr' } = Astro.props;
 
 // Construct page title format
-const siteName = "Abdla"; // Consider making this global later
+const siteName = "Abdla"; // Brand name
 const fullPageTitle = `${title} | ${siteName}`;
+
+// SEO Configuration
+const siteDescription = description || "Technology Consultant and Runner sharing insights on tech, productivity, and personal growth.";
+const siteUrl = "https://abdla.box";
+const currentUrl = `${siteUrl}${Astro.url.pathname}`;
+const imageUrl = `${siteUrl}/favicon.svg`; // You can update this to a proper OG image later
 ---
-<html lang={lang} dir={dir} class="font-sans antialiased"> {/* Base font, improved rendering */}
+<html lang={lang} dir={dir} class="font-sans antialiased">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  
+  <!-- Primary Meta Tags -->
   <title>{fullPageTitle}</title>
-  {description && <meta name="description" content={description} />}
+  <meta name="title" content={fullPageTitle} />
+  <meta name="description" content={siteDescription} />
+  <meta name="author" content="Abdla" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href={currentUrl} />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={currentUrl} />
+  <meta property="og:title" content={fullPageTitle} />
+  <meta property="og:description" content={siteDescription} />
+  <meta property="og:image" content={imageUrl} />
+  <meta property="og:site_name" content={siteName} />
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content={currentUrl} />
+  <meta property="twitter:title" content={fullPageTitle} />
+  <meta property="twitter:description" content={siteDescription} />
+  <meta property="twitter:image" content={imageUrl} />
+  
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#007BC5" />
+  <meta name="msapplication-TileColor" content="#007BC5" />
+  
+  <!-- Language and Direction -->
+  <link rel="alternate" hreflang="en" href={`${siteUrl}/en`} />
+  <link rel="alternate" hreflang="ar" href={`${siteUrl}/ar`} />
+  <link rel="alternate" hreflang="x-default" href={siteUrl} />
+  
+  <!-- RSS Feed -->
+  <link rel="alternate" type="application/rss+xml" title={`${siteName} Blog`} href={`${siteUrl}/rss.xml`} />
 
   {/* Google Analytics */}
   <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.googleAnalytics.id}`}></script>
