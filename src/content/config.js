@@ -9,7 +9,9 @@ const blogCollection = defineCollection({
     featuredImage: z.object({
       url: z.string(),
       alt: z.string(),
-      caption: z.string().optional()
+      caption: z.string().optional(),
+      // For R2 images, store just the path, we'll generate optimized URLs
+      r2Path: z.string().optional()
     }).optional(),
     pubDate: z.date(),
     updatedDate: z.date().optional(),

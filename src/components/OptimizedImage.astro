@@ -1,0 +1,60 @@
+
+---
+import { imageManager } from '../utils/imageUpload.ts';
+
+export interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  sizes?: string;
+}
+
+const { 
+  src, 
+  alt, 
+  width = 800, 
+  height, 
+  class: className = '', 
+  loading = 'lazy',
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+} = Astro.props;
+
+// Check if this is an R2 image (starts with r2://)
+const isR2Image = src.startsWith('r2://');
+const imagePath = isR2Image ? src.replace('r2://', '') : src;
+
+// Generate different sizes for responsive images
+const generateSrcSet = (path: string) => {
+  if (!isR2Image) return '';
+  
+  const sizes = [400, 800, 1200, 1600];
+  return sizes
+    .map(size => `${imageManager.getOptimizedImageUrl(path, { width: size, format: 'auto' })} ${size}w`)
+    .join(', ');
+};
+
+const optimizedSrc = isR2Image 
+  ? imageManager.getOptimizedImageUrl(imagePath, { 
+      width, 
+      height, 
+      format: 'auto',
+      quality: 85 
+    })
+  : src;
+
+const srcSet = generateSrcSet(imagePath);
+---
+
+<img 
+  src={optimizedSrc}
+  alt={alt}
+  width={width}
+  height={height}
+  class={className}
+  loading={loading}
+  sizes={sizes}
+  srcset={srcSet}
+/>
