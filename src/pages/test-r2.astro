@@ -1,0 +1,130 @@
+
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OptimizedImage from '../components/OptimizedImage.astro';
+import { imageManager } from '../utils/imageUpload.ts';
+
+// Test your configuration
+const config = {
+  accountId: import.meta.env.CLOUDFLARE_ACCOUNT_ID || 'NOT_SET',
+  accessKeyId: import.meta.env.R2_ACCESS_KEY_ID || 'NOT_SET',
+  secretAccessKey: import.meta.env.R2_SECRET_ACCESS_KEY ? 'SET' : 'NOT_SET',
+  bucketUrl: import.meta.env.R2_BUCKET_URL || 'NOT_SET'
+};
+
+// Test image optimization URLs
+const testImagePath = 'test-image.jpg';
+const optimizedUrls = {
+  original: imageManager.getR2ImageUrl(testImagePath),
+  webp800: imageManager.getOptimizedImageUrl(testImagePath, { width: 800, format: 'webp' }),
+  auto400: imageManager.getOptimizedImageUrl(testImagePath, { width: 400, format: 'auto' }),
+  avif600: imageManager.getOptimizedImageUrl(testImagePath, { width: 600, format: 'avif' })
+};
+---
+
+<BaseLayout title="R2 Configuration Test" description="Test page for R2 setup">
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-lavender">R2 Configuration Test</h1>
+    
+    <div class="grid gap-6">
+      <!-- Configuration Status -->
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-4 text-electric-blue">Environment Variables</h2>
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span>CLOUDFLARE_ACCOUNT_ID:</span>
+            <span class={config.accountId !== 'NOT_SET' ? 'text-green-600' : 'text-red-600'}>
+              {config.accountId !== 'NOT_SET' ? '✓ SET' : '✗ NOT SET'}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span>R2_ACCESS_KEY_ID:</span>
+            <span class={config.accessKeyId !== 'NOT_SET' ? 'text-green-600' : 'text-red-600'}>
+              {config.accessKeyId !== 'NOT_SET' ? '✓ SET' : '✗ NOT SET'}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span>R2_SECRET_ACCESS_KEY:</span>
+            <span class={config.secretAccessKey === 'SET' ? 'text-green-600' : 'text-red-600'}>
+              {config.secretAccessKey === 'SET' ? '✓ SET' : '✗ NOT SET'}
+            </span>
+          </div>
+          <div class="flex justify-between">
+            <span>R2_BUCKET_URL:</span>
+            <span class={config.bucketUrl !== 'NOT_SET' ? 'text-green-600' : 'text-red-600'}>
+              {config.bucketUrl !== 'NOT_SET' ? '✓ SET' : '✗ NOT SET'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generated URLs Test -->
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-4 text-electric-blue">Generated URLs</h2>
+        <div class="space-y-3">
+          <div>
+            <strong>Original R2 URL:</strong>
+            <br>
+            <code class="text-sm bg-gray-100 dark:bg-gray-800 p-1 rounded break-all">
+              {optimizedUrls.original}
+            </code>
+          </div>
+          <div>
+            <strong>WebP 800px:</strong>
+            <br>
+            <code class="text-sm bg-gray-100 dark:bg-gray-800 p-1 rounded break-all">
+              {optimizedUrls.webp800}
+            </code>
+          </div>
+          <div>
+            <strong>Auto format 400px:</strong>
+            <br>
+            <code class="text-sm bg-gray-100 dark:bg-gray-800 p-1 rounded break-all">
+              {optimizedUrls.auto400}
+            </code>
+          </div>
+          <div>
+            <strong>AVIF 600px:</strong>
+            <br>
+            <code class="text-sm bg-gray-100 dark:bg-gray-800 p-1 rounded break-all">
+              {optimizedUrls.avif600}
+            </code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Image Component -->
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-4 text-electric-blue">OptimizedImage Component Test</h2>
+        <p class="mb-4 text-gray-600 dark:text-gray-300">
+          This will only work if you have uploaded a test image to your R2 bucket:
+        </p>
+        
+        <!-- Test with a sample image (will show broken if not uploaded) -->
+        <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 p-4 rounded">
+          <OptimizedImage 
+            src="r2://test-image.jpg" 
+            alt="Test R2 Image" 
+            width={400}
+            class="max-w-full h-auto"
+          />
+          <p class="text-sm text-gray-500 mt-2">
+            Expected: r2://test-image.jpg (upload this to your R2 bucket to test)
+          </p>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="card">
+        <h2 class="text-2xl font-semibold mb-4 text-electric-blue">Next Steps</h2>
+        <ol class="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300">
+          <li>Verify all environment variables show "✓ SET" above</li>
+          <li>Check that generated URLs look correct</li>
+          <li>Upload a test image named "test-image.jpg" to your R2 bucket</li>
+          <li>Refresh this page to see if the image loads</li>
+          <li>Try opening the generated URLs in your browser</li>
+        </ol>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
