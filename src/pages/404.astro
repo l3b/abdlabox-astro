@@ -16,7 +16,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <!-- Game Canvas -->
       <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl border-4 border-electric-blue dark:border-teal p-4 mb-6">
-        <canvas id="gameCanvas" class="w-full max-w-4xl mx-auto block rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600"></canvas>
+        <canvas id="gameCanvas" class="w-full max-w-4xl mx-auto block rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 min-h-[400px] md:min-h-[500px]"></canvas>
         
         <!-- Game UI Overlay -->
         <div class="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
@@ -90,7 +90,7 @@ class EndlessRunnerGame {
 
   setupCanvas() {
     this.canvas.width = 1000;
-    this.canvas.height = 500;
+    this.canvas.height = 700; // Taller for mobile
     
     // Make canvas responsive
     const resizeCanvas = () => {
@@ -115,7 +115,7 @@ class EndlessRunnerGame {
     // Runner (VR headset wearer) - Made longer
     this.runner = {
       x: 120,
-      y: 320, // Adjusted for taller character
+      y: 520, // Adjusted for taller canvas
       width: 45,
       height: 80, // Taller character
       velocityY: 0,
@@ -123,16 +123,18 @@ class EndlessRunnerGame {
       onGround: true
     };
     
-    // Obstacles - Reduced spawn rate for easier gameplay
+    // Obstacles - Better spacing
     this.obstacles = [];
-    this.obstacleSpawnRate = 0.008; // Much lower spawn rate
+    this.obstacleSpawnRate = 0.005; // Even lower spawn rate
+    this.lastObstacleX = 0; // Track last obstacle position
+    this.minObstacleDistance = 300; // Minimum distance between obstacles
     
     // Collectibles (VR goggles)
     this.collectibles = [];
     this.collectibleSpawnRate = 0.012; // Higher collectible spawn rate
     
     // Ground
-    this.groundY = 400;
+    this.groundY = 600; // Adjusted for taller canvas
     this.groundPattern = [];
     this.initGroundPattern();
     
@@ -156,9 +158,22 @@ class EndlessRunnerGame {
     });
 
     // Mobile controls - tap anywhere on canvas
-    this.canvas.addEventListener('click', () => this.handleInput());
+    this.canvas.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.handleInput();
+    });
+    
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      this.handleInput();
+    });
+
+    // Also listen on the entire game container for mobile
+    const gameContainer = this.canvas.parentElement;
+    gameContainer.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       this.handleInput();
     });
 
@@ -219,8 +234,13 @@ class EndlessRunnerGame {
       this.runner.onGround = true;
     }
 
-    // Spawn obstacles - Much less frequent
-    if (Math.random() < this.obstacleSpawnRate) {
+    // Spawn obstacles - Better spacing control
+    const currentTime = Date.now();
+    const shouldSpawn = Math.random() < this.obstacleSpawnRate;
+    const lastObstacle = this.obstacles[this.obstacles.length - 1];
+    const distanceFromLast = lastObstacle ? this.canvas.width - lastObstacle.x : this.minObstacleDistance + 1;
+    
+    if (shouldSpawn && distanceFromLast >= this.minObstacleDistance) {
       this.obstacles.push({
         x: this.canvas.width,
         y: this.groundY - 30, // Smaller obstacles
@@ -228,13 +248,14 @@ class EndlessRunnerGame {
         height: 30,
         type: 'barrier'
       });
+      this.lastObstacleX = this.canvas.width;
     }
 
     // Spawn collectibles
     if (Math.random() < this.collectibleSpawnRate) {
       this.collectibles.push({
         x: this.canvas.width,
-        y: this.groundY - 120,
+        y: this.groundY - 150, // Higher for taller canvas
         width: 35,
         height: 35,
         type: 'vr'
