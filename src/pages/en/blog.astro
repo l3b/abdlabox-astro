@@ -70,9 +70,9 @@ const pageDescription = "Latest articles and thoughts on Technology, Knowledge M
                     {post.data.tags.map(tag => (
                       <a 
                         href={`/en/tags/${normalizeTag(tag)}`}
-                        class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-neon-yellow hover:text-gray-900 transition-colors"
+                        class="tag"
                       >
-                        #{tag}
+                        {tag}
                       </a>
                     ))}
                   </div>
