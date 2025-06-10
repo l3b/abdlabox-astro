@@ -85,6 +85,7 @@ class EndlessRunnerGame {
     
     this.setupCanvas();
     this.setupControls();
+    this.setupAudio();
     this.init();
   }
 
@@ -104,6 +105,60 @@ class EndlessRunnerGame {
     resizeCanvas();
   }
 
+  setupAudio() {
+    // Create audio context for sound effects
+    this.audioContext = null;
+    this.sounds = {};
+    
+    // Initialize audio context on first user interaction
+    this.audioReady = false;
+  }
+
+  // Create simple sound effects using Web Audio API
+  createSound(frequency, duration, type = 'sine') {
+    if (!this.audioContext) {
+      try {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        console.log('Audio not supported');
+        return;
+      }
+    }
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+    oscillator.type = type;
+    
+    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+    
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + duration);
+  }
+
+  playSound(soundType) {
+    if (!this.audioContext) return;
+    
+    switch(soundType) {
+      case 'jump':
+        this.createSound(400, 0.2, 'square');
+        break;
+      case 'collect':
+        this.createSound(800, 0.3, 'sine');
+        setTimeout(() => this.createSound(1000, 0.2, 'sine'), 100);
+        break;
+      case 'gameOver':
+        this.createSound(200, 0.5, 'sawtooth');
+        setTimeout(() => this.createSound(150, 0.5, 'sawtooth'), 200);
+        break;
+    }
+  }
+
   init() {
     this.gameRunning = false;
     this.gameStarted = false;
@@ -111,6 +166,10 @@ class EndlessRunnerGame {
     this.distance = 0;
     this.speed = 3; // Slower initial speed
     this.gameSpeed = 1.0; // Normal initial game speed
+    
+    // Animation state for running
+    this.animationFrame = 0;
+    this.legCycle = 0;
     
     // Runner (VR headset wearer) - Made longer
     this.runner = {
@@ -182,6 +241,12 @@ class EndlessRunnerGame {
   }
 
   handleInput() {
+    // Initialize audio context on first interaction
+    if (!this.audioReady) {
+      this.setupAudio();
+      this.audioReady = true;
+    }
+    
     if (!this.gameStarted) {
       this.startGame();
     } else if (this.gameRunning && this.runner.onGround) {
@@ -196,6 +261,7 @@ class EndlessRunnerGame {
       this.runner.velocityY = -16; // Good jump height
       this.runner.jumping = true;
       this.runner.onGround = false;
+      this.playSound('jump');
     }
   }
 
@@ -289,6 +355,7 @@ class EndlessRunnerGame {
       // Collection detection
       if (this.checkCollision(this.runner, collectible)) {
         this.score += 25; // Higher score for collectibles
+        this.playSound('collect');
         return false;
       }
       
@@ -308,6 +375,10 @@ class EndlessRunnerGame {
     this.speed = 3 * this.gameSpeed;
     this.obstacleSpawnRate = Math.min(0.008 + this.distance / 20000, 0.025); // Much gentler increase
 
+    // Update animation frame for running legs
+    this.animationFrame++;
+    this.legCycle = (this.animationFrame * 0.3) % (Math.PI * 2);
+    
     // Update score
     this.score += Math.floor(this.speed / 10);
     this.scoreElement.textContent = this.score;
@@ -382,6 +453,20 @@ class EndlessRunnerGame {
   drawRunner() {
     const { x, y, width, height } = this.runner;
     
+    // Calculate running animation values
+    const isRunning = this.gameRunning && this.runner.onGround;
+    const bodyBounce = isRunning ? Math.sin(this.legCycle * 2) * 1.5 : 0;
+    const armSwing = isRunning ? Math.sin(this.legCycle + Math.PI) * 3 : 0;
+    
+    // Leg positions for running animation
+    const leftLegOffset = isRunning ? Math.sin(this.legCycle) * 4 : 0;
+    const rightLegOffset = isRunning ? Math.sin(this.legCycle + Math.PI) * 4 : 0;
+    const leftLegY = isRunning ? Math.sin(this.legCycle) * 2 : 0;
+    const rightLegY = isRunning ? Math.sin(this.legCycle + Math.PI) * 2 : 0;
+    
+    this.ctx.save();
+    this.ctx.translate(0, bodyBounce);
+    
     // Yellow T-shirt (main body)
     this.ctx.fillStyle = '#FFE600'; // Neon yellow t-shirt
     this.ctx.fillRect(x + 8, y + 25, 28, 35);
@@ -403,31 +488,38 @@ class EndlessRunnerGame {
     this.ctx.fillStyle = '#000080'; // Dark blue lens
     this.ctx.fillRect(x + 12, y + 11, 20, 6);
     
-    // Arms (skin tone)
+    // Arms with swinging animation (skin tone)
     this.ctx.fillStyle = '#FFB6C1';
-    this.ctx.fillRect(x + 2, y + 30, 10, 25); // Left arm
-    this.ctx.fillRect(x + 32, y + 30, 10, 25); // Right arm
+    this.ctx.fillRect(x + 2 + armSwing, y + 30, 10, 25); // Left arm
+    this.ctx.fillRect(x + 32 - armSwing, y + 30, 10, 25); // Right arm
     
     // Shorts/Pants (dark blue)
     this.ctx.fillStyle = '#191970'; // Midnight blue
     this.ctx.fillRect(x + 12, y + 55, 20, 20);
     
-    // Legs (skin tone)
+    this.ctx.restore();
+    
+    // Animated legs (skin tone) - drawn separately to avoid body bounce affecting them
     this.ctx.fillStyle = '#FFB6C1';
-    this.ctx.fillRect(x + 12, y + 70, 8, 15); // Left leg
-    this.ctx.fillRect(x + 24, y + 70, 8, 15); // Right leg
     
-    // Shoes (black)
+    // Left leg with animation
+    this.ctx.fillRect(x + 12 + leftLegOffset, y + 70 + leftLegY, 8, 15);
+    // Right leg with animation  
+    this.ctx.fillRect(x + 24 + rightLegOffset, y + 70 + rightLegY, 8, 15);
+    
+    // Animated shoes (black)
     this.ctx.fillStyle = '#000000';
-    this.ctx.fillRect(x + 10, y + 82, 12, 6); // Left shoe
-    this.ctx.fillRect(x + 22, y + 82, 12, 6); // Right shoe
+    this.ctx.fillRect(x + 10 + leftLegOffset, y + 82 + leftLegY, 12, 6); // Left shoe
+    this.ctx.fillRect(x + 22 + rightLegOffset, y + 82 + rightLegY, 12, 6); // Right shoe
     
-    // Running animation (simple bounce)
-    if (this.gameRunning && this.runner.onGround) {
-      const bounce = Math.sin(Date.now() * 0.02) * 2;
-      this.ctx.save();
-      this.ctx.translate(0, bounce);
-      this.ctx.restore();
+    // Add dust particles when running
+    if (isRunning && Math.random() < 0.3) {
+      this.ctx.fillStyle = 'rgba(139, 69, 19, 0.6)'; // Brown dust
+      for (let i = 0; i < 3; i++) {
+        const dustX = x - 5 - Math.random() * 10;
+        const dustY = y + 85 + Math.random() * 5;
+        this.ctx.fillRect(dustX, dustY, 2, 2);
+      }
     }
   }
 
@@ -468,6 +560,7 @@ class EndlessRunnerGame {
 
   gameOver() {
     this.gameRunning = false;
+    this.playSound('gameOver');
     this.finalScoreElement.textContent = this.score;
     this.finalDistanceElement.textContent = Math.floor(this.distance);
     this.gameOverScreen.classList.remove('hidden');
