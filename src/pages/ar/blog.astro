@@ -2,7 +2,7 @@
 // src/pages/ar/blog.astro - Styled Version 6 (Near Black H1)
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { normalizeTag } from '../../data/tags';
+import { normalizeTag, getOrCreateTag } from '../../data/tags';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 
 // 1. Fetch Arabic posts, filter drafts
@@ -65,18 +65,20 @@ const pageDescription = "أحدث المقالات والأفكار حول ال�
               نُشر في: {post.data.pubDate.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
             {post.data.tags && post.data.tags.length > 0 && (
-              <span>
-                تصنيفات:
-                {post.data.tags?.map(tag => (
-                <a 
-                  href={`/ar/tags/${normalizeTag(tag)}`}
-                  class="tag"
-                >
-                  {tag}
-                </a>
-              ))}
-              </span>
-            )}
+                  <div class="flex gap-2 flex-wrap">
+                    {post.data.tags.map(tag => {
+                      const tagInfo = getOrCreateTag(tag);
+                      return (
+                        <a 
+                          href={`/ar/tags/${tagInfo.slug.ar}`}
+                          class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-neon-yellow hover:text-gray-900 transition-colors"
+                        >
+                          #{tagInfo.ar}
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
           </div>
 
           {/* Post Description */}
@@ -98,4 +100,3 @@ const pageDescription = "أحدث المقالات والأفكار حول ال�
     </div> {/* End space-y div */}
   </div> {/* End container div */}
 </BaseLayout>
-```

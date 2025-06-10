@@ -49,6 +49,22 @@ const baseTagTranslations: Record<string, TagTranslation> = {
       en: 'web-development',
       ar: 'تطوير-ويب'
     }
+  },
+  ai: {
+    en: 'AI',
+    ar: 'الذكاء-الاصطناعي',
+    slug: {
+      en: 'ai',
+      ar: 'الذكاء-الاصطناعي'
+    }
+  },
+  vibecoding: {
+    en: 'Vibecoding',
+    ar: 'البرمذة',
+    slug: {
+      en: 'vibecoding',
+      ar: 'البرمذة'
+    }
   }
 };
 
@@ -64,6 +80,24 @@ export function findTagByValue(value: string): TagTranslation | undefined {
 
 export function normalizeTag(tag: string): string {
   return tag.toLowerCase().replace(/\s+/g, '-');
+}
+
+// Generate a tag translation automatically if it doesn't exist
+export function getOrCreateTag(tag: string): TagTranslation {
+  const existing = findTagByValue(tag);
+  if (existing) return existing;
+  
+  // Create automatic translation
+  const normalizedTag = normalizeTag(tag);
+  return {
+    en: tag,
+    ar: tag, // Same for both languages if no translation exists
+    slug: {
+      en: normalizedTag,
+      ar: normalizedTag
+    }
+  };
+}.replace(/\s+/g, '-');
 }
 
 export const tags = baseTagTranslations;
