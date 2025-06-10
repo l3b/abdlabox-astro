@@ -10,7 +10,7 @@ pubDate: 2025-04-17
 language: "en"
 translationKey: "first-post"
 tags: ["astro", "learning", "web development"]
-isDraft: false
+isDraft: true
 ---
 
 # Welcome to My Blog

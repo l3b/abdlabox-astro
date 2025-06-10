@@ -4,7 +4,7 @@ description: "تجربة عدة مقالات ..."
 pubDate: 2025-04-28 # Use YYYY-MM-DD format
 language: "ar"
 tags: ["تقنية", "ذكاء إصطناعي"]
-isDraft: false
+isDraft: true
 ---
 
 ## أهلا وسهلا 
