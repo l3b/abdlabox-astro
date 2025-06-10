@@ -7,11 +7,13 @@ const blogCollection = defineCollection({
     title: z.string(),
     description: z.string().optional(),
     featuredImage: z.object({
-      url: z.string(),
+      url: z.string().optional(),
       alt: z.string(),
       caption: z.string().optional(),
       // For R2 images, store just the path, we'll generate optimized URLs
       r2Path: z.string().optional()
+    }).refine(data => data.url || data.r2Path, {
+      message: "Either url or r2Path must be provided"
     }).optional(),
     pubDate: z.date(),
     updatedDate: z.date().optional(),
