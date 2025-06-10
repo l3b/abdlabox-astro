@@ -30,6 +30,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
 
+        <!-- Start Screen -->
+        <div id="startScreen" class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white rounded-lg">
+          <div class="text-center">
+            <h3 class="text-3xl font-bold mb-4">Ready to Run?</h3>
+            <p class="text-lg mb-6">Press SPACE or TAP to start!</p>
+            <div class="text-neon-yellow text-lg animate-pulse">🎮 Press SPACE or TAP the screen 🎮</div>
+          </div>
+        </div>
+
         <!-- Game Over Screen -->
         <div id="gameOverScreen" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white rounded-lg hidden">
           <div class="text-center">
@@ -39,20 +48,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <button id="restartBtn" class="button bg-electric-blue hover:bg-neon-yellow text-white hover:text-soft-charcoal px-6 py-3 rounded-lg font-semibold transition-all duration-200">
               Try Again
             </button>
+            <p class="text-sm mt-4 text-gray-300">Press SPACE or TAP to play again</p>
           </div>
         </div>
       </div>
 
       <!-- Controls -->
       <div class="mb-6">
-        <div class="flex flex-wrap justify-center gap-4 mb-4">
-          <button id="startBtn" class="button bg-electric-blue hover:bg-neon-yellow text-white hover:text-soft-charcoal px-6 py-3 rounded-lg font-semibold">
-            Start Game
-          </button>
-        </div>
-        <div class="text-sm text-gray-600 dark:text-gray-300">
-          <p class="mb-1"><strong>Desktop:</strong> Press SPACE or ARROW UP to jump</p>
-          <p><strong>Mobile:</strong> Tap anywhere on the screen to jump</p>
+        <div class="text-sm text-gray-600 dark:text-gray-300 text-center">
+          <p class="mb-1"><strong>Desktop:</strong> Press SPACE or ARROW UP to jump/start</p>
+          <p><strong>Mobile:</strong> Tap anywhere on the screen to jump/start</p>
         </div>
       </div>
 
@@ -73,6 +78,7 @@ class EndlessRunnerGame {
     this.ctx = this.canvas.getContext('2d');
     this.scoreElement = document.getElementById('score');
     this.speedElement = document.getElementById('speed');
+    this.startScreen = document.getElementById('startScreen');
     this.gameOverScreen = document.getElementById('gameOverScreen');
     this.finalScoreElement = document.getElementById('finalScore');
     this.finalDistanceElement = document.getElementById('finalDistance');
@@ -100,35 +106,37 @@ class EndlessRunnerGame {
 
   init() {
     this.gameRunning = false;
+    this.gameStarted = false;
     this.score = 0;
     this.distance = 0;
-    this.speed = 4; // Increased initial speed
-    this.gameSpeed = 1.5; // Faster initial game speed
+    this.speed = 3; // Slower initial speed
+    this.gameSpeed = 1.0; // Normal initial game speed
     
-    // Runner (VR headset wearer)
+    // Runner (VR headset wearer) - Made longer
     this.runner = {
       x: 120,
-      y: 350,
-      width: 40,
-      height: 60,
+      y: 320, // Adjusted for taller character
+      width: 45,
+      height: 80, // Taller character
       velocityY: 0,
       jumping: false,
       onGround: true
     };
     
-    // Obstacles
+    // Obstacles - Reduced spawn rate for easier gameplay
     this.obstacles = [];
-    this.obstacleSpawnRate = 0.015;
+    this.obstacleSpawnRate = 0.008; // Much lower spawn rate
     
     // Collectibles (VR goggles)
     this.collectibles = [];
-    this.collectibleSpawnRate = 0.008;
+    this.collectibleSpawnRate = 0.012; // Higher collectible spawn rate
     
     // Ground
-    this.groundY = 410;
+    this.groundY = 400;
     this.groundPattern = [];
     this.initGroundPattern();
     
+    this.startScreen.classList.remove('hidden');
     this.draw();
   }
 
@@ -143,25 +151,34 @@ class EndlessRunnerGame {
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
-        this.jump();
+        this.handleInput();
       }
     });
 
     // Mobile controls - tap anywhere on canvas
-    this.canvas.addEventListener('click', () => this.jump());
+    this.canvas.addEventListener('click', () => this.handleInput());
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      this.jump();
+      this.handleInput();
     });
 
     // Game controls
-    document.getElementById('startBtn').addEventListener('click', () => this.startGame());
     document.getElementById('restartBtn').addEventListener('click', () => this.restartGame());
+  }
+
+  handleInput() {
+    if (!this.gameStarted) {
+      this.startGame();
+    } else if (this.gameRunning && this.runner.onGround) {
+      this.jump();
+    } else if (!this.gameRunning && this.gameStarted) {
+      this.restartGame();
+    }
   }
 
   jump() {
     if (this.gameRunning && this.runner.onGround) {
-      this.runner.velocityY = -18; // Higher jump
+      this.runner.velocityY = -16; // Good jump height
       this.runner.jumping = true;
       this.runner.onGround = false;
     }
@@ -169,13 +186,14 @@ class EndlessRunnerGame {
 
   startGame() {
     this.gameRunning = true;
-    document.getElementById('startBtn').style.display = 'none';
+    this.gameStarted = true;
+    this.startScreen.classList.add('hidden');
     this.gameLoop();
   }
 
   restartGame() {
     this.gameOverScreen.classList.add('hidden');
-    document.getElementById('startBtn').style.display = 'inline-block';
+    this.gameStarted = false;
     this.init();
   }
 
@@ -190,7 +208,7 @@ class EndlessRunnerGame {
 
   update() {
     // Update runner physics
-    this.runner.velocityY += 1.0; // gravity
+    this.runner.velocityY += 0.8; // Slightly less gravity
     this.runner.y += this.runner.velocityY;
 
     // Ground collision
@@ -201,13 +219,13 @@ class EndlessRunnerGame {
       this.runner.onGround = true;
     }
 
-    // Spawn obstacles
+    // Spawn obstacles - Much less frequent
     if (Math.random() < this.obstacleSpawnRate) {
       this.obstacles.push({
         x: this.canvas.width,
-        y: this.groundY - 35,
-        width: 25,
-        height: 35,
+        y: this.groundY - 30, // Smaller obstacles
+        width: 20, // Narrower obstacles
+        height: 30,
         type: 'barrier'
       });
     }
@@ -216,9 +234,9 @@ class EndlessRunnerGame {
     if (Math.random() < this.collectibleSpawnRate) {
       this.collectibles.push({
         x: this.canvas.width,
-        y: this.groundY - 100,
-        width: 30,
-        height: 30,
+        y: this.groundY - 120,
+        width: 35,
+        height: 35,
         type: 'vr'
       });
     }
@@ -227,8 +245,15 @@ class EndlessRunnerGame {
     this.obstacles = this.obstacles.filter(obstacle => {
       obstacle.x -= this.speed;
       
-      // Collision detection
-      if (this.checkCollision(this.runner, obstacle)) {
+      // More forgiving collision detection
+      const runnerHitbox = {
+        x: this.runner.x + 5,
+        y: this.runner.y + 5,
+        width: this.runner.width - 10,
+        height: this.runner.height - 10
+      };
+      
+      if (this.checkCollision(runnerHitbox, obstacle)) {
         this.gameOver();
         return false;
       }
@@ -242,7 +267,7 @@ class EndlessRunnerGame {
       
       // Collection detection
       if (this.checkCollision(this.runner, collectible)) {
-        this.score += 15;
+        this.score += 25; // Higher score for collectibles
         return false;
       }
       
@@ -256,14 +281,14 @@ class EndlessRunnerGame {
       this.groundPattern.push(this.groundPattern[this.groundPattern.length - 1] + 20);
     }
 
-    // Increase difficulty
+    // Slower difficulty increase
     this.distance += this.speed;
-    this.gameSpeed = 1.5 + Math.floor(this.distance / 800) * 0.3;
-    this.speed = 4 * this.gameSpeed;
-    this.obstacleSpawnRate = Math.min(0.015 + this.distance / 12000, 0.04);
+    this.gameSpeed = 1.0 + Math.floor(this.distance / 1500) * 0.2; // Slower speed increase
+    this.speed = 3 * this.gameSpeed;
+    this.obstacleSpawnRate = Math.min(0.008 + this.distance / 20000, 0.025); // Much gentler increase
 
     // Update score
-    this.score += Math.floor(this.speed / 8);
+    this.score += Math.floor(this.speed / 10);
     this.scoreElement.textContent = this.score;
     this.speedElement.textContent = this.gameSpeed.toFixed(1) + 'x';
   }
@@ -282,9 +307,6 @@ class EndlessRunnerGame {
     gradient.addColorStop(1, '#98FB98'); // Pale green
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw "404 PAGE NOT FOUND" text in the background
-    this.draw404Text();
 
     // Draw clouds
     this.drawClouds();
@@ -307,20 +329,6 @@ class EndlessRunnerGame {
 
     // Draw collectibles
     this.collectibles.forEach(collectible => this.drawCollectible(collectible));
-  }
-
-  draw404Text() {
-    // Draw large "404 PAGE NOT FOUND" text in the background
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.1;
-    this.ctx.fillStyle = '#007BC5'; // Electric blue
-    this.ctx.font = 'bold 60px Arial';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('404', this.canvas.width / 2, 120);
-    
-    this.ctx.font = 'bold 32px Arial';
-    this.ctx.fillText('PAGE NOT FOUND', this.canvas.width / 2, 170);
-    this.ctx.restore();
   }
 
   drawClouds() {
@@ -353,40 +361,49 @@ class EndlessRunnerGame {
   drawRunner() {
     const { x, y, width, height } = this.runner;
     
-    // Body
-    this.ctx.fillStyle = '#FF6961'; // Coral
-    this.ctx.fillRect(x + 10, y + 20, 20, 30);
+    // Yellow T-shirt (main body)
+    this.ctx.fillStyle = '#FFE600'; // Neon yellow t-shirt
+    this.ctx.fillRect(x + 8, y + 25, 28, 35);
     
-    // Head
+    // Head (skin tone)
     this.ctx.fillStyle = '#FFB6C1';
-    this.ctx.fillRect(x + 5, y, 30, 25);
+    this.ctx.fillRect(x + 8, y, 28, 25);
     
     // VR Headset - Main body (using site colors)
     this.ctx.fillStyle = '#007BC5'; // Electric blue
-    this.ctx.fillRect(x + 2, y + 5, 36, 15);
+    this.ctx.fillRect(x + 4, y + 8, 36, 12);
     
-    // VR Headset - Yellow accents
-    this.ctx.fillStyle = '#FFE600'; // Neon yellow
-    this.ctx.fillRect(x + 4, y + 7, 32, 3);
-    this.ctx.fillRect(x + 4, y + 15, 32, 3);
-    
-    // VR Headset - Blue lens area
+    // VR Headset - Blue accents
     this.ctx.fillStyle = '#46C3B8'; // Teal
-    this.ctx.fillRect(x + 8, y + 9, 24, 5);
+    this.ctx.fillRect(x + 6, y + 10, 32, 3);
+    this.ctx.fillRect(x + 6, y + 15, 32, 3);
     
-    // Arms
+    // VR Headset - Lens area
+    this.ctx.fillStyle = '#000080'; // Dark blue lens
+    this.ctx.fillRect(x + 12, y + 11, 20, 6);
+    
+    // Arms (skin tone)
     this.ctx.fillStyle = '#FFB6C1';
-    this.ctx.fillRect(x, y + 25, 8, 20);
-    this.ctx.fillRect(x + 32, y + 25, 8, 20);
+    this.ctx.fillRect(x + 2, y + 30, 10, 25); // Left arm
+    this.ctx.fillRect(x + 32, y + 30, 10, 25); // Right arm
     
-    // Legs
-    this.ctx.fillStyle = '#4169E1';
-    this.ctx.fillRect(x + 8, y + 50, 8, 15);
-    this.ctx.fillRect(x + 24, y + 50, 8, 15);
+    // Shorts/Pants (dark blue)
+    this.ctx.fillStyle = '#191970'; // Midnight blue
+    this.ctx.fillRect(x + 12, y + 55, 20, 20);
+    
+    // Legs (skin tone)
+    this.ctx.fillStyle = '#FFB6C1';
+    this.ctx.fillRect(x + 12, y + 70, 8, 15); // Left leg
+    this.ctx.fillRect(x + 24, y + 70, 8, 15); // Right leg
+    
+    // Shoes (black)
+    this.ctx.fillStyle = '#000000';
+    this.ctx.fillRect(x + 10, y + 82, 12, 6); // Left shoe
+    this.ctx.fillRect(x + 22, y + 82, 12, 6); // Right shoe
     
     // Running animation (simple bounce)
     if (this.gameRunning && this.runner.onGround) {
-      const bounce = Math.sin(Date.now() * 0.03) * 1;
+      const bounce = Math.sin(Date.now() * 0.02) * 2;
       this.ctx.save();
       this.ctx.translate(0, bounce);
       this.ctx.restore();
@@ -400,9 +417,9 @@ class EndlessRunnerGame {
     
     // Glitch lines
     this.ctx.fillStyle = '#FFE600'; // Neon yellow
-    this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, 3);
-    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height / 2, obstacle.width - 4, 3);
-    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height - 5, obstacle.width - 4, 3);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, 2);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height / 2, obstacle.width - 4, 2);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height - 4, obstacle.width - 4, 2);
   }
 
   drawCollectible(collectible) {
@@ -414,15 +431,15 @@ class EndlessRunnerGame {
     
     // Yellow accent
     this.ctx.fillStyle = '#FFE600'; // Neon yellow
-    this.ctx.fillRect(x + 2, y + 2, width - 4, 4);
-    this.ctx.fillRect(x + 2, y + height - 6, width - 4, 4);
+    this.ctx.fillRect(x + 3, y + 3, width - 6, 5);
+    this.ctx.fillRect(x + 3, y + height - 8, width - 6, 5);
     
     // Teal center
     this.ctx.fillStyle = '#46C3B8'; // Teal
-    this.ctx.fillRect(x + 4, y + 8, width - 8, height - 16);
+    this.ctx.fillRect(x + 6, y + 10, width - 12, height - 20);
     
     // Floating animation
-    const float = Math.sin(Date.now() * 0.015 + x * 0.01) * 4;
+    const float = Math.sin(Date.now() * 0.015 + x * 0.01) * 6;
     this.ctx.save();
     this.ctx.translate(0, float);
     this.ctx.restore();
