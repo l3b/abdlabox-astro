@@ -2,29 +2,33 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { findTagByValue, normalizeTag, tags } from '../../../data/tags';
 
 export async function getStaticPaths() {
-  const allTags = Object.values(tags);
-  return allTags.map(tagTranslation => ({
-    params: { tag: tagTranslation.slug.ar },
-    props: { tag: tagTranslation.slug.ar }
+  const allPosts = await getCollection('blog', ({ data }) => 
+    data.language === 'ar' && !data.isDraft
+  );
+  
+  // Collect all unique tags from posts
+  const allTags = new Set();
+  allPosts.forEach(post => {
+    if (post.data.tags) {
+      post.data.tags.forEach(tag => allTags.add(tag));
+    }
+  });
+  
+  return Array.from(allTags).map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+    props: { tag: tag }
   }));
 }
 
 const { tag } = Astro.props;
-const tagTranslation = findTagByValue(tag);
-
-if (!tagTranslation) {
-  return Astro.redirect('/ar/blog');
-}
 
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'ar' && !data.isDraft && 
-         (data.tags || []).some(t => {
-           const foundTag = findTagByValue(tag);
-           return t === foundTag?.ar;
-         });
+         (data.tags || []).some(t => 
+           t.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase().replace(/\s+/g, '-')
+         );
 });
 
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -53,6 +57,13 @@ const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDa
           {post.data.description && (
             <p class="text-gray-600 mt-2">{post.data.description}</p>
           )}
+          <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+            <time>{new Date(post.data.pubDate).toLocaleDateString('ar-EG', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</time>
+          </div>
         </article>
       ))}
     </div>

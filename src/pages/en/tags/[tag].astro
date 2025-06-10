@@ -2,44 +2,53 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import { findTagByValue, normalizeTag, tags } from '../../../data/tags';
 
 export async function getStaticPaths() {
-  const allTags = Object.values(tags);
-  return allTags.map(tagTranslation => ({
-    params: { tag: tagTranslation.slug.en },
-    props: { tag: tagTranslation.slug.en }
+  const allPosts = await getCollection('blog', ({ data }) => 
+    data.language === 'en' && !data.isDraft
+  );
+  
+  // Collect all unique tags from posts
+  const allTags = new Set();
+  allPosts.forEach(post => {
+    if (post.data.tags) {
+      post.data.tags.forEach(tag => allTags.add(tag));
+    }
+  });
+  
+  return Array.from(allTags).map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+    props: { tag: tag }
   }));
 }
 
 const { tag } = Astro.props;
-const tagTranslation = findTagByValue(tag);
-
-if (!tagTranslation) {
-  return Astro.redirect('/en/blog');
-}
 
 const posts = await getCollection('blog', ({ data }) => {
   return data.language === 'en' && !data.isDraft && 
-         (data.tags || []).some(t => {
-           const normalizedTag = t.toLowerCase().replace(/-/g, ' ');
-           return normalizedTag === tagTranslation.en.toLowerCase();
-         });
+         (data.tags || []).some(t => 
+           t.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase().replace(/\s+/g, '-')
+         );
 });
 
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Format tag for display (capitalize first letter of each word)
+const displayTag = tag.split('-').map(word => 
+  word.charAt(0).toUpperCase() + word.slice(1)
+).join(' ');
 ---
 
-<BaseLayout title={`Posts tagged with "${tag}"`} description={`All posts tagged with ${tag}`} lang="en" dir="ltr">
+<BaseLayout title={`Posts tagged with "${displayTag}"`} description={`All posts tagged with ${displayTag}`} lang="en" dir="ltr">
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
     <div class="inline-block">
       <h1 class="text-4xl md:text-5xl font-bold mb-2 text-soft-charcoal">
-        {tagTranslation?.en || tag.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+        {displayTag}
       </h1>
       <div class="h-1 bg-neon-yellow"></div>
     </div>
     <p class="text-lg text-gray-600 mb-8">
-      Browse all posts tagged under {tag}
+      Browse all posts tagged with {displayTag}
     </p>
 
     <div class="space-y-6">
@@ -53,6 +62,13 @@ const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDa
           {post.data.description && (
             <p class="text-gray-600 mt-2">{post.data.description}</p>
           )}
+          <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+            <time>{new Date(post.data.pubDate).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</time>
+          </div>
         </article>
       ))}
     </div>
