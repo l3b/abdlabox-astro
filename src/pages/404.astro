@@ -6,17 +6,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="404 - Page Not Found" description="Oops! The page you're looking for doesn't exist. Play our endless running game while you're here!">
   <div class="min-h-screen bg-gradient-to-b from-cool-light-gray to-white dark:from-soft-charcoal dark:to-gray-900 flex flex-col items-center justify-center px-4">
     <!-- Game Container -->
-    <div class="w-full max-w-4xl mx-auto text-center">
+    <div class="w-full max-w-6xl mx-auto text-center">
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-6">
         <h1 class="text-6xl font-bold text-electric-blue dark:text-teal mb-4">404</h1>
         <h2 class="text-2xl font-semibold text-soft-charcoal dark:text-cool-light-gray mb-2">Page Not Found</h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">Oops! While you're here, help our VR runner escape the digital void!</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Oops! While you're here, help our VR runner escape the digital void!</p>
       </div>
 
       <!-- Game Canvas -->
       <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-2xl border-4 border-electric-blue dark:border-teal p-4 mb-6">
-        <canvas id="gameCanvas" class="w-full max-w-2xl mx-auto block rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600"></canvas>
+        <canvas id="gameCanvas" class="w-full max-w-4xl mx-auto block rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600"></canvas>
         
         <!-- Game UI Overlay -->
         <div class="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
@@ -49,13 +49,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <button id="startBtn" class="button bg-electric-blue hover:bg-neon-yellow text-white hover:text-soft-charcoal px-6 py-3 rounded-lg font-semibold">
             Start Game
           </button>
-          <button id="jumpBtn" class="button bg-teal hover:bg-lime text-white hover:text-soft-charcoal px-6 py-3 rounded-lg font-semibold md:hidden">
-            Jump
-          </button>
         </div>
         <div class="text-sm text-gray-600 dark:text-gray-300">
           <p class="mb-1"><strong>Desktop:</strong> Press SPACE or ARROW UP to jump</p>
-          <p><strong>Mobile:</strong> Tap the Jump button or tap anywhere on the screen</p>
+          <p><strong>Mobile:</strong> Tap anywhere on the screen to jump</p>
         </div>
       </div>
 
@@ -86,8 +83,8 @@ class EndlessRunnerGame {
   }
 
   setupCanvas() {
-    this.canvas.width = 800;
-    this.canvas.height = 400;
+    this.canvas.width = 1000;
+    this.canvas.height = 500;
     
     // Make canvas responsive
     const resizeCanvas = () => {
@@ -105,13 +102,13 @@ class EndlessRunnerGame {
     this.gameRunning = false;
     this.score = 0;
     this.distance = 0;
-    this.speed = 2;
-    this.gameSpeed = 1;
+    this.speed = 4; // Increased initial speed
+    this.gameSpeed = 1.5; // Faster initial game speed
     
     // Runner (VR headset wearer)
     this.runner = {
-      x: 100,
-      y: 280,
+      x: 120,
+      y: 350,
       width: 40,
       height: 60,
       velocityY: 0,
@@ -121,14 +118,14 @@ class EndlessRunnerGame {
     
     // Obstacles
     this.obstacles = [];
-    this.obstacleSpawnRate = 0.02;
+    this.obstacleSpawnRate = 0.015;
     
     // Collectibles (VR goggles)
     this.collectibles = [];
-    this.collectibleSpawnRate = 0.005;
+    this.collectibleSpawnRate = 0.008;
     
     // Ground
-    this.groundY = 340;
+    this.groundY = 410;
     this.groundPattern = [];
     this.initGroundPattern();
     
@@ -150,8 +147,7 @@ class EndlessRunnerGame {
       }
     });
 
-    // Mobile controls
-    document.getElementById('jumpBtn').addEventListener('click', () => this.jump());
+    // Mobile controls - tap anywhere on canvas
     this.canvas.addEventListener('click', () => this.jump());
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
@@ -165,7 +161,7 @@ class EndlessRunnerGame {
 
   jump() {
     if (this.gameRunning && this.runner.onGround) {
-      this.runner.velocityY = -12;
+      this.runner.velocityY = -18; // Higher jump
       this.runner.jumping = true;
       this.runner.onGround = false;
     }
@@ -194,7 +190,7 @@ class EndlessRunnerGame {
 
   update() {
     // Update runner physics
-    this.runner.velocityY += 0.8; // gravity
+    this.runner.velocityY += 1.0; // gravity
     this.runner.y += this.runner.velocityY;
 
     // Ground collision
@@ -209,10 +205,10 @@ class EndlessRunnerGame {
     if (Math.random() < this.obstacleSpawnRate) {
       this.obstacles.push({
         x: this.canvas.width,
-        y: this.groundY - 30,
-        width: 20,
-        height: 30,
-        type: 'cactus'
+        y: this.groundY - 35,
+        width: 25,
+        height: 35,
+        type: 'barrier'
       });
     }
 
@@ -220,9 +216,9 @@ class EndlessRunnerGame {
     if (Math.random() < this.collectibleSpawnRate) {
       this.collectibles.push({
         x: this.canvas.width,
-        y: this.groundY - 80,
-        width: 25,
-        height: 25,
+        y: this.groundY - 100,
+        width: 30,
+        height: 30,
         type: 'vr'
       });
     }
@@ -246,7 +242,7 @@ class EndlessRunnerGame {
       
       // Collection detection
       if (this.checkCollision(this.runner, collectible)) {
-        this.score += 10;
+        this.score += 15;
         return false;
       }
       
@@ -262,12 +258,12 @@ class EndlessRunnerGame {
 
     // Increase difficulty
     this.distance += this.speed;
-    this.gameSpeed = 1 + Math.floor(this.distance / 500) * 0.2;
-    this.speed = 2 * this.gameSpeed;
-    this.obstacleSpawnRate = Math.min(0.02 + this.distance / 10000, 0.05);
+    this.gameSpeed = 1.5 + Math.floor(this.distance / 800) * 0.3;
+    this.speed = 4 * this.gameSpeed;
+    this.obstacleSpawnRate = Math.min(0.015 + this.distance / 12000, 0.04);
 
     // Update score
-    this.score += Math.floor(this.speed / 10);
+    this.score += Math.floor(this.speed / 8);
     this.scoreElement.textContent = this.score;
     this.speedElement.textContent = this.gameSpeed.toFixed(1) + 'x';
   }
@@ -287,6 +283,9 @@ class EndlessRunnerGame {
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Draw "404 PAGE NOT FOUND" text in the background
+    this.draw404Text();
+
     // Draw clouds
     this.drawClouds();
 
@@ -297,7 +296,7 @@ class EndlessRunnerGame {
     // Draw ground pattern
     this.ctx.fillStyle = '#654321';
     this.groundPattern.forEach(x => {
-      this.ctx.fillRect(x, this.groundY, 10, 5);
+      this.ctx.fillRect(x, this.groundY, 10, 8);
     });
 
     // Draw runner with VR headset
@@ -310,19 +309,44 @@ class EndlessRunnerGame {
     this.collectibles.forEach(collectible => this.drawCollectible(collectible));
   }
 
+  draw404Text() {
+    // Draw large "404 PAGE NOT FOUND" text in the background
+    this.ctx.save();
+    this.ctx.globalAlpha = 0.1;
+    this.ctx.fillStyle = '#007BC5'; // Electric blue
+    this.ctx.font = 'bold 60px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('404', this.canvas.width / 2, 120);
+    
+    this.ctx.font = 'bold 32px Arial';
+    this.ctx.fillText('PAGE NOT FOUND', this.canvas.width / 2, 170);
+    this.ctx.restore();
+  }
+
   drawClouds() {
     this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    // Static clouds for simplicity
+    // Animated clouds
+    const cloudOffset = (Date.now() * 0.001) % (this.canvas.width + 200);
+    
+    // Cloud 1
     this.ctx.beginPath();
-    this.ctx.arc(150, 80, 30, 0, Math.PI * 2);
-    this.ctx.arc(170, 80, 40, 0, Math.PI * 2);
-    this.ctx.arc(190, 80, 30, 0, Math.PI * 2);
+    this.ctx.arc(150 - cloudOffset * 0.5, 80, 30, 0, Math.PI * 2);
+    this.ctx.arc(170 - cloudOffset * 0.5, 80, 40, 0, Math.PI * 2);
+    this.ctx.arc(190 - cloudOffset * 0.5, 80, 30, 0, Math.PI * 2);
     this.ctx.fill();
 
+    // Cloud 2
     this.ctx.beginPath();
-    this.ctx.arc(500, 60, 25, 0, Math.PI * 2);
-    this.ctx.arc(520, 60, 35, 0, Math.PI * 2);
-    this.ctx.arc(540, 60, 25, 0, Math.PI * 2);
+    this.ctx.arc(500 - cloudOffset * 0.3, 60, 25, 0, Math.PI * 2);
+    this.ctx.arc(520 - cloudOffset * 0.3, 60, 35, 0, Math.PI * 2);
+    this.ctx.arc(540 - cloudOffset * 0.3, 60, 25, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Cloud 3
+    this.ctx.beginPath();
+    this.ctx.arc(800 - cloudOffset * 0.4, 90, 20, 0, Math.PI * 2);
+    this.ctx.arc(815 - cloudOffset * 0.4, 90, 30, 0, Math.PI * 2);
+    this.ctx.arc(830 - cloudOffset * 0.4, 90, 20, 0, Math.PI * 2);
     this.ctx.fill();
   }
 
@@ -337,13 +361,18 @@ class EndlessRunnerGame {
     this.ctx.fillStyle = '#FFB6C1';
     this.ctx.fillRect(x + 5, y, 30, 25);
     
-    // VR Headset
-    this.ctx.fillStyle = '#1E2430'; // Soft charcoal
+    // VR Headset - Main body (using site colors)
+    this.ctx.fillStyle = '#007BC5'; // Electric blue
     this.ctx.fillRect(x + 2, y + 5, 36, 15);
     
-    // VR Headset detail (glowing effect)
-    this.ctx.fillStyle = '#007BC5'; // Electric blue
-    this.ctx.fillRect(x + 4, y + 7, 32, 11);
+    // VR Headset - Yellow accents
+    this.ctx.fillStyle = '#FFE600'; // Neon yellow
+    this.ctx.fillRect(x + 4, y + 7, 32, 3);
+    this.ctx.fillRect(x + 4, y + 15, 32, 3);
+    
+    // VR Headset - Blue lens area
+    this.ctx.fillStyle = '#46C3B8'; // Teal
+    this.ctx.fillRect(x + 8, y + 9, 24, 5);
     
     // Arms
     this.ctx.fillStyle = '#FFB6C1';
@@ -355,39 +384,48 @@ class EndlessRunnerGame {
     this.ctx.fillRect(x + 8, y + 50, 8, 15);
     this.ctx.fillRect(x + 24, y + 50, 8, 15);
     
-    // Running animation (simple)
+    // Running animation (simple bounce)
     if (this.gameRunning && this.runner.onGround) {
-      const bounce = Math.sin(Date.now() * 0.02) * 2;
+      const bounce = Math.sin(Date.now() * 0.03) * 1;
+      this.ctx.save();
       this.ctx.translate(0, bounce);
-      this.ctx.translate(0, -bounce);
+      this.ctx.restore();
     }
   }
 
   drawObstacle(obstacle) {
-    this.ctx.fillStyle = '#228B22'; // Forest green
+    // Digital barrier/glitch effect
+    this.ctx.fillStyle = '#DC143C'; // Crimson
     this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     
-    // Add some detail to make it look like a digital barrier
+    // Glitch lines
     this.ctx.fillStyle = '#FFE600'; // Neon yellow
-    this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, 4);
-    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height - 6, obstacle.width - 4, 4);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + 2, obstacle.width - 4, 3);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height / 2, obstacle.width - 4, 3);
+    this.ctx.fillRect(obstacle.x + 2, obstacle.y + obstacle.height - 5, obstacle.width - 4, 3);
   }
 
   drawCollectible(collectible) {
     const { x, y, width, height } = collectible;
     
-    // VR Goggle collectible
-    this.ctx.fillStyle = '#8F5CCC'; // Lavender
+    // VR Goggle collectible - using site colors
+    this.ctx.fillStyle = '#007BC5'; // Electric blue
     this.ctx.fillRect(x, y, width, height);
     
-    // Glowing effect
+    // Yellow accent
+    this.ctx.fillStyle = '#FFE600'; // Neon yellow
+    this.ctx.fillRect(x + 2, y + 2, width - 4, 4);
+    this.ctx.fillRect(x + 2, y + height - 6, width - 4, 4);
+    
+    // Teal center
     this.ctx.fillStyle = '#46C3B8'; // Teal
-    this.ctx.fillRect(x + 2, y + 2, width - 4, height - 4);
+    this.ctx.fillRect(x + 4, y + 8, width - 8, height - 16);
     
     // Floating animation
-    const float = Math.sin(Date.now() * 0.01 + x * 0.01) * 3;
+    const float = Math.sin(Date.now() * 0.015 + x * 0.01) * 4;
+    this.ctx.save();
     this.ctx.translate(0, float);
-    this.ctx.translate(0, -float);
+    this.ctx.restore();
   }
 
   gameOver() {
@@ -403,3 +441,4 @@ document.addEventListener('DOMContentLoaded', () => {
   new EndlessRunnerGame();
 });
 </script>
+</BaseLayout>
