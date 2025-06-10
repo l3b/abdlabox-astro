@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
+import OptimizedImage from '../../components/OptimizedImage.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { arSA } from 'date-fns/locale'; // For Arabic relative time
 
@@ -216,11 +217,21 @@ try {
               <div class="space-y-2">
                 {post.data.featuredImage && (
                   <a href={`/ar/blog/${post.slug.replace(/^ar\//, '')}`} class="block mb-4">
-                    <img 
-                      src={post.data.featuredImage.url} 
-                      alt={post.data.featuredImage.alt || `صورة توضيحية لـ ${post.data.title}`} 
-                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-                    />
+                    {post.data.featuredImage.r2Path ? (
+                      <OptimizedImage 
+                        src={`r2://${post.data.featuredImage.r2Path}`}
+                        alt={post.data.featuredImage.alt || `صورة توضيحية لـ ${post.data.title}`}
+                        width={300}
+                        height={128}
+                        class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                      />
+                    ) : (
+                      <img 
+                        src={post.data.featuredImage.url} 
+                        alt={post.data.featuredImage.alt || `صورة توضيحية لـ ${post.data.title}`} 
+                        class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                      />
+                    )}
                   </a>
                 )}
                 <h3 class="text-lg font-semibold">

@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
+import OptimizedImage from '../../components/OptimizedImage.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { enUS } from 'date-fns/locale'; // For English relative time
 
@@ -201,11 +202,21 @@ try {
             <div>
               {latestEnPost.data.featuredImage && (
                 <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="block mb-4">
-                  <img 
-                    src={latestEnPost.data.featuredImage.url} 
-                    alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`} 
-                    class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-                  />
+                  {latestEnPost.data.featuredImage.r2Path ? (
+                    <OptimizedImage 
+                      src={`r2://${latestEnPost.data.featuredImage.r2Path}`}
+                      alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`}
+                      width={300}
+                      height={128}
+                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                    />
+                  ) : (
+                    <img 
+                      src={latestEnPost.data.featuredImage.url} 
+                      alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`} 
+                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                    />
+                  )}
                 </a>
               )}
               <h3 class="text-lg font-semibold mt-1">
