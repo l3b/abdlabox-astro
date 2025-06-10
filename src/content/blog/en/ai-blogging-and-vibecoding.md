@@ -13,8 +13,6 @@ isDraft: false
 translationKey: "ai-blogging-and-vibecoding" 
 ---
 
-# AI, Blogging, and the First Barrier Broken
-
 Public speaking has always been one of the hardest things for me. Over time, I've gotten better — more confident, more practiced — but the overthinking never really left. If you gave me the choice between delivering a rehearsed speech or speaking off the cuff, I’d go with improvisation every time. I don't fully know why. I’m no expert in psychology, but I suspect perfectionism has something to do with it — the need to get every word *just right*.
 
 That same hesitation has kept me from blogging for years. I’ve always wanted to write and share my thoughts online. I’ve made attempts before — drafts, mockups, even full designs — but I never managed to hit “Publish.” I wanted the blog to look clean, the content to be thoughtful, even if no one was going to read it. And so, for a long time, I stayed stuck at the start line.
