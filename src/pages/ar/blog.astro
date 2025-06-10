@@ -2,7 +2,7 @@
 // src/pages/ar/blog.astro - Styled Version 6 (Near Black H1)
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { normalizeTag, getOrCreateTag } from '../../data/tags';
+import { normalizeTag } from '../../data/tags';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 
 // 1. Fetch Arabic posts, filter drafts
@@ -66,17 +66,14 @@ const pageDescription = "أحدث المقالات والأفكار حول ال�
             </span>
             {post.data.tags && post.data.tags.length > 0 && (
                   <div class="flex gap-2 flex-wrap">
-                    {post.data.tags.map(tag => {
-                      const tagInfo = getOrCreateTag(tag);
-                      return (
-                        <a 
-                          href={`/ar/tags/${tagInfo.slug.ar}`}
-                          class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-neon-yellow hover:text-gray-900 transition-colors"
-                        >
-                          #{tagInfo.ar}
-                        </a>
-                      );
-                    })}
+                    {post.data.tags.map(tag => (
+                      <a 
+                        href={`/ar/tags/${normalizeTag(tag)}`}
+                        class="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs hover:bg-neon-yellow hover:text-gray-900 transition-colors"
+                      >
+                        #{tag}
+                      </a>
+                    ))}
                   </div>
                 )}
           </div>

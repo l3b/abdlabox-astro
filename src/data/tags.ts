@@ -97,7 +97,6 @@ export function getOrCreateTag(tag: string): TagTranslation {
       ar: normalizedTag
     }
   };
-}.replace(/\s+/g, '-');
 }
 
 export const tags = baseTagTranslations;
