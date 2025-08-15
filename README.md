@@ -1,48 +1,213 @@
-# Astro Starter Kit: Basics
+# Abdla.box - Personal Digital Space
 
-```sh
-npm create astro@latest -- --template basics
+> A bilingual (Arabic/English) personal website built with Astro, featuring dynamic content integration, live activity feeds, and a unique "Electric Dunes" visual identity.
+
+## 🌟 Overview
+
+**Abdla.box** is a personal digital platform that bridges technology, culture, and curiosity. Built with modern web technologies, it serves as a hub for sharing knowledge, showcasing projects, and connecting with the community through various digital channels.
+
+### Live at: [abdla.box](https://abdla.box)
+
+## ✨ Features
+
+### Core Functionality
+- **🌐 Bilingual Support**: Full Arabic and English support with RTL/LTR layouts
+- **📝 Blog System**: Markdown-based blogging with tag categorization
+- **🔄 Live Activity Feeds**: Real-time integration with:
+  - GitHub activity tracking
+  - Bluesky social posts
+  - Goodreads reading list
+  - Trakt.tv watching history
+- **🎨 Electric Dunes Theme**: Custom visual identity inspired by Saudi desert landscapes
+- **📱 Responsive Design**: Optimized for all devices with Tailwind CSS
+- **🚀 Performance**: Static site generation with Astro for lightning-fast loads
+- **📊 Analytics Ready**: Integrated analytics tracking support
+
+### Content Categories
+- **Tech & AI** - Technology insights and AI explorations
+- **Knowledge Management** - Learning resources and methodologies
+- **Sports & Running** - Fitness journey and activities
+- **Dammam Diaries** - Local perspectives from Eastern Saudi Arabia
+- **Faith Reflections** - Islamic thoughts and spiritual insights
+- **Life & Society** - Social observations and cultural commentary
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Astro](https://astro.build) v5.7
+- **Styling**: Tailwind CSS v3.4 with Typography plugin
+- **Icons**: Astro Icon with MDI and Simple Icons
+- **Languages**: TypeScript, JavaScript
+- **Content**: Markdown with frontmatter
+- **APIs**: Integration with GitHub, Bluesky (AT Protocol), Goodreads RSS, Trakt.tv
+
+## 📁 Project Structure
+
 ```
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
+abdlabox-astro/
+├── public/                 # Static assets
+│   ├── images/            # Blog and site images
+│   ├── favicon files      # Site icons
+│   └── site.webmanifest   # PWA manifest
 ├── src/
-│   ├── layouts/
+│   ├── assets/            # Source assets
+│   ├── components/        # Reusable Astro components
+│   │   ├── Header.astro
+│   │   ├── OptimizedImage.astro
+│   │   └── Welcome.astro
+│   ├── content/           # Blog content
+│   │   ├── blog/
+│   │   │   ├── ar/       # Arabic blog posts
+│   │   │   └── en/       # English blog posts
+│   │   └── config.js     # Content configuration
+│   ├── data/              # Data files
+│   │   ├── analytics.ts
+│   │   ├── socialLinks.ts
+│   │   └── tags.ts
+│   ├── layouts/           # Page layouts
+│   │   ├── BaseLayout.astro
 │   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── pages/             # Route pages
+│   │   ├── ar/           # Arabic pages
+│   │   ├── en/           # English pages
+│   │   └── index.astro   # Homepage
+│   ├── styles/            # Global styles
+│   └── utils/             # Utility functions
+│       ├── i18n.ts
+│       ├── readingTime.ts
+│       └── structuredData.ts
+├── astro.config.mjs       # Astro configuration
+├── tailwind.config.mjs    # Tailwind configuration
+└── package.json           # Dependencies
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 🚀 Getting Started
 
-## 🧞 Commands
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-All commands are run from the root of the project, from a terminal:
+### Installation
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/abdlabox-astro.git
+cd abdlabox-astro
+```
 
-## 👀 Want to learn more?
+2. Install dependencies:
+```bash
+npm install
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+3. Start the development server:
+```bash
+npm run dev
+```
+
+4. Open [http://localhost:4321](http://localhost:4321) in your browser
+
+## 📝 Available Scripts
+
+| Command | Action |
+|---------|--------|
+| `npm run dev` | Start development server at `localhost:4321` |
+| `npm run build` | Build production site to `./dist/` |
+| `npm run preview` | Preview production build locally |
+| `npm run astro` | Run Astro CLI commands |
+
+## 🌍 Deployment
+
+### Cloudflare Pages (Recommended)
+
+1. Connect your GitHub repository to Cloudflare Pages
+2. Configure build settings:
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Node version**: 18+
+
+3. Set up branch deployments:
+   - **Production branch**: `main` → `abdla.box`
+   - **Staging branch**: `staging` → `staging.abdla.box`
+
+4. Environment variables (if needed):
+   - Add any API keys or configuration through Cloudflare dashboard
+
+### Other Platforms
+The site can be deployed to any static hosting service:
+- Vercel
+- Netlify  
+- GitHub Pages
+- AWS S3 + CloudFront
+
+## 🎨 Customization
+
+### Brand Colors (Electric Dunes Theme)
+- **Primary**: Electric Blue `#0EA5E9`
+- **Accent**: Desert Orange `#F97316`
+- **Background**: Near Black `#0A0A0A`
+- **Text**: Off-white `#FAFAFA`
+
+### Adding Blog Posts
+
+Create a new `.md` file in `src/content/blog/[language]/`:
+
+```markdown
+---
+title: "Your Post Title"
+description: "Brief description"
+pubDate: 2024-01-31
+tags: ["tech", "ai"]
+isDraft: false
+---
+
+Your content here...
+```
+
+### Modifying Social Links
+
+Edit `src/data/socialLinks.ts` to update social media profiles and links.
+
+## 🔧 Configuration
+
+### Astro Config
+Main configuration in `astro.config.mjs`:
+- Site URL
+- i18n settings
+- Markdown rendering
+- Integrations
+
+### Environment Variables
+Create a `.env` file for API keys:
+```env
+GITHUB_TOKEN=your_token_here
+BLUESKY_HANDLE=your.handle.bsky.social
+BLUESKY_APP_PASSWORD=your_app_password
+```
+
+## 📚 Resources
+
+- [Astro Documentation](https://docs.astro.build)
+- [Tailwind CSS](https://tailwindcss.com)
+- [AT Protocol (Bluesky)](https://atproto.com)
+
+## 🤝 Contributing
+
+While this is a personal website, suggestions and feedback are welcome! Feel free to:
+- Open issues for bugs or feature requests
+- Submit pull requests for improvements
+- Share ideas for content or features
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 👤 Author
+
+**Abdullah Al-Thani (Abdla)**
+- Website: [abdla.box](https://abdla.box)
+- GitHub: [@yourusername](https://github.com/yourusername)
+- Bluesky: [@abdla.bsky.social](https://bsky.app/profile/abdla.bsky.social)
+
+---
+
+Built with ❤️ in Dammam, Saudi Arabia
