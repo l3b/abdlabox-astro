@@ -61,7 +61,18 @@
   }
 
   .dark h2 {
-    @apply text-electric-blue;
+    @apply text-lavender;
+  }
+  
+  /* Dark mode card titles should use lavender */
+  .dark .card h2,
+  .dark .card h3 {
+    @apply text-lavender;
+  }
+  
+  /* Override electric-blue text to lavender in dark mode */
+  .dark .text-electric-blue {
+    @apply text-lavender;
   }
 
   .dark .text-gray-600 {
@@ -282,7 +293,7 @@ main a {
 }
 
 .dark .header-top {
-  @apply bg-lavender;
+  @apply bg-gray-900/95 text-gray-100 border-b border-gray-700 backdrop-blur-sm;
 }
 
 /* Logo Font - Simple but with personality */
