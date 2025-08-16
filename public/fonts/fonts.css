@@ -1,13 +1,65 @@
 /* Arabic Fonts - Local hosting for better performance */
 
-/* AlNaseeb Font - Primary Arabic Font */
+/* ==================================
+   The Year of The Camel - Display/Title Font
+   ================================== */
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-ExtraLight.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-Light.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-Regular.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-Medium.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-Bold.otf') format('opentype');
+}
+
+@font-face {
+  font-family: 'Year of Camel';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/The Year of The Camel/TheYearofTheCamel-ExtraBold.otf') format('opentype');
+}
+
+/* ==================================
+   AlNaseeb Font - Alternative Display Font
+   ================================== */
 @font-face {
   font-family: 'AlNaseeb';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url('/fonts/Boutros-AlNaseeb.ttf') format('truetype');
-  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
 }
 
 @font-face {
@@ -16,10 +68,11 @@
   font-weight: 700;
   font-display: swap;
   src: url('/fonts/Boutros-AlNaseeb.ttf') format('truetype');
-  unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
 }
 
-/* IBM Plex Sans Arabic - Modern, clean Arabic font */
+/* ==================================
+   IBM Plex Sans Arabic - Body Text Font
+   ================================== */
 @font-face {
   font-family: 'IBM Plex Sans Arabic';
   font-style: normal;
@@ -47,7 +100,9 @@
   unicode-range: U+0600-06FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE80-FEFC;
 }
 
-/* Readex Pro - Professional Arabic/Latin font */
+/* ==================================
+   Readex Pro - Alternative Body Font
+   ================================== */
 @font-face {
   font-family: 'Readex Pro';
   font-style: normal;

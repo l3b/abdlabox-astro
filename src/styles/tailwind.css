@@ -71,20 +71,65 @@
   }
 }
 
-/* Arabic font application */
+/* Arabic Typography System */
 [dir="rtl"] body,
-[lang="ar"] {
-  font-family: 'AlNaseeb', 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+[lang="ar"] body {
+  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
   font-weight: 400;
   letter-spacing: 0;
   word-spacing: 0.05em;
+  line-height: 1.8;
+}
+
+/* Arabic Headings - Using Year of Camel for display */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[lang="ar"] h1,
+[lang="ar"] h2,
+[lang="ar"] h3 {
+  font-family: 'Year of Camel', 'AlNaseeb', 'Tajawal', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Specific heading sizes for Arabic */
+[dir="rtl"] h1,
+[lang="ar"] h1 {
+  font-size: 3.5rem;
+  line-height: 1.2;
+}
+
+[dir="rtl"] h2,
+[lang="ar"] h2 {
+  font-size: 2.5rem;
+  line-height: 1.3;
+}
+
+[dir="rtl"] h3,
+[lang="ar"] h3 {
+  font-size: 2rem;
+  line-height: 1.4;
 }
 
 /* English font application */
 [dir="ltr"] body,
-[lang="en"] {
+[lang="en"] body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: -0.01em;
+  line-height: 1.6;
+}
+
+/* English Headings */
+[dir="ltr"] h1,
+[dir="ltr"] h2,
+[dir="ltr"] h3,
+[lang="en"] h1,
+[lang="en"] h2,
+[lang="en"] h3 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* Add this rule to force light text in code blocks */

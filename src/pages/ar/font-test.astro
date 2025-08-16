@@ -1,0 +1,160 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const pageTitle = "اختبار الخطوط العربية";
+const sampleText = "عبدالله الثاني - مستشار تقني ومطور";
+const sampleParagraph = "أهلاً بكم في موقعي الشخصي حيث أشارك أفكاري وتجاربي في عالم التقنية والبرمجة. أسعى لبناء جسور بين الثقافة والتكنولوجيا من خلال المحتوى والأدوات والمحادثات الهادفة.";
+
+const fonts = [
+  { name: "Year of Camel", family: "'Year of Camel'", description: "خط عام الجمل - خط عصري من وزارة الثقافة" },
+  { name: "AlNaseeb", family: "'AlNaseeb'", description: "خط النصيب - خط تقليدي أنيق" },
+  { name: "IBM Plex Sans Arabic", family: "'IBM Plex Sans Arabic'", description: "خط IBM - خط حديث ومقروء" },
+  { name: "Readex Pro", family: "'Readex Pro'", description: "خط Readex - خط احترافي ثنائي اللغة" },
+  { name: "Noto Sans Arabic", family: "'Noto Sans Arabic'", description: "خط Noto - خط Google العالمي" },
+  { name: "Vazirmatn", family: "'Vazirmatn'", description: "خط وزیرمتن - خط فارسي عربي حديث" },
+  { name: "Rubik", family: "'Rubik'", description: "خط Rubik - خط هندسي عصري" },
+  { name: "Tajawal", family: "'Tajawal'", description: "خط تجوال - خط Google العربي" }
+];
+
+const weights = [
+  { value: 300, label: "خفيف" },
+  { value: 400, label: "عادي" },
+  { value: 500, label: "متوسط" },
+  { value: 600, label: "سميك" },
+  { value: 700, label: "ثقيل" },
+  { value: 800, label: "ثقيل جداً" }
+];
+---
+
+<BaseLayout title={pageTitle} lang="ar" dir="rtl">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 text-electric-blue">{pageTitle}</h1>
+    
+    <div class="mb-12 p-6 bg-cool-light-gray dark:bg-dark-surface rounded-lg">
+      <h2 class="text-2xl font-bold mb-4 text-lavender">النظام الحالي</h2>
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-xl font-semibold mb-2">العناوين: Year of Camel</h3>
+          <h1 style="font-family: 'Year of Camel'" class="text-3xl">{sampleText}</h1>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold mb-2">النص الأساسي: IBM Plex Sans Arabic</h3>
+          <p style="font-family: 'IBM Plex Sans Arabic'" class="text-lg leading-relaxed">{sampleParagraph}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-8">
+      {fonts.map((font) => (
+        <div class="card p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold text-electric-blue">{font.name}</h3>
+            <span class="text-sm text-gray-600 dark:text-gray-400">{font.description}</span>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Title Example -->
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400">عنوان رئيسي (حجم 3xl)</span>
+              <h2 style={`font-family: ${font.family}`} class="text-3xl font-bold mt-1">
+                {sampleText}
+              </h2>
+            </div>
+            
+            <!-- Subtitle Example -->
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400">عنوان فرعي (حجم xl)</span>
+              <h3 style={`font-family: ${font.family}`} class="text-xl font-semibold mt-1">
+                حيث يلتقي العلم بالفضول
+              </h3>
+            </div>
+            
+            <!-- Paragraph Example -->
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400">فقرة نصية (حجم عادي)</span>
+              <p style={`font-family: ${font.family}`} class="text-base leading-relaxed mt-1">
+                {sampleParagraph}
+              </p>
+            </div>
+            
+            <!-- Weight Variations -->
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400 block mb-2">أوزان الخط المختلفة</span>
+              <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                {weights.map((weight) => (
+                  <div class="text-center">
+                    <span style={`font-family: ${font.family}; font-weight: ${weight.value}`} class="block text-lg">
+                      عبدالله
+                    </span>
+                    <span class="text-xs text-gray-500">{weight.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <!-- Numbers and Mixed Content -->
+            <div>
+              <span class="text-xs text-gray-500 dark:text-gray-400">أرقام ومحتوى مختلط</span>
+              <p style={`font-family: ${font.family}`} class="text-base mt-1">
+                البريد: abdla@example.com | الهاتف: +966 50 123 4567 | السنة: 2025
+              </p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Font Combinations Section -->
+    <div class="mt-12">
+      <h2 class="text-3xl font-bold mb-6 text-lavender">تجارب دمج الخطوط</h2>
+      
+      <div class="grid gap-6">
+        <!-- Combination 1 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-bold text-teal mb-4">التجربة الأولى: Year of Camel + IBM Plex</h3>
+          <h2 style="font-family: 'Year of Camel'" class="text-2xl font-bold mb-2">{sampleText}</h2>
+          <p style="font-family: 'IBM Plex Sans Arabic'" class="text-base leading-relaxed">{sampleParagraph}</p>
+        </div>
+        
+        <!-- Combination 2 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-bold text-teal mb-4">التجربة الثانية: AlNaseeb + Readex Pro</h3>
+          <h2 style="font-family: 'AlNaseeb'" class="text-2xl font-bold mb-2">{sampleText}</h2>
+          <p style="font-family: 'Readex Pro'" class="text-base leading-relaxed">{sampleParagraph}</p>
+        </div>
+        
+        <!-- Combination 3 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-bold text-teal mb-4">التجربة الثالثة: Rubik + Vazirmatn</h3>
+          <h2 style="font-family: 'Rubik'" class="text-2xl font-bold mb-2">{sampleText}</h2>
+          <p style="font-family: 'Vazirmatn'" class="text-base leading-relaxed">{sampleParagraph}</p>
+        </div>
+        
+        <!-- Combination 4 -->
+        <div class="card p-6">
+          <h3 class="text-xl font-bold text-teal mb-4">التجربة الرابعة: Vazirmatn لكل شيء</h3>
+          <h2 style="font-family: 'Vazirmatn'; font-weight: 700" class="text-2xl mb-2">{sampleText}</h2>
+          <p style="font-family: 'Vazirmatn'; font-weight: 400" class="text-base leading-relaxed">{sampleParagraph}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="mt-12 p-6 bg-neon-yellow-light dark:bg-gray-800 rounded-lg">
+      <h2 class="text-2xl font-bold mb-4 text-electric-blue-dark">توصياتي</h2>
+      <div class="space-y-3">
+        <p class="font-semibold">للهوية العصرية والجريئة:</p>
+        <ul class="list-disc list-inside space-y-2 mr-4">
+          <li><strong>Year of Camel للعناوين</strong> - خط مميز وعصري من وزارة الثقافة</li>
+          <li><strong>IBM Plex Sans Arabic للنصوص</strong> - واضح ومقروء وحديث</li>
+        </ul>
+        
+        <p class="font-semibold mt-4">للهوية الأنيقة والاحترافية:</p>
+        <ul class="list-disc list-inside space-y-2 mr-4">
+          <li><strong>Vazirmatn للعناوين والنصوص</strong> - خط متكامل وأنيق</li>
+          <li><strong>Readex Pro كبديل</strong> - ممتاز للمحتوى ثنائي اللغة</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
