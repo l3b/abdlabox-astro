@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Strava Refresh Token</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FC4C02;
+            border-bottom: 2px solid #FC4C02;
+            padding-bottom: 10px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #FC4C02;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        button {
+            background: #FC4C02;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #e03e00;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            border: 1px solid #4caf50;
+            display: none;
+        }
+        .error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        pre {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏃 Get Strava Refresh Token with Correct Permissions</h1>
+        
+        <div class="note">
+            <strong>⚠️ Important:</strong> This tool will help you get a new refresh token with the correct permissions to read your activities. You'll need your Strava App Client ID and Secret.
+        </div>
+
+        <div class="step">
+            <h2>Step 1: Enter Your Strava App Credentials</h2>
+            <p>These are from your Strava API settings at <a href="https://www.strava.com/settings/api" target="_blank">https://www.strava.com/settings/api</a></p>
+            
+            <label>Client ID:</label>
+            <input type="text" id="clientId" placeholder="e.g., 173015" value="173015">
+            
+            <label>Client Secret:</label>
+            <input type="password" id="clientSecret" placeholder="Your client secret" value="de88c30e5920a07c6b457dea8927d36c975c1670">
+        </div>
+
+        <div class="step">
+            <h2>Step 2: Authorize with Strava</h2>
+            <p>Click the button below to authorize with the correct permissions (read all activities):</p>
+            <button onclick="authorizeStrava()">🔐 Authorize with Strava</button>
+            
+            <p style="margin-top: 15px; color: #666;">
+                This will request permissions for:
+                <ul>
+                    <li>✅ <code>read</code> - Read public activities</li>
+                    <li>✅ <code>read_all</code> - Read private activities</li>
+                    <li>✅ <code>activity:read</code> - Read activity data</li>
+                    <li>✅ <code>activity:read_all</code> - Read all activity data</li>
+                </ul>
+            </p>
+        </div>
+
+        <div class="step">
+            <h2>Step 3: Paste the Authorization Code</h2>
+            <p>After authorizing, Strava will redirect you to a page with an error (that's normal!). Look at the URL and copy the <code>code</code> parameter:</p>
+            <p style="color: #666; font-size: 14px;">
+                Example URL: <code>http://localhost/?state=&code=<strong>8d12345abc67890def123456789abcdef1234</strong>&scope=read,activity:read_all</code>
+            </p>
+            
+            <label>Authorization Code:</label>
+            <input type="text" id="authCode" placeholder="Paste the code from the URL">
+            
+            <button onclick="getRefreshToken()">🔄 Get Refresh Token</button>
+        </div>
+
+        <div id="result" class="result">
+            <h3>✅ Success! Here's your new refresh token:</h3>
+            <pre id="tokenDisplay"></pre>
+            <p>Update your <code>.env</code> file with this new token:</p>
+            <pre id="envUpdate"></pre>
+        </div>
+
+        <div id="error" class="result error" style="display: none;">
+            <h3>❌ Error</h3>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        function authorizeStrava() {
+            const clientId = document.getElementById('clientId').value;
+            if (!clientId) {
+                alert('Please enter your Client ID first');
+                return;
+            }
+            
+            // Request all necessary scopes for reading activities
+            const scope = 'read,read_all,activity:read,activity:read_all';
+            const redirectUri = 'http://localhost';
+            
+            const authUrl = `https://www.strava.com/oauth/authorize?` +
+                `client_id=${clientId}&` +
+                `response_type=code&` +
+                `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+                `approval_prompt=force&` +
+                `scope=${scope}`;
+            
+            window.open(authUrl, '_blank');
+        }
+
+        async function getRefreshToken() {
+            const clientId = document.getElementById('clientId').value;
+            const clientSecret = document.getElementById('clientSecret').value;
+            const authCode = document.getElementById('authCode').value;
+            
+            if (!clientId || !clientSecret || !authCode) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Hide previous results
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            try {
+                // Use a CORS proxy since Strava doesn't allow direct browser requests
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const stravaUrl = 'https://www.strava.com/oauth/token';
+                
+                const response = await fetch(proxyUrl + stravaUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_id: clientId,
+                        client_secret: clientSecret,
+                        code: authCode,
+                        grant_type: 'authorization_code'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.refresh_token) {
+                    document.getElementById('tokenDisplay').textContent = data.refresh_token;
+                    document.getElementById('envUpdate').textContent = 
+                        `STRAVA_CLIENT_ID="${clientId}"\n` +
+                        `STRAVA_CLIENT_SECRET="${clientSecret}"\n` +
+                        `STRAVA_REFRESH_TOKEN="${data.refresh_token}"`;
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    throw new Error('No refresh token in response');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // If CORS proxy fails, show manual instructions
+                document.getElementById('errorMessage').innerHTML = `
+                    <strong>Automatic token exchange failed (likely due to CORS).</strong><br><br>
+                    Please use this cURL command instead:<br><br>
+                    <pre style="background: #f5f5f5; color: #333; padding: 10px; border-radius: 5px;">curl -X POST https://www.strava.com/oauth/token \\
+  -F client_id=${clientId} \\
+  -F client_secret=${clientSecret} \\
+  -F code=${authCode} \\
+  -F grant_type=authorization_code</pre>
+                    <br>
+                    Run this in your terminal and copy the <code>refresh_token</code> from the response.
+                `;
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
