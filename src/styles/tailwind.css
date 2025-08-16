@@ -74,7 +74,8 @@
 /* Arabic font application */
 [dir="rtl"] body,
 [lang="ar"] {
-  font-family: 'AlNaseeb', 'Tajawal', 'Noto Sans Arabic', sans-serif;
+  font-family: 'AlNaseeb', 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+  font-weight: 400;
   letter-spacing: 0;
   word-spacing: 0.05em;
 }

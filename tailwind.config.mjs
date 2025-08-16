@@ -33,8 +33,8 @@ export default {
       fontFamily: {
         // English fonts
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        // Arabic fonts with AlNaseeb as primary
-        arabic: ['AlNaseeb', 'Tajawal', 'Noto Sans Arabic', 'sans-serif'],
+        // Arabic fonts - AlNaseeb as primary with fallbacks
+        arabic: ['AlNaseeb', 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', 'sans-serif'],
         // Monospace for code
         mono: ['JetBrains Mono', 'Cascadia Code', 'Consolas', 'monospace'],
       },
