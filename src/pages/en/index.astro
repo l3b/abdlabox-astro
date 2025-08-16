@@ -237,44 +237,45 @@ try {
             Latest from the Blog
           </h2>
         </a>
-        <div class="flex-grow space-y-4">
-          {latestEnPosts.map(post => (
-            <div class="space-y-2">
-              {post.data.featuredImage && (
-                <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`} class="block mb-4">
-                  {post.data.featuredImage.r2Path ? (
-                    <OptimizedImage 
-                      src={`r2://${post.data.featuredImage.r2Path}`}
-                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
-                      width={300}
-                      height={128}
-                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-                    />
-                  ) : (
-                    <img 
-                      src={post.data.featuredImage.url} 
-                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} 
-                      class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-                    />
-                  )}
-                </a>
-              )}
-              <h3 class="text-lg font-semibold">
-                <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
-                   class="hover:text-teal-600 transition-colors duration-200">
-                  <span class="text-soft-charcoal">
-                    {post.data.title}
-                  </span>
-                </a>
-              </h3>
-              {post.data.description && (
-                <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
-                  {post.data.description}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
+        {latestEnPosts.length > 0 ? (
+          <div class="flex-grow space-y-4">
+            {latestEnPosts.map(post => (
+              <div class="space-y-2">
+                {post.data.featuredImage && (
+                  <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`} class="block mb-4">
+                    {post.data.featuredImage.r2Path ? (
+                      <OptimizedImage 
+                        src={`r2://${post.data.featuredImage.r2Path}`}
+                        alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
+                        width={300}
+                        height={128}
+                        class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                      />
+                    ) : (
+                      <img 
+                        src={post.data.featuredImage.url} 
+                        alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} 
+                        class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                      />
+                    )}
+                  </a>
+                )}
+                <h3 class="text-lg font-semibold">
+                  <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
+                     class="hover:text-teal-600 transition-colors duration-200">
+                    <span class="text-soft-charcoal">
+                      {post.data.title}
+                    </span>
+                  </a>
+                </h3>
+                {post.data.description && (
+                  <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                    {post.data.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
           <EmptyState 
             message="No recent posts available"
