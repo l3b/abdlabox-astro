@@ -1,14 +1,13 @@
 
 ---
 // src/components/Header.astro - Styled Version 1
-const siteTitle = "Abdla";
-
 import { getCollection } from 'astro:content';
 import { getBlogTranslation } from '../utils/i18n';
 import { Icon } from 'astro-icon/components';
 
 const currentPath = Astro.url.pathname;
 const currentLocale = Astro.currentLocale || (currentPath.startsWith('/ar') ? 'ar' : 'en');
+const siteTitle = currentLocale === 'ar' ? 'عبدالله' : 'Abdla';
 let alternateLocale = currentLocale === 'en' ? 'ar' : 'en';
 let alternateLocaleName = currentLocale === 'en' ? 'العربية' : 'English';
 let alternatePath = '';
