@@ -18,6 +18,7 @@
   - Bluesky social posts
   - Goodreads reading list
   - Trakt.tv watching history
+  - Strava fitness activities
 - **🎨 Electric Dunes Theme**: Custom visual identity inspired by Saudi desert landscapes
 - **📱 Responsive Design**: Optimized for all devices with Tailwind CSS
 - **🚀 Performance**: Static site generation with Astro for lightning-fast loads
@@ -38,7 +39,7 @@
 - **Icons**: Astro Icon with MDI and Simple Icons
 - **Languages**: TypeScript, JavaScript
 - **Content**: Markdown with frontmatter
-- **APIs**: Integration with GitHub, Bluesky (AT Protocol), Goodreads RSS, Trakt.tv
+- **APIs**: Integration with GitHub, Bluesky (AT Protocol), Goodreads RSS, Trakt.tv, TMDB, Strava
 
 ## 📁 Project Structure
 
@@ -52,7 +53,10 @@ abdlabox-astro/
 │   ├── assets/            # Source assets
 │   ├── components/        # Reusable Astro components
 │   │   ├── Header.astro
+│   │   ├── Footer.astro
 │   │   ├── OptimizedImage.astro
+│   │   ├── EmptyState.astro
+│   │   ├── StravaStats.astro
 │   │   └── Welcome.astro
 │   ├── content/           # Blog content
 │   │   ├── blog/
@@ -74,6 +78,7 @@ abdlabox-astro/
 │   └── utils/             # Utility functions
 │       ├── i18n.ts
 │       ├── readingTime.ts
+│       ├── stravaApi.ts
 │       └── structuredData.ts
 ├── astro.config.mjs       # Astro configuration
 ├── tailwind.config.mjs    # Tailwind configuration
@@ -90,7 +95,7 @@ abdlabox-astro/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/abdlabox-astro.git
+git clone https://github.com/l3b/abdlabox-astro.git
 cd abdlabox-astro
 ```
 
@@ -177,11 +182,22 @@ Main configuration in `astro.config.mjs`:
 - Integrations
 
 ### Environment Variables
-Create a `.env` file for API keys:
+Copy `.env.example` to `.env` and fill in your API keys:
 ```env
-GITHUB_TOKEN=your_token_here
-BLUESKY_HANDLE=your.handle.bsky.social
+# Bluesky API
+BLUESKY_IDENTIFIER=your.handle.bsky.social
 BLUESKY_APP_PASSWORD=your_app_password
+
+# Trakt API (for watch history)
+TRAKT_API_KEY=your_trakt_api_key
+
+# TMDB API (for movie/TV posters)
+TMDB_API_KEY=your_tmdb_api_key
+
+# Strava API (for fitness tracking)
+STRAVA_CLIENT_ID=your_client_id
+STRAVA_CLIENT_SECRET=your_client_secret
+STRAVA_REFRESH_TOKEN=your_refresh_token
 ```
 
 ## 📚 Resources
@@ -205,9 +221,9 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Abdullah Al-Thani (Abdla)**
 - Website: [abdla.box](https://abdla.box)
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Bluesky: [@abdla.bsky.social](https://bsky.app/profile/abdla.bsky.social)
+- GitHub: [@l3b](https://github.com/l3b)
+- Bluesky: [@abdla.box](https://bsky.app/profile/abdla.box)
 
 ---
 
-Built with ❤️ in Dammam, Saudi Arabia
+Built with ❤️ and Astro 🚀
