@@ -111,12 +111,12 @@
   line-height: 1.5;
 }
 
-/* Navigation Links - Simple, clean font */
+/* Navigation Links - Clean font for better readability */
 [dir="rtl"] header,
 [dir="rtl"] nav,
 [lang="ar"] header,
 [lang="ar"] nav {
-  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
   font-weight: 500;
 }
 
