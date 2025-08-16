@@ -72,7 +72,7 @@
   
   /* Override electric-blue text to lavender in dark mode */
   .dark .text-electric-blue {
-    @apply text-lavender;
+    color: #A78BFA !important;
   }
 
   .dark .text-gray-600 {
@@ -115,7 +115,7 @@
   }
   
   .dark .prose a {
-    @apply text-electric-blue hover:text-teal;
+    @apply text-lavender hover:text-teal;
   }
 
   /* Footer dark mode - Better contrast */
