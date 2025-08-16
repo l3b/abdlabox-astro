@@ -71,8 +71,19 @@
   }
 }
 
-[dir="rtl"] body {
-  font-family: 'Tajawal', sans-serif;
+/* Arabic font application */
+[dir="rtl"] body,
+[lang="ar"] {
+  font-family: 'AlNaseeb', 'Tajawal', 'Noto Sans Arabic', sans-serif;
+  letter-spacing: 0;
+  word-spacing: 0.05em;
+}
+
+/* English font application */
+[dir="ltr"] body,
+[lang="en"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 /* Add this rule to force light text in code blocks */
