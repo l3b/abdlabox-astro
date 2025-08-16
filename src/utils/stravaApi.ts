@@ -4,6 +4,7 @@
 interface StravaActivity {
   id: number;
   name: string;
+  description?: string;
   distance: number;
   moving_time: number;
   start_date: string;
@@ -12,6 +13,14 @@ interface StravaActivity {
   max_speed: number;
   total_elevation_gain: number;
   private?: boolean;
+  photos?: {
+    primary?: {
+      urls?: {
+        '600'?: string;
+      };
+    };
+    count?: number;
+  };
 }
 
 interface StravaStats {
@@ -53,10 +62,12 @@ interface RunningStats {
   recentActivities: Array<{
     id: number;
     name: string;
+    description?: string;
     distance: number;
     time: string;
     date: string;
     pace: string;
+    photoUrl?: string;
   }>;
 }
 
@@ -85,27 +96,41 @@ const calculatePace = (seconds: number, meters: number): string => {
   return `${paceMinutes}:${paceSeconds.toString().padStart(2, '0')}`;
 };
 
-// Format date relative to today
-const formatRelativeDate = (dateString: string): string => {
+// Format date relative to today (bilingual support)
+const formatRelativeDate = (dateString: string, locale: 'ar' | 'en' = 'ar'): string => {
   const date = new Date(dateString);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
   
-  if (date.toDateString() === today.toDateString()) {
-    return 'اليوم';
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return 'أمس';
-  } else {
-    const days = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    if (days < 7) {
-      return `منذ ${days} أيام`;
+  if (locale === 'en') {
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      const days = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (days < 7) {
+        return `${days} days ago`;
+      }
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
-    return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+  } else {
+    if (date.toDateString() === today.toDateString()) {
+      return 'اليوم';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'أمس';
+    } else {
+      const days = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+      if (days < 7) {
+        return `منذ ${days} أيام`;
+      }
+      return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
+    }
   }
 };
 
-export async function fetchStravaStats(): Promise<RunningStats | null> {
+export async function fetchStravaStats(locale: 'ar' | 'en' = 'ar'): Promise<RunningStats | null> {
   try {
     // Check if credentials are available
     const clientId = import.meta.env.STRAVA_CLIENT_ID;
@@ -135,26 +160,29 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
         recentActivities: [
           {
             id: 12345678,
-            name: 'جري صباحي',
+            name: 'Morning Run',
+            description: 'Easy morning run with sunrise',
             distance: 10.2,
             time: '52 min',
-            date: 'أمس',
+            date: locale === 'en' ? 'Yesterday' : 'أمس',
             pace: '5:06'
           },
           {
             id: 12345679,
-            name: 'جري مسائي سريع',
+            name: 'Evening Speed Run',
+            description: 'Speed training on the track',
             distance: 5.5,
             time: '25 min',
-            date: 'منذ 3 أيام',
+            date: locale === 'en' ? '3 days ago' : 'منذ 3 أيام',
             pace: '4:32'
           },
           {
             id: 12345680,
-            name: 'جري طويل نهاية الأسبوع',
+            name: 'Weekend Long Run',
+            description: 'Long run preparing for next race',
             distance: 15.0,
             time: '1h 22m',
-            date: 'منذ 5 أيام',
+            date: locale === 'en' ? '5 days ago' : 'منذ 5 أيام',
             pace: '5:28'
           }
         ]
@@ -230,11 +258,39 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
       if (activitiesResponse.ok) {
         const activities: StravaActivity[] = await activitiesResponse.json();
         // Filter only public running activities
-        runningActivities = activities.filter(a => 
+        const publicActivities = activities.filter(a => 
           (a.type === 'Run' || a.type === 'VirtualRun' || a.type === 'Walk') &&
           !a.private // Only include public activities
         ).slice(0, 3);
-        console.log(`Found ${runningActivities.length} public running activities`);
+        
+        // Fetch detailed data for each activity to get descriptions and photos
+        runningActivities = [];
+        for (const activity of publicActivities) {
+          try {
+            const detailResponse = await fetch(
+              `https://www.strava.com/api/v3/activities/${activity.id}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`
+                }
+              }
+            );
+            
+            if (detailResponse.ok) {
+              const detailedActivity = await detailResponse.json();
+              runningActivities.push(detailedActivity);
+            } else {
+              // If detail fetch fails, use the basic activity
+              runningActivities.push(activity);
+            }
+          } catch (detailError) {
+            console.warn(`Could not fetch details for activity ${activity.id}:`, detailError);
+            // Use basic activity if detail fetch fails
+            runningActivities.push(activity);
+          }
+        }
+        
+        console.log(`Found ${runningActivities.length} public running activities with details`);
       } else {
         const errorText = await activitiesResponse.text();
         console.warn(`Could not fetch Strava activities (${activitiesResponse.status}): ${errorText}`);
@@ -268,10 +324,12 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
       recentActivities: runningActivities.map(activity => ({
         id: activity.id,
         name: activity.name,
+        description: activity.description,
         distance: metersToKm(activity.distance),
         time: secondsToTime(activity.moving_time),
-        date: formatRelativeDate(activity.start_date),
-        pace: calculatePace(activity.moving_time, activity.distance)
+        date: formatRelativeDate(activity.start_date, locale),
+        pace: calculatePace(activity.moving_time, activity.distance),
+        photoUrl: activity.photos?.primary?.urls?.['600']
       }))
     };
     
