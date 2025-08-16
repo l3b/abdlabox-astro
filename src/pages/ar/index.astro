@@ -6,6 +6,8 @@ import { Icon } from 'astro-icon/components';
 import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import StravaStats from '../../components/StravaStats.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Footer from '../../components/Footer.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { arSA } from 'date-fns/locale'; // For Arabic relative time
 
@@ -203,16 +205,16 @@ try {
     <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-soft-charcoal">{pageTitle}</h1>
     <p class="text-lg text-gray-600 text-center mb-12 md:mb-16">{pageSubtitle}</p>
 
-    {/* Grid for Signal Sections */}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+    {/* Dynamic Grid Layout with Different Card Sizes */}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 auto-rows-min">
 
-      {/* Section 1: Latest Blog Post */}
-      {latestArPosts.length > 0 ? (
-        <section class="card">
-          <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-            <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
+      {/* Section 1: Latest Blog Post - Featured Large Card */}
+      <section class="card card-featured card-accent-blog md:col-span-2 lg:col-span-8 lg:row-span-2">
+          <h2 class="text-2xl font-bold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+            <Icon name="mdi:post-outline" class="w-7 h-7 flex-shrink-0"/>
             أحدث ما في المدونة
           </h2>
+          {latestArPosts.length > 0 ? (
           <div class="flex-grow space-y-4">
             {latestArPosts.map(post => (
               <div class="space-y-2">
@@ -251,76 +253,35 @@ try {
               </div>
             ))}
           </div>
-          <a href="/ar/blog" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-4 flex-shrink-0">
+          ) : (
+            <EmptyState 
+              message="لا توجد مقالات حديثة حالياً"
+              icon="mdi:post-outline"
+              locale="ar"
+            />
+          )}
+          <a href="/ar/blog" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-6 flex-shrink-0">
             كل المقالات <span aria-hidden="true">&larr;</span>
           </a>
         </section>
-      ) : (
-         <section class="p-6 bg-white rounded-lg border border-gray-200 shadow-sm text-gray-400 italic">لا توجد مقالات.</section>
-      )}
 
-      {/* Section 2: Goodreads Currently Reading */}
-       <section class="card">
+      {/* Section 2: Strava Activity - Prominent Position */}
+      <section class="card card-accent-fitness md:col-span-1 lg:col-span-4 lg:row-span-2">
          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
-           أقرأ الآن
+           <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
+           آخر نشاط رياضي
          </h2>
-         <div class="flex-grow"> {/* Allow content to grow */}
-           {currentlyReadingBooks.length > 0 ? (
-              <div class="space-y-3">
-                {currentlyReadingBooks.map(book => (
-                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
-                     <p class="text-soft-charcoal text-lg font-semibold leading-snug">
-                        {book.title}
-                     </p>
-                  </a>
-                ))}
-              </div>
-           ) : ( <p class="italic text-gray-400">(لا يوجد كتب حاليًا أو تعذر جلب البيانات...)</p> )}
+         <div class="flex-grow">
+           <StravaStats />
          </div>
-         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start"> {/* Align link bottom-start */}
-            ملفي على Goodreads &larr;
-         </a>
        </section>
 
-      {/* Section 3: Trakt Recently Watched */}
-       <section class="card">
+      {/* Section 3: Bluesky Posts - Medium Card */}
+       <section class="card card-accent-social md:col-span-1 lg:col-span-6">
         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-            <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
-            شاهدت مؤخرًا
+            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
+            من Bluesky
         </h2>
-         {recentlyWatchedItems.length > 0 ? (
-            <div class="flex-grow">
-              <ul class="space-y-4">
-                {recentlyWatchedItems.map(item => (
-                  <li key={item.id}>
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
-                       <p class="text-soft-charcoal text-base font-medium leading-snug group-hover:text-teal-600">
-                          {item.type === 'movie' ? '🎬 ' : '📺 '}
-                          {item.title}
-                       </p>
-                    </a>
-                     {item.overview && (
-                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-2">
-                         {item.overview}
-                       </p>
-                     )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-         ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على سجل مشاهدة حديث أو تعذر جلب البيانات...)</p> )}
-           <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-              ملفي على Trakt &larr;
-           </a>
-       </section>
-
-       {/* Section 4: Bluesky Posts */}
-       <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
-           من Bluesky
-         </h2>
          {latestBlueskyPosts.length > 0 ? (
             <div class="flex-grow space-y-5">
               {latestBlueskyPosts.map(post => {
@@ -349,49 +310,117 @@ try {
                  )
               })}
             </div>
-         ) : ( <p class="italic text-gray-400 flex-grow">(لم يتم العثور على منشورات حديثة باللغة العربية أو تعذر جلب البيانات...)</p> )}
+         ) : (
+            <EmptyState 
+              message="لم يتم العثور على منشورات حديثة باللغة العربية"
+              icon="simple-icons:bluesky"
+              locale="ar"
+            />
+         )}
        </section>
 
-     {/* Section 5: Strava Activity - Using API Integration */}
-     <section class="card">
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
-            آخر نشاط رياضي
+       {/* Section 4: GitHub Latest Events - Compact Card */}
+       <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
+           من GitHub
          </h2>
          <div class="flex-grow">
-           <StravaStats />
+           {latestGitHubEvents.length > 0 ? (
+              <ul class="space-y-2">
+                {latestGitHubEvents.map(event => (
+                  <li key={event.id}>
+                    <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
+                       <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
+                          {event.display}
+                       </p>
+                    </a>
+                    <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
+                  </li>
+                ))}
+              </ul>
+           ) : (
+              <EmptyState 
+                message="لا يوجد نشاط حديث"
+                icon="simple-icons:github"
+                locale="ar"
+              />
+           )}
          </div>
+         <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            ملفي على GitHub &larr;
+         </a>
        </section>
 
-      {/* Section 6: GitHub Latest Events - UPDATED DISPLAY */}
-      <section class="card">
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
-           من GitHub
-        </h2>
-        <div class="flex-grow">
-          {latestGitHubEvents.length > 0 ? (
-             <ul class="space-y-3"> {/* Use list for multiple events */}
-               {latestGitHubEvents.map(event => (
-                 <li key={event.id}>
-                   <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
-                      <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600"> {/* Smaller text size */}
-                         {event.display}
-                      </p>
-                   </a>
-                   <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
-                 </li>
-               ))}
-             </ul>
-          ) : (
-             <p class="italic text-gray-400">(لا يوجد نشاط حديث أو تعذر جلب البيانات...)</p>
-          )}
-        </div>
-        <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-           ملفي على GitHub &larr;
-        </a>
-      </section>
+       {/* Section 5: Goodreads Currently Reading - Compact Card */}
+       <section class="card card-compact card-accent-reading md:col-span-1 lg:col-span-4">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
+           أقرأ الآن
+         </h2>
+         <div class="flex-grow">
+           {currentlyReadingBooks.length > 0 ? (
+              <div class="space-y-2">
+                {currentlyReadingBooks.map(book => (
+                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
+                     <p class="text-soft-charcoal text-sm font-medium leading-snug">
+                        {book.title}
+                     </p>
+                  </a>
+                ))}
+              </div>
+           ) : (
+              <EmptyState 
+                message="لا يوجد كتب حاليًا"
+                icon="simple-icons:goodreads"
+                locale="ar"
+              />
+           )}
+         </div>
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            ملفي على Goodreads &larr;
+         </a>
+       </section>
+
+       {/* Section 6: Trakt Recently Watched - Compact Card */}
+       <section class="card card-compact md:col-span-1 lg:col-span-4">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
+           شاهدت مؤخرًا
+         </h2>
+         {recentlyWatchedItems.length > 0 ? (
+            <div class="flex-grow">
+              <ul class="space-y-2">
+                {recentlyWatchedItems.map(item => (
+                  <li key={item.id}>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
+                       <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600">
+                          {item.type === 'movie' ? '🎬 ' : '📺 '}
+                          {item.title}
+                       </p>
+                    </a>
+                     {item.overview && (
+                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-1">
+                         {item.overview}
+                       </p>
+                     )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+         ) : (
+            <EmptyState 
+              message="لم يتم العثور على سجل مشاهدة حديث"
+              icon="simple-icons:trakt"
+              locale="ar"
+            />
+         )}
+         <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            ملفي على Trakt &larr;
+         </a>
+       </section>
 
     </div> {/* End Grid */}
   </div> {/* End Container */}
+  <Footer />
 </BaseLayout>

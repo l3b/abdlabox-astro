@@ -1,0 +1,43 @@
+---
+interface Props {
+  message: string;
+  icon?: string;
+  locale?: 'ar' | 'en';
+}
+
+const { message, icon = 'mdi:alert-circle-outline', locale = 'ar' } = Astro.props;
+import { Icon } from 'astro-icon/components';
+---
+
+<div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+  <div class="w-16 h-16 mb-4 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center">
+    <Icon name={icon} class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+  </div>
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    {message}
+  </p>
+  <div class="mt-2 flex gap-2">
+    <span class="inline-block w-8 h-1 bg-gray-200 dark:bg-gray-700/50 rounded-full animate-pulse"></span>
+    <span class="inline-block w-8 h-1 bg-gray-200 dark:bg-gray-700/50 rounded-full animate-pulse delay-75"></span>
+    <span class="inline-block w-8 h-1 bg-gray-200 dark:bg-gray-700/50 rounded-full animate-pulse delay-150"></span>
+  </div>
+</div>
+
+<style>
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+  
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+</style>

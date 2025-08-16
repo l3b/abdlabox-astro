@@ -6,6 +6,8 @@ import { Icon } from 'astro-icon/components';
 import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import StravaStats from '../../components/StravaStats.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import Footer from '../../components/Footer.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { enUS } from 'date-fns/locale'; // For English relative time
 
@@ -13,15 +15,15 @@ const pageTitle = "The Base"; // English Title
 const pageSubtitle = "A live snapshot from my digital world"; // English Subtitle
 const pageDescription = "Abdullah's digital interface: Exploring ideas and experiences across various signals."; // English Description
 
-// --- Fetch Latest ENGLISH Blog Post ---
-let latestEnPost = null; // Renamed variable
+// --- Fetch Latest ENGLISH Blog Posts (up to 3) ---
+let latestEnPosts = [];
 try {
-    latestEnPost = (await getCollection('blog', ({ data, slug }) => {
+    latestEnPosts = (await getCollection('blog', ({ data, slug }) => {
         // Filter for English posts now
         return slug.startsWith('en/') && data.isDraft !== true;
-    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())[0];
-    console.log("Found Latest English Blog Post:", latestEnPost?.data.title);
-} catch (e) { console.error("Error fetching English blog post:", e); }
+    })).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3);
+    console.log("Found Latest English Blog Post:", latestEnPosts[0]?.data.title);
+} catch (e) { console.error("Error fetching English blog posts:", e); }
 
 
 // --- Fetch Goodreads Currently Reading (Logic is language-agnostic) ---
@@ -199,74 +201,64 @@ try {
           </h2>
         </a>
         <div class="flex-grow space-y-4">
-          {latestEnPost ? (
-            <div>
-              {latestEnPost.data.featuredImage && (
-                <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="block mb-4">
-                  {latestEnPost.data.featuredImage.r2Path ? (
+          {latestEnPosts.map(post => (
+            <div class="space-y-2">
+              {post.data.featuredImage && (
+                <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`} class="block mb-4">
+                  {post.data.featuredImage.r2Path ? (
                     <OptimizedImage 
-                      src={`r2://${latestEnPost.data.featuredImage.r2Path}`}
-                      alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`}
+                      src={`r2://${post.data.featuredImage.r2Path}`}
+                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
                       width={300}
                       height={128}
                       class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
                     />
                   ) : (
                     <img 
-                      src={latestEnPost.data.featuredImage.url} 
-                      alt={latestEnPost.data.featuredImage.alt || `Featured image for ${latestEnPost.data.title}`} 
+                      src={post.data.featuredImage.url} 
+                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} 
                       class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
                     />
                   )}
                 </a>
               )}
-              <h3 class="text-lg font-semibold mt-1">
-                <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`}
+              <h3 class="text-lg font-semibold">
+                <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
                    class="hover:text-teal-600 transition-colors duration-200">
                   <span class="text-soft-charcoal">
-                    {latestEnPost.data.title}
+                    {post.data.title}
                   </span>
                 </a>
               </h3>
-              {latestEnPost.data.description && (
-                <p class="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                  {latestEnPost.data.description}
+              {post.data.description && (
+                <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                  {post.data.description}
                 </p>
               )}
-              <a href={`/en/blog/${latestEnPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-2 flex-shrink-0">
-                Read more <span aria-hidden="true">&rarr;</span>
-              </a>
             </div>
-          ) : (
-            <p class="italic text-gray-400">No English blog posts found.</p>
-          )}
+          ))}
         </div>
+        ) : (
+          <EmptyState 
+            message="No recent posts available"
+            icon="mdi:post-outline"
+            locale="en"
+          />
+        )}
+        <a href="/en/blog" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-6 flex-shrink-0">
+          All Posts <span aria-hidden="true">&rarr;</span>
+        </a>
       </section>
 
       {/* Section 2: Goodreads Currently Reading */}
        <section class="card">
-         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-electric-blue">
-           <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-             <Icon name="simple-icons:goodreads" class="w-6 h-6 flex-shrink-0"/>
-             Currently Reading
-           </h2>
-         </a>
+         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
+           Latest Running Activities
+         </h2>
          <div class="flex-grow">
-           {currentlyReadingBooks.length > 0 ? (
-              <div class="space-y-3">
-                {currentlyReadingBooks.map(book => (
-                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
-                     <p class="text-soft-charcoal text-lg font-semibold leading-snug">
-                        {book.title}
-                     </p>
-                  </a>
-                ))}
-              </div>
-           ) : ( <p class="italic text-gray-400">(No books currently reading or failed to fetch...)</p> )}
+           <StravaStats locale="en" />
          </div>
-         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-            My Goodreads Profile &rarr;
-         </a>
        </section>
 
       {/* Section 3: Trakt Recently Watched */}
@@ -303,70 +295,109 @@ try {
            </a>
        </section>
 
-       {/* Section 4: Bluesky Posts */}
-       <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
-           From Bluesky {/* English Heading */}
-         </h2>
-         {latestBlueskyPosts.length > 0 ? (
-            <div class="flex-grow space-y-5">
-              {latestBlueskyPosts.map(post => {
-                 const postUrl = `https://bsky.app/profile/${BSKY_IDENTIFIER}/post/${post.uri?.split('/').pop() ?? ''}`;
-                 return (
-                    <div class="pb-5 border-b border-gray-100 last:border-b-0 last:pb-0" key={post.cid}>
-                      {post.embedImageUrl && ( <a href={post.embedLinkUrl || postUrl} /* ... */ > <img src={post.embedImageUrl} /* ... */ /> </a> )}
-                      {post.text && ( <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">{post.text}</p> )}
-                      {!post.text && post.embedLinkTitle && post.embedLinkUrl && ( <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4"><em class="text-gray-500">[Shared Link]:</em> {post.embedLinkTitle}</p> )}
-                      <a href={postUrl} target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-xs">
-                         View on Bluesky <span aria-hidden="true">&rarr;</span> {/* English Link Text */}
-                      </a>
-                    </div>
-                 )
-              })}
-            </div>
-         ) : ( <p class="italic text-gray-400 flex-grow">(No recent English posts found or failed to fetch...)</p> )} {/* English Fallback */}
-       </section>
-
-       {/* Section 5: Strava Activity - Using API Integration */}
-       <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
-           Latest Activity {/* English Heading */}
+       {/* Section 4: GitHub Latest Events - Compact Card */}
+       <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
+           From GitHub
          </h2>
          <div class="flex-grow">
-           <StravaStats />
+           {latestGitHubEvents.length > 0 ? (
+              <ul class="space-y-2">
+                {latestGitHubEvents.map(event => (
+                  <li key={event.id}>
+                    <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
+                       <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
+                          {event.display}
+                       </p>
+                    </a>
+                    <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
+                  </li>
+                ))}
+              </ul>
+           ) : (
+              <EmptyState 
+                message="No recent activity"
+                icon="simple-icons:github"
+                locale="en"
+              />
+           )}
          </div>
+         <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            My GitHub Profile &rarr;
+         </a>
        </section>
 
-      {/* Section 6: GitHub Latest Events (Display logic is language-agnostic, but time uses locale) */}
-      <section class="card">
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:github" class="w-6 h-6 flex-shrink-0"/>
-           From GitHub {/* English Heading */}
-        </h2>
-        <div class="flex-grow">
-          {latestGitHubEvents.length > 0 ? (
-             <ul class="space-y-3">
-               {latestGitHubEvents.map(event => (
-                 <li key={event.id}>
-                   <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
-                      <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
-                         {event.display} {/* Display string translated in frontmatter */}
-                      </p>
-                   </a>
-                   <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p> {/* timeAgo formatted with enUS */}
-                 </li>
-               ))}
-             </ul>
-          ) : ( <p class="italic text-gray-400">(No recent public activity found or failed to fetch...)</p> )} {/* English Fallback */}
-        </div>
-        <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-           My GitHub Profile &rarr; {/* English Link Text */}
-        </a>
-      </section>
+       {/* Section 5: Goodreads Currently Reading - Compact Card */}
+       <section class="card card-compact card-accent-reading md:col-span-1 lg:col-span-4">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
+           Currently Reading
+         </h2>
+         <div class="flex-grow">
+           {currentlyReadingBooks.length > 0 ? (
+              <div class="space-y-2">
+                {currentlyReadingBooks.map(book => (
+                  <a href={book.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block">
+                     <p class="text-soft-charcoal text-sm font-medium leading-snug">
+                        {book.title}
+                     </p>
+                  </a>
+                ))}
+              </div>
+           ) : (
+              <EmptyState 
+                message="No books currently"
+                icon="simple-icons:goodreads"
+                locale="en"
+              />
+           )}
+         </div>
+         <a href={GOODREADS_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            My Goodreads Profile &rarr;
+         </a>
+       </section>
+
+       {/* Section 6: Trakt Recently Watched - Compact Card */}
+       <section class="card card-compact md:col-span-1 lg:col-span-4">
+         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
+           <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
+           Recently Watched
+         </h2>
+         {recentlyWatchedItems.length > 0 ? (
+            <div class="flex-grow">
+              <ul class="space-y-2">
+                {recentlyWatchedItems.map(item => (
+                  <li key={item.id}>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
+                       <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600">
+                          {item.type === 'movie' ? '🎬 ' : '📺 '}
+                          {item.title}
+                       </p>
+                    </a>
+                     {item.overview && (
+                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-1">
+                         {item.overview}
+                       </p>
+                     )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+         ) : (
+            <EmptyState 
+              message="No recent watched history"
+              icon="simple-icons:trakt"
+              locale="en"
+            />
+         )}
+         <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            My Trakt Profile &rarr;
+         </a>
+       </section>
 
 
     </div> {/* End Grid */}
   </div> {/* End Container */}
+  <Footer />
 </BaseLayout>
