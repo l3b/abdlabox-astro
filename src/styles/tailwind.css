@@ -81,35 +81,64 @@
   line-height: 1.8;
 }
 
-/* Arabic Headings - Using Year of Camel for display */
+/* Main Page Titles Only - Using Year of Camel */
 [dir="rtl"] h1,
-[dir="rtl"] h2,
-[dir="rtl"] h3,
-[lang="ar"] h1,
-[lang="ar"] h2,
-[lang="ar"] h3 {
+[lang="ar"] h1 {
   font-family: 'Year of Camel', 'AlNaseeb', 'Tajawal', sans-serif;
   font-weight: 700;
+  font-size: 3.5rem;
+  line-height: 1.2;
   letter-spacing: 0.02em;
 }
 
-/* Specific heading sizes for Arabic */
-[dir="rtl"] h1,
-[lang="ar"] h1 {
-  font-size: 3.5rem;
-  line-height: 1.2;
+/* Blog Post Titles (h2 in listings, h1 in post pages) - Keep Year of Camel but smaller */
+[dir="rtl"] article h1,
+[dir="rtl"] article h2,
+[lang="ar"] article h1,
+[lang="ar"] article h2 {
+  font-family: 'Year of Camel', 'AlNaseeb', 'Tajawal', sans-serif;
+  font-weight: 600;
+}
+
+/* Card Section Titles (homepage boxes) - Use cleaner font */
+[dir="rtl"] .card h2,
+[dir="rtl"] .card h3,
+[lang="ar"] .card h2,
+[lang="ar"] .card h3 {
+  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', 'Tajawal', sans-serif !important;
+  font-weight: 600;
+  font-size: 1.25rem; /* Smaller size for card titles */
+  line-height: 1.5;
+}
+
+/* Navigation Links - Simple, clean font */
+[dir="rtl"] header,
+[dir="rtl"] nav,
+[lang="ar"] header,
+[lang="ar"] nav {
+  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+  font-weight: 500;
+}
+
+/* General h2 and h3 (non-card) - Medium display font */
+[dir="rtl"] h2:not(.card h2),
+[dir="rtl"] h3:not(.card h3),
+[lang="ar"] h2:not(.card h2),
+[lang="ar"] h3:not(.card h3) {
+  font-family: 'Year of Camel', 'Vazirmatn', 'Tajawal', sans-serif;
+  font-weight: 600;
 }
 
 [dir="rtl"] h2,
 [lang="ar"] h2 {
-  font-size: 2.5rem;
-  line-height: 1.3;
+  font-size: 2rem;
+  line-height: 1.4;
 }
 
 [dir="rtl"] h3,
 [lang="ar"] h3 {
-  font-size: 2rem;
-  line-height: 1.4;
+  font-size: 1.5rem;
+  line-height: 1.5;
 }
 
 /* English font application */
