@@ -1,6 +1,5 @@
 ---
 const currentLocale = Astro.currentLocale || 'ar';
-const currentYear = new Date().getFullYear();
 
 const footerLinks = {
   social: [
@@ -8,15 +7,18 @@ const footerLinks = {
     { name: 'Bluesky', url: 'https://bsky.app/profile/abdla.box', icon: 'simple-icons:bluesky' },
     { name: 'Strava', url: 'https://www.strava.com/athletes/7746516', icon: 'simple-icons:strava' },
     { name: 'Goodreads', url: 'https://www.goodreads.com/user/show/4693662-abdullah-althani', icon: 'simple-icons:goodreads' },
+    { name: 'Trakt', url: 'https://trakt.tv/users/althani', icon: 'simple-icons:trakt' },
   ],
-  quick: currentLocale === 'ar' ? [
+  nav: currentLocale === 'ar' ? [
+    { name: 'الواجهة', url: '/ar/' },
     { name: 'المدونة', url: '/ar/blog' },
-    { name: 'عني', url: '/ar/about' },
-    { name: 'تواصل', url: '/ar/contact' },
+    { name: 'من وراء الكثبان؟', url: '/ar/about' },
+    { name: 'أرسل إشارة', url: '/ar/contact' },
   ] : [
+    { name: 'Base', url: '/en/' },
     { name: 'Blog', url: '/en/blog' },
-    { name: 'About', url: '/en/about' },
-    { name: 'Contact', url: '/en/contact' },
+    { name: 'Behind the Dunes?', url: '/en/about' },
+    { name: 'Send a Signal', url: '/en/contact' },
   ]
 };
 
@@ -24,106 +26,52 @@ import { Icon } from 'astro-icon/components';
 ---
 
 <footer class="mt-20 border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-  <div class="container mx-auto px-4 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  <div class="container mx-auto px-4 py-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
       
-      {/* Brand Section */}
-      <div class="text-center md:text-start">
-        <h3 class="text-2xl font-bold mb-3 font-logo bg-gradient-to-r from-electric-blue to-teal bg-clip-text text-transparent">
-          Abdla
-        </h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {currentLocale === 'ar' ? 
-            'حيث يلتقي العلم بالفضول' : 
-            'Where knowledge meets curiosity'}
-        </p>
-        <div class="flex gap-3 justify-center md:justify-start">
-          {footerLinks.social.map(link => (
-            <a 
-              href={link.url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800/70 flex items-center justify-center hover:bg-electric-blue hover:text-white dark:hover:bg-electric-blue dark:hover:text-gray-900 transition-all duration-200"
-              title={link.name}
-            >
-              <Icon name={link.icon} class="w-5 h-5" />
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Links */}
-      <div class="text-center">
-        <h4 class="font-semibold mb-4 text-gray-700 dark:text-gray-200">
-          {currentLocale === 'ar' ? 'روابط سريعة' : 'Quick Links'}
-        </h4>
-        <ul class="space-y-2">
-          {footerLinks.quick.map(link => (
-            <li>
-              <a 
-                href={link.url}
-                class="text-gray-600 dark:text-gray-300 hover:text-electric-blue dark:hover:text-electric-blue transition-colors"
-              >
-                {link.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Stats / Info */}
-      <div class="text-center md:text-end">
-        <h4 class="font-semibold mb-4 text-gray-700 dark:text-gray-200">
-          {currentLocale === 'ar' ? 'معلومات' : 'Info'}
-        </h4>
-        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <p>
-            {currentLocale === 'ar' ? 
-              `آخر تحديث: ${new Date().toLocaleDateString('ar-SA')}` : 
-              `Last updated: ${new Date().toLocaleDateString('en-US')}`}
-          </p>
-          <p>
-            {currentLocale === 'ar' ? 'الدمام، السعودية' : 'Dammam, Saudi Arabia'}
-          </p>
+      {/* Left: Navigation Links */}
+      <nav class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        {footerLinks.nav.map(link => (
           <a 
-            href="https://github.com/l3b/abdlabox-astro" 
-            class="inline-flex items-center gap-1 hover:text-electric-blue transition-colors"
-            target="_blank"
+            href={link.url}
+            class="text-gray-600 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue transition-colors"
+          >
+            {link.name}
+          </a>
+        ))}
+      </nav>
+
+      {/* Center: Social Icons */}
+      <div class="flex items-center gap-3">
+        {footerLinks.social.map(link => (
+          <a 
+            href={link.url} 
+            target="_blank" 
             rel="noopener noreferrer"
+            class="text-gray-500 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue transition-colors"
+            title={link.name}
           >
-            <Icon name="mdi:source-branch" class="w-4 h-4" />
-            {currentLocale === 'ar' ? 'عرض المصدر' : 'View Source'}
+            <Icon name={link.icon} class="w-5 h-5" />
           </a>
-        </div>
+        ))}
       </div>
-    </div>
 
-    {/* Bottom Bar */}
-    <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-          <span>Built with</span>
-          <Icon name="simple-icons:astro" class="w-4 h-4 text-[#FF5D01]" />
-          <span>&</span>
-          <span class="text-red-500">♥</span>
-        </div>
+      {/* Right: Theme & Language */}
+      <div class="flex items-center gap-3">
+        <button 
+          id="theme-toggle-footer" 
+          class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
+          aria-label="Toggle theme"
+        >
+          <Icon name="mdi:theme-light-dark" class="w-5 h-5" />
+        </button>
         
-        <div class="flex items-center gap-4">
-          <button 
-            id="theme-toggle-footer" 
-            class="p-2 rounded-full bg-gray-100 dark:bg-gray-800/70 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Toggle theme"
-          >
-            <Icon name="mdi:theme-light-dark" class="w-5 h-5" />
-          </button>
-          
-          <a 
-            href={currentLocale === 'ar' ? '/en/' : '/ar/'}
-            class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800/70 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
-          >
-            {currentLocale === 'ar' ? 'English' : 'العربية'}
-          </a>
-        </div>
+        <a 
+          href={currentLocale === 'ar' ? '/en/' : '/ar/'}
+          class="px-3 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-600 dark:text-gray-400"
+        >
+          {currentLocale === 'ar' ? 'EN' : 'AR'}
+        </a>
       </div>
     </div>
   </div>
