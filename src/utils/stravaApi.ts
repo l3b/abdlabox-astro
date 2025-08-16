@@ -243,6 +243,48 @@ export async function fetchStravaStats(locale: 'ar' | 'en' = 'ar'): Promise<Runn
     
     const stats: StravaStats = await statsResponse.json();
     
+    // Fetch all activities for the year to calculate accurate YTD totals
+    let actualYtdDistance = 0;
+    let actualYtdRuns = 0;
+    
+    try {
+      const currentYear = new Date().getFullYear();
+      const yearStart = new Date(currentYear, 0, 1).getTime() / 1000; // Unix timestamp
+      
+      // Fetch up to 200 activities (should cover the whole year)
+      const allActivitiesResponse = await fetch(
+        `https://www.strava.com/api/v3/athlete/activities?after=${yearStart}&per_page=200`,
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+      
+      if (allActivitiesResponse.ok) {
+        const allActivities: StravaActivity[] = await allActivitiesResponse.json();
+        
+        // Filter and sum all running/walking activities for the year
+        const runningActivities = allActivities.filter(a => 
+          a.type === 'Run' || 
+          a.type === 'VirtualRun' || 
+          a.type === 'TrailRun' || 
+          a.type === 'Walk' || 
+          a.type === 'Hike'
+        );
+        
+        actualYtdRuns = runningActivities.length;
+        actualYtdDistance = metersToKm(runningActivities.reduce((sum, activity) => sum + activity.distance, 0));
+        
+        console.log(`Calculated YTD totals: ${actualYtdRuns} activities, ${actualYtdDistance} km (includes Trail Runs & Walks)`);
+        console.log(`API ytd_run_totals: ${stats.ytd_run_totals.count} runs, ${metersToKm(stats.ytd_run_totals.distance)} km (Run type only)`);
+      }
+    } catch (error) {
+      console.warn('Could not calculate actual YTD totals, using API stats:', error);
+      actualYtdDistance = metersToKm(stats.ytd_run_totals.distance);
+      actualYtdRuns = stats.ytd_run_totals.count;
+    }
+    
     // Try to fetch recent activities, but don't fail if it doesn't work
     let runningActivities: StravaActivity[] = [];
     try {
@@ -257,9 +299,13 @@ export async function fetchStravaStats(locale: 'ar' | 'en' = 'ar'): Promise<Runn
       
       if (activitiesResponse.ok) {
         const activities: StravaActivity[] = await activitiesResponse.json();
-        // Filter only public running activities
+        // Filter only public running/walking activities - include all types
         const publicActivities = activities.filter(a => 
-          (a.type === 'Run' || a.type === 'VirtualRun' || a.type === 'Walk') &&
+          (a.type === 'Run' || 
+           a.type === 'VirtualRun' || 
+           a.type === 'TrailRun' || 
+           a.type === 'Walk' || 
+           a.type === 'Hike') &&
           !a.private // Only include public activities
         ).slice(0, 3);
         
@@ -300,9 +346,10 @@ export async function fetchStravaStats(locale: 'ar' | 'en' = 'ar'): Promise<Runn
       // Continue without activities
     }
     
-    // Calculate stats
+    // Calculate stats - use actualYtdDistance if we calculated it, otherwise fall back to API stats
     const weeklyDistance = metersToKm(stats.recent_run_totals.distance / 4); // Average of last 4 weeks
-    const yearDistance = metersToKm(stats.ytd_run_totals.distance);
+    const yearDistance = actualYtdDistance || metersToKm(stats.ytd_run_totals.distance);
+    const yearRuns = actualYtdRuns || stats.ytd_run_totals.count;
     const annualGoal = 750; // km - Annual target (updated)
     const yearProgress = Math.min(100, Math.round((yearDistance / annualGoal) * 100));
     
@@ -318,7 +365,7 @@ export async function fetchStravaStats(locale: 'ar' | 'en' = 'ar'): Promise<Runn
       },
       thisYear: {
         distance: yearDistance,
-        runs: stats.ytd_run_totals.count,
+        runs: yearRuns,
         progress: yearProgress
       },
       recentActivities: runningActivities.map(activity => ({
