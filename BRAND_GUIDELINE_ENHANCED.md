@@ -101,29 +101,31 @@ To bridge technology and culture through authentic storytelling, continuous lear
 
 ## **3. Typography System**
 
-### **3.1 Font Families**
+### **3.1 Font Families - FINAL IMPLEMENTATION**
 
+#### **Arabic Typography**
 ```css
-@font-face {
-  font-family: 'AlNaseeb';
-  src: url('/fonts/AlNaseeb-Regular.woff2') format('woff2'),
-       url('/fonts/AlNaseeb-Regular.woff') format('woff');
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'AlNaseeb';
-  src: url('/fonts/AlNaseeb-Bold.woff2') format('woff2'),
-       url('/fonts/AlNaseeb-Bold.woff') format('woff');
-  font-weight: 700;
-  font-display: swap;
-}
-
 :root {
-  --font-english: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-arabic: 'AlNaseeb', 'Noto Sans Arabic', 'Tajawal', sans-serif;
+  --font-arabic-display: 'Year of Camel', 'AlNaseeb', sans-serif;
+  --font-arabic-ui: 'Vazirmatn', 'IBM Plex Sans Arabic', sans-serif;
+  --font-arabic-body: 'IBM Plex Sans Arabic', 'Readex Pro', sans-serif;
+}
+```
+
+#### **English Typography**
+```css
+:root {
+  --font-english-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-english-ui: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  --font-english-body: 'Plus Jakarta Sans', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+}
+```
+
+#### **Brand Logo Font**
+```css
+:root {
+  --font-logo: 'Comfortaa', 'Quicksand', sans-serif;
 }
 ```
 
@@ -148,25 +150,42 @@ To bridge technology and culture through authentic storytelling, continuous lear
 - **Semibold:** 600 - Subheadings, navigation
 - **Bold:** 700 - Headlines, CTAs
 
-### **3.4 Language-Specific Rules**
+### **3.4 Typography Usage by Context**
+
+| Context | Arabic Font | English Font | Notes |
+|---------|------------|--------------|-------|
+| **Logo** | Comfortaa | Comfortaa | Consistent brand identity |
+| **H1 Titles** | Year of Camel | Space Grotesk | Distinctive, bold |
+| **H2-H3 Headings** | Year of Camel | Space Grotesk | Lighter weight than H1 |
+| **Card Titles** | Vazirmatn | Inter | Clean, smaller (1.25rem) |
+| **Navigation** | Vazirmatn | Inter | Medium weight |
+| **Body Text** | IBM Plex Sans Arabic | Plus Jakarta Sans | Optimized readability |
+| **Code** | JetBrains Mono | JetBrains Mono | Monospace |
+
+### **3.5 Font Implementation**
 
 ```css
-/* Arabic Typography */
-[lang="ar"] {
-  font-family: var(--font-arabic);
-  letter-spacing: 0;
-  word-spacing: 0.1em;
+/* Arabic Typography System */
+[dir="rtl"] body,
+[lang="ar"] body {
+  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', sans-serif;
+  font-weight: 400;
+  line-height: 1.8;
 }
 
-/* English Typography */
-[lang="en"] {
-  font-family: var(--font-english);
+/* English Typography System */
+[dir="ltr"] body,
+[lang="en"] body {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Logo - Universal */
+header .site-title {
+  font-family: 'Comfortaa', 'Quicksand', sans-serif;
+  font-weight: 700;
   letter-spacing: -0.02em;
-}
-
-/* Mixed Content */
-.mixed-content {
-  font-family: var(--font-english), var(--font-arabic);
 }
 ```
 
