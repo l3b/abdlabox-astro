@@ -141,24 +141,57 @@
   line-height: 1.5;
 }
 
-/* English font application */
+/* English font application - Body text */
 [dir="ltr"] body,
 [lang="en"] body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: -0.01em;
   line-height: 1.6;
 }
 
-/* English Headings */
+/* English Main Titles (H1) - Distinctive like Year of Camel */
 [dir="ltr"] h1,
-[dir="ltr"] h2,
-[dir="ltr"] h3,
-[lang="en"] h1,
-[lang="en"] h2,
-[lang="en"] h3 {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+[lang="en"] h1 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* English Blog/Article Headings */
+[dir="ltr"] article h1,
+[dir="ltr"] article h2,
+[lang="en"] article h1,
+[lang="en"] article h2 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+/* English Card Titles - Clean like Vazirmatn */
+[dir="ltr"] .card h2,
+[dir="ltr"] .card h3,
+[lang="en"] .card h2,
+[lang="en"] .card h3 {
+  font-family: 'Inter', 'IBM Plex Sans', sans-serif !important;
+  font-weight: 600;
+}
+
+/* English Navigation - Clean and modern */
+[dir="ltr"] header,
+[dir="ltr"] nav,
+[lang="en"] header,
+[lang="en"] nav {
+  font-family: 'Inter', 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+}
+
+/* English General Headings */
+[dir="ltr"] h2,
+[dir="ltr"] h3,
+[lang="en"] h2,
+[lang="en"] h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* Add this rule to force light text in code blocks */
