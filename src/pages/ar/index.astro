@@ -48,7 +48,7 @@ try {
 
 
 // --- Fetch Trakt Recently Watched ---
-interface WatchedItem { id: number; title: string; link: string; type: 'movie' | 'episode' | 'unknown'; overview: string | null; }
+interface WatchedItem { id: number; title: string; link: string; type: 'movie' | 'episode' | 'unknown'; overview: string | null; posterUrl?: string; tmdbId?: number; }
 let recentlyWatchedItems: WatchedItem[] = [];
 const TRAKT_USERNAME = 'althani';
 const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
@@ -66,13 +66,16 @@ if (TRAKT_API_KEY) { try {
        const historyData = await traktResponse.json();
        if (historyData && historyData.length > 0) {
           recentlyWatchedItems = historyData.map((item: any): WatchedItem | null => {
-             let title = '', link = '#', overview: string | null = null; const type = item.type || 'unknown'; const id = item.id;
+             let title = '', link = '#', overview: string | null = null, tmdbId: number | undefined = undefined; 
+             const type = item.type || 'unknown'; 
+             const id = item.id;
              try {
                if (type === 'movie' && item.movie?.ids?.slug) { 
                  // Check for Arabic title in translations or use English
                  title = item.movie.title || 'فيلم غير معروف'; 
                  link = `https://trakt.tv/movies/${item.movie.ids.slug}`; 
-                 overview = item.movie.overview; 
+                 overview = item.movie.overview;
+                 tmdbId = item.movie.ids?.tmdb; // Get TMDB ID for poster
                }
                else if (type === 'episode' && item.show?.ids?.slug && item.episode) { 
                  const showTitle = item.show.title || 'مسلسل غير معروف'; 
@@ -81,11 +84,34 @@ if (TRAKT_API_KEY) { try {
                  const epTitle = item.episode.title ? ` - ${item.episode.title}` : ''; 
                  title = `${showTitle} م${String(season).padStart(2, '0')}ح${String(number).padStart(2, '0')}${epTitle}`; 
                  link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`; 
-                 overview = item.episode.overview || item.show.overview; 
+                 overview = item.episode.overview || item.show.overview;
+                 tmdbId = item.show.ids?.tmdb; // Use show's TMDB ID for TV poster
                }
              } catch (e) { return null; }
-             if (title && id) { return { id, title, link, type, overview }; } return null;
+             if (title && id) { return { id, title, link, type, overview, tmdbId }; } return null;
           }).filter((item): item is WatchedItem => item !== null);
+          
+          // Fetch poster images from TMDB for items that have TMDB IDs
+          const TMDB_API_KEY = import.meta.env.TMDB_API_KEY;
+          if (TMDB_API_KEY) {
+            for (const item of recentlyWatchedItems) {
+              if (item.tmdbId) {
+                try {
+                  const mediaType = item.type === 'movie' ? 'movie' : 'tv';
+                  const tmdbUrl = `https://api.themoviedb.org/3/${mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}&language=ar`;
+                  const tmdbResponse = await fetch(tmdbUrl);
+                  if (tmdbResponse.ok) {
+                    const tmdbData = await tmdbResponse.json();
+                    if (tmdbData.poster_path) {
+                      item.posterUrl = `https://image.tmdb.org/t/p/w200${tmdbData.poster_path}`;
+                    }
+                  }
+                } catch (e) {
+                  console.warn(`Could not fetch TMDB poster for ${item.title}`);
+                }
+              }
+            }
+          }
        } // else { console.log("No items found in Trakt history."); }
     } else { console.error(`Trakt fetch failed: ${traktResponse.status}`); }
  } catch (error) { console.error("Error fetching Trakt:", error); }
@@ -342,38 +368,53 @@ try {
          )}
        </section>
 
-       {/* Section 4: GitHub Latest Events - Compact Card */}
-       <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
-         <a href="https://github.com/l3b" target="_blank" rel="noopener noreferrer" class="block">
+       {/* Section 4: Trakt Recently Watched - Moved from Section 6 */}
+       <section class="card card-compact card-accent-entertainment md:col-span-1 lg:col-span-6">
+         <a href="https://trakt.tv/users/althani" target="_blank" rel="noopener noreferrer" class="block">
            <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
-             <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
-             من GitHub
+             <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
+             شاهدت مؤخرًا
            </h2>
          </a>
-         <div class="flex-grow">
-           {latestGitHubEvents.length > 0 ? (
-              <ul class="space-y-2">
-                {latestGitHubEvents.map(event => (
-                  <li key={event.id}>
-                    <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
-                       <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
-                          {event.display}
+         {recentlyWatchedItems.length > 0 ? (
+            <div class="flex-grow">
+              <ul class="space-y-3">
+                {recentlyWatchedItems.map(item => (
+                  <li key={item.id} class="flex gap-3">
+                    {item.posterUrl && (
+                      <a href={item.link} target="_blank" rel="noopener noreferrer" class="flex-shrink-0">
+                        <img 
+                          src={item.posterUrl} 
+                          alt={item.title}
+                          class="w-12 h-18 object-cover rounded shadow-sm hover:shadow-md transition-shadow"
+                          loading="lazy"
+                        />
+                      </a>
+                    )}
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="flex-grow hover:text-teal-600 transition-colors duration-200 block group">
+                       <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600">
+                          {item.type === 'movie' ? '🎬 ' : '📺 '}
+                          {item.title}
                        </p>
+                       {item.overview && (
+                         <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-2">
+                           {item.overview}
+                         </p>
+                       )}
                     </a>
-                    <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
                   </li>
                 ))}
               </ul>
-           ) : (
-              <EmptyState 
-                message="لا يوجد نشاط حديث"
-                icon="simple-icons:github"
-                locale="ar"
-              />
-           )}
-         </div>
-         <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
-            ملفي على GitHub &larr;
+            </div>
+         ) : (
+            <EmptyState 
+              message="لم يتم العثور على سجل مشاهدة حديث"
+              icon="simple-icons:trakt"
+              locale="ar"
+            />
+         )}
+         <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            ملفي على Trakt &larr;
          </a>
        </section>
 
@@ -409,43 +450,38 @@ try {
          </a>
        </section>
 
-       {/* Section 6: Trakt Recently Watched - Compact Card */}
-       <section class="card card-compact card-accent-entertainment md:col-span-1 lg:col-span-4">
-         <a href="https://trakt.tv/users/althani" target="_blank" rel="noopener noreferrer" class="block">
+       {/* Section 6: GitHub Latest Events - Moved from Section 4 */}
+       <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-4">
+         <a href="https://github.com/l3b" target="_blank" rel="noopener noreferrer" class="block">
            <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
-             <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
-             شاهدت مؤخرًا
+             <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
+             من GitHub
            </h2>
          </a>
-         {recentlyWatchedItems.length > 0 ? (
-            <div class="flex-grow">
+         <div class="flex-grow">
+           {latestGitHubEvents.length > 0 ? (
               <ul class="space-y-2">
-                {recentlyWatchedItems.map(item => (
-                  <li key={item.id}>
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
-                       <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600">
-                          {item.type === 'movie' ? '🎬 ' : '📺 '}
-                          {item.title}
+                {latestGitHubEvents.map(event => (
+                  <li key={event.id}>
+                    <a href={event.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 group">
+                       <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
+                          {event.display}
                        </p>
                     </a>
-                     {item.overview && (
-                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-1">
-                         {item.overview}
-                       </p>
-                     )}
+                    <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
                   </li>
                 ))}
               </ul>
-            </div>
-         ) : (
-            <EmptyState 
-              message="لم يتم العثور على سجل مشاهدة حديث"
-              icon="simple-icons:trakt"
-              locale="ar"
-            />
-         )}
-         <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
-            ملفي على Trakt &larr;
+           ) : (
+              <EmptyState 
+                message="لا يوجد نشاط حديث"
+                icon="simple-icons:github"
+                locale="ar"
+              />
+           )}
+         </div>
+         <a href={GITHUB_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start">
+            ملفي على GitHub &larr;
          </a>
        </section>
 
