@@ -243,19 +243,12 @@ main a {
   @apply bg-lavender;
 }
 
-/* Logo Font - Unique for both languages */
+/* Logo Font - Simple but with personality */
 header .site-title,
 header .site-title a {
-  font-family: 'Bricolage Grotesque', 'Outfit', 'Space Grotesk', sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-/* Arabic logo override - use Year of Camel for Arabic name */
-[dir="rtl"] header .site-title,
-[lang="ar"] header .site-title {
-  font-family: 'Year of Camel', 'Bricolage Grotesque', sans-serif;
+  font-family: 'Comfortaa', 'Quicksand', 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 ::selection {

@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const logoFonts = [
+  { name: "Comfortaa", family: "'Comfortaa'", description: "Rounded, friendly with unique curves" },
+  { name: "Quicksand", family: "'Quicksand'", description: "Geometric with soft, rounded edges" },
+  { name: "Unbounded", family: "'Unbounded'", description: "Modern with interesting letter shapes" },
+  { name: "Fredoka", family: "'Fredoka'", description: "Playful but professional rounded" },
+  { name: "Paytone One", family: "'Paytone One'", description: "Bold with subtle quirks" },
+  { name: "Space Grotesk", family: "'Space Grotesk'", description: "Distinctive with unique 'a' and 'g'" },
+  { name: "Rubik", family: "'Rubik'", description: "Slightly rounded, friendly" },
+];
+---
+
+<BaseLayout title="Logo Font Test" lang="en" dir="ltr">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">Logo Font Testing</h1>
+    
+    <div class="mb-8 p-6 bg-electric-blue rounded-lg">
+      <p class="text-white mb-4">Current Logo (Syne):</p>
+      <div style="font-family: 'Syne'; font-weight: 800; font-size: 2rem; letter-spacing: -0.02em;" class="text-white">
+        Abdla
+      </div>
+    </div>
+
+    <div class="grid gap-6">
+      {logoFonts.map((font) => (
+        <div class="card p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">{font.name}</h3>
+            <span class="text-sm text-gray-600">{font.description}</span>
+          </div>
+          
+          <!-- In header context (blue bg) -->
+          <div class="bg-electric-blue p-4 rounded-lg mb-4">
+            <div style={`font-family: ${font.family}; font-weight: 800; color: white;`} class="flex items-baseline gap-4">
+              <span style="font-size: 2rem; letter-spacing: -0.02em;">Abdla</span>
+              <span style="font-size: 1.5rem; letter-spacing: -0.01em;">Abdla</span>
+              <span style="font-size: 1.25rem;">Abdla</span>
+            </div>
+          </div>
+          
+          <!-- In light mode -->
+          <div class="bg-white p-4 rounded-lg mb-4">
+            <div style={`font-family: ${font.family}; font-weight: 800;`} class="flex items-baseline gap-4 text-electric-blue">
+              <span style="font-size: 2rem; letter-spacing: -0.02em;">Abdla</span>
+              <span style="font-size: 1.5rem; letter-spacing: -0.01em;">Abdla</span>
+              <span style="font-size: 1.25rem;">Abdla</span>
+            </div>
+          </div>
+          
+          <!-- In dark mode -->
+          <div class="bg-soft-charcoal p-4 rounded-lg">
+            <div style={`font-family: ${font.family}; font-weight: 800;`} class="flex items-baseline gap-4 text-cool-light-gray">
+              <span style="font-size: 2rem; letter-spacing: -0.02em;">Abdla</span>
+              <span style="font-size: 1.5rem; letter-spacing: -0.01em;">Abdla</span>
+              <span style="font-size: 1.25rem;">Abdla</span>
+            </div>
+          </div>
+          
+          <!-- With .box extension -->
+          <div class="mt-4 p-4 bg-gray-100 rounded-lg">
+            <div style={`font-family: ${font.family}; font-weight: 800;`} class="text-electric-blue">
+              <span style="font-size: 1.5rem; letter-spacing: -0.02em;">Abdla</span>
+              <span style="font-size: 1rem; font-weight: 400;" class="text-gray-500">.box</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-12 p-6 bg-neon-yellow-light rounded-lg">
+      <h2 class="text-xl font-bold mb-4">Recommendations for Identity</h2>
+      <ul class="space-y-2">
+        <li><strong>For Tech/Modern:</strong> Syne or Orbitron</li>
+        <li><strong>For Friendly/Approachable:</strong> Righteous or Plus Jakarta Sans</li>
+        <li><strong>For Bold Statement:</strong> Audiowide</li>
+        <li><strong>For Minimal/Clean:</strong> Outfit (Extra Bold)</li>
+      </ul>
+    </div>
+  </div>
+</BaseLayout>

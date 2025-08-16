@@ -7,7 +7,7 @@ import { Icon } from 'astro-icon/components';
 
 const currentPath = Astro.url.pathname;
 const currentLocale = Astro.currentLocale || (currentPath.startsWith('/ar') ? 'ar' : 'en');
-const siteTitle = currentLocale === 'ar' ? 'عبدالله' : 'Abdla';
+const siteTitle = 'Abdla';
 let alternateLocale = currentLocale === 'en' ? 'ar' : 'en';
 let alternateLocaleName = currentLocale === 'en' ? 'العربية' : 'English';
 let alternatePath = '';
@@ -70,9 +70,12 @@ const navLinks = [
           );
         })}
         {alternateLocale && !currentPath.includes('/tags/') && (
-          <a href={alternatePath} class="text-white hover:text-neon-yellow flex items-center gap-1 font-bold">
-            {currentLocale === 'en' ? 'ع' : 'E'}
-            <span class="sr-only">{currentLocale === 'en' ? 'عربي' : 'English'}</span>
+          <a 
+            href={alternatePath} 
+            class={`px-3 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-electric-blue transition-all duration-200 text-sm font-medium ${currentLocale === 'en' ? 'font-arabic-body' : ''}`}
+            title={alternateLocaleName}
+          >
+            {currentLocale === 'en' ? 'عربي' : 'EN'}
           </a>
         )}
         <button id="themeToggle" class="md:ml-4">
