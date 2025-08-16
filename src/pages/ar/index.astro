@@ -208,12 +208,14 @@ try {
     {/* Dynamic Grid Layout with Different Card Sizes */}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 auto-rows-min">
 
-      {/* Section 1: Latest Blog Post - Featured Large Card */}
-      <section class="card card-featured card-accent-blog md:col-span-2 lg:col-span-8 lg:row-span-2">
-          <h2 class="text-2xl font-bold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+      {/* Section 1: Latest Blog Post - Large Card */}
+      <section class="card card-accent-blog md:col-span-2 lg:col-span-8 lg:row-span-2">
+        <a href="/ar/blog" class="block">
+          <h2 class="text-2xl font-bold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
             <Icon name="mdi:post-outline" class="w-7 h-7 flex-shrink-0"/>
             أحدث ما في المدونة
           </h2>
+        </a>
           {latestArPosts.length > 0 ? (
           <div class="flex-grow space-y-4">
             {latestArPosts.map(post => (
@@ -267,10 +269,12 @@ try {
 
       {/* Section 2: Strava Activity - Prominent Position */}
       <section class="card card-accent-fitness md:col-span-1 lg:col-span-4 lg:row-span-2">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
-           آخر نشاط رياضي
-         </h2>
+        <a href="https://www.strava.com/athletes/7746516" target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
+            آخر نشاط رياضي
+          </h2>
+        </a>
          <div class="flex-grow">
            <StravaStats />
          </div>
@@ -278,10 +282,12 @@ try {
 
       {/* Section 3: Bluesky Posts - Medium Card */}
        <section class="card card-accent-social md:col-span-1 lg:col-span-6">
-        <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
+        <a href="https://bsky.app/profile/abdla.box" target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
             <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
             من Bluesky
-        </h2>
+          </h2>
+        </a>
          {latestBlueskyPosts.length > 0 ? (
             <div class="flex-grow space-y-5">
               {latestBlueskyPosts.map(post => {
@@ -321,10 +327,12 @@ try {
 
        {/* Section 4: GitHub Latest Events - Compact Card */}
        <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
-           من GitHub
-         </h2>
+         <a href="https://github.com/l3b" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
+             من GitHub
+           </h2>
+         </a>
          <div class="flex-grow">
            {latestGitHubEvents.length > 0 ? (
               <ul class="space-y-2">
@@ -354,10 +362,12 @@ try {
 
        {/* Section 5: Goodreads Currently Reading - Compact Card */}
        <section class="card card-compact card-accent-reading md:col-span-1 lg:col-span-4">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
-           أقرأ الآن
-         </h2>
+         <a href="https://www.goodreads.com/user/show/4693662-abdullah-althani" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
+             أقرأ الآن
+           </h2>
+         </a>
          <div class="flex-grow">
            {currentlyReadingBooks.length > 0 ? (
               <div class="space-y-2">
@@ -383,11 +393,13 @@ try {
        </section>
 
        {/* Section 6: Trakt Recently Watched - Compact Card */}
-       <section class="card card-compact md:col-span-1 lg:col-span-4">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
-           شاهدت مؤخرًا
-         </h2>
+       <section class="card card-compact card-accent-coral md:col-span-1 lg:col-span-4">
+         <a href="https://trakt.tv/users/althani" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
+             شاهدت مؤخرًا
+           </h2>
+         </a>
          {recentlyWatchedItems.length > 0 ? (
             <div class="flex-grow">
               <ul class="space-y-2">

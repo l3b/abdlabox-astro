@@ -189,14 +189,14 @@ try {
     <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-soft-charcoal">{pageTitle}</h1>
     <p class="text-lg text-gray-600 text-center mb-12 md:mb-16">{pageSubtitle}</p>
 
-    {/* Grid for Signal Sections */}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+    {/* Dynamic Grid Layout with Different Card Sizes */}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 auto-rows-min">
 
-      {/* Section 1: Latest Blog Posts */}
-      <section class="card">
-        <a href="/en/blog" class="text-electric-blue">
-          <h2 class="text-xl font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-            <Icon name="mdi:post-outline" class="w-6 h-6 flex-shrink-0"/>
+      {/* Section 1: Latest Blog Posts - Large Card */}
+      <section class="card card-accent-blog md:col-span-2 lg:col-span-8 lg:row-span-2">
+        <a href="/en/blog" class="block">
+          <h2 class="text-2xl font-bold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="mdi:post-outline" class="w-7 h-7 flex-shrink-0"/>
             Latest from the Blog
           </h2>
         </a>
@@ -359,11 +359,13 @@ try {
        </section>
 
        {/* Section 6: Trakt Recently Watched - Compact Card */}
-       <section class="card card-compact md:col-span-1 lg:col-span-4">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
-           Recently Watched
-         </h2>
+       <section class="card card-compact card-accent-coral md:col-span-1 lg:col-span-4">
+         <a href="https://trakt.tv/users/althani" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
+             Recently Watched
+           </h2>
+         </a>
          {recentlyWatchedItems.length > 0 ? (
             <div class="flex-grow">
               <ul class="space-y-2">
