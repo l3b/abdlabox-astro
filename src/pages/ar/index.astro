@@ -55,17 +55,35 @@ const TRAKT_USERNAME = 'althani';
 const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
 const TRAKT_PROFILE_URL = `https://trakt.tv/users/${TRAKT_USERNAME}`;
 if (TRAKT_API_KEY) { try {
-    const traktUrl = `https://api.trakt.tv/users/${TRAKT_USERNAME}/history?limit=3&extended=full`;
-    // console.log(`Workspaceing Trakt History: ${traktUrl}`); // Optional: uncomment for debugging
-    const traktResponse = await fetch(traktUrl, { headers: { 'Content-Type': 'application/json', 'trakt-api-version': '2', 'trakt-api-key': TRAKT_API_KEY }});
+    const traktUrl = `https://api.trakt.tv/users/${TRAKT_USERNAME}/history?limit=3&extended=full&languages=ar`;
+    // console.log(`Fetching Trakt History: ${traktUrl}`); // Optional: uncomment for debugging
+    const traktResponse = await fetch(traktUrl, { headers: { 
+      'Content-Type': 'application/json', 
+      'trakt-api-version': '2', 
+      'trakt-api-key': TRAKT_API_KEY,
+      'Accept-Language': 'ar' // Request Arabic translations
+    }});
     if (traktResponse.ok) {
        const historyData = await traktResponse.json();
        if (historyData && historyData.length > 0) {
           recentlyWatchedItems = historyData.map((item: any): WatchedItem | null => {
              let title = '', link = '#', overview: string | null = null; const type = item.type || 'unknown'; const id = item.id;
              try {
-               if (type === 'movie' && item.movie?.ids?.slug) { title = item.movie.title || 'Unknown Movie'; link = `https://trakt.tv/movies/${item.movie.ids.slug}`; overview = item.movie.overview; }
-               else if (type === 'episode' && item.show?.ids?.slug && item.episode) { const showTitle = item.show.title || 'Unknown Show'; const season = item.episode.season; const number = item.episode.number; const epTitle = item.episode.title ? ` - ${item.episode.title}` : ''; title = `${showTitle} S${String(season).padStart(2, '0')}E${String(number).padStart(2, '0')}${epTitle}`; link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`; overview = item.episode.overview || item.show.overview; }
+               if (type === 'movie' && item.movie?.ids?.slug) { 
+                 // Check for Arabic title in translations or use English
+                 title = item.movie.title || 'فيلم غير معروف'; 
+                 link = `https://trakt.tv/movies/${item.movie.ids.slug}`; 
+                 overview = item.movie.overview; 
+               }
+               else if (type === 'episode' && item.show?.ids?.slug && item.episode) { 
+                 const showTitle = item.show.title || 'مسلسل غير معروف'; 
+                 const season = item.episode.season; 
+                 const number = item.episode.number; 
+                 const epTitle = item.episode.title ? ` - ${item.episode.title}` : ''; 
+                 title = `${showTitle} م${String(season).padStart(2, '0')}ح${String(number).padStart(2, '0')}${epTitle}`; 
+                 link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`; 
+                 overview = item.episode.overview || item.show.overview; 
+               }
              } catch (e) { return null; }
              if (title && id) { return { id, title, link, type, overview }; } return null;
           }).filter((item): item is WatchedItem => item !== null);
@@ -393,7 +411,7 @@ try {
        </section>
 
        {/* Section 6: Trakt Recently Watched - Compact Card */}
-       <section class="card card-compact card-accent-coral md:col-span-1 lg:col-span-4">
+       <section class="card card-compact card-accent-entertainment md:col-span-1 lg:col-span-4">
          <a href="https://trakt.tv/users/althani" target="_blank" rel="noopener noreferrer" class="block">
            <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
              <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0"/>
