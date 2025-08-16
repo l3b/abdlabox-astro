@@ -250,57 +250,72 @@ try {
         </a>
       </section>
 
-      {/* Section 2: Goodreads Currently Reading */}
-       <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
-           Latest Running Activities
-         </h2>
-         <div class="flex-grow">
-           <StravaStats locale="en" />
-         </div>
-       </section>
-
-      {/* Section 3: Trakt Recently Watched */}
-       <section class="card">
-        <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-electric-blue">
-          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
-              <Icon name="simple-icons:trakt" class="w-6 h-6 flex-shrink-0"/>
-              Recently Watched
+      {/* Section 2: Strava Activity - Prominent Position */}
+      <section class="card card-accent-fitness md:col-span-1 lg:col-span-4 lg:row-span-2">
+        <a href="https://www.strava.com/athletes/7746516" target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
+            Latest Running Activities
           </h2>
         </a>
-         {recentlyWatchedItems.length > 0 ? (
-            <div class="flex-grow">
-              <ul class="space-y-4">
-                {recentlyWatchedItems.map(item => (
-                  <li key={item.id}>
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="hover:text-teal-600 transition-colors duration-200 block group">
-                       <p class="text-soft-charcoal text-base font-medium leading-snug group-hover:text-teal-600">
-                          {item.type === 'movie' ? '🎬 ' : '📺 '}
-                          {item.title}
-                       </p>
-                    </a>
-                     {item.overview && (
-                       <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-2">
-                         {item.overview}
-                       </p>
-                     )}
-                  </li>
-                ))}
-              </ul>
+        <div class="flex-grow">
+          <StravaStats locale="en" />
+        </div>
+      </section>
+
+      {/* Section 3: Bluesky Posts - Medium Card */}
+       <section class="card card-accent-social md:col-span-1 lg:col-span-6">
+        <a href="https://bsky.app/profile/abdla.box" target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0"/>
+            From Bluesky
+          </h2>
+        </a>
+         {latestBlueskyPosts.length > 0 ? (
+            <div class="flex-grow space-y-5">
+              {latestBlueskyPosts.map(post => {
+                 const postUrl = `https://bsky.app/profile/${BSKY_IDENTIFIER}/post/${post.uri?.split('/').pop() ?? ''}`;
+                 return (
+                    <div class="pb-5 border-b border-gray-100 last:border-b-0 last:pb-0" key={post.cid}>
+                      {post.embedImageUrl && (
+                        <a href={post.embedLinkUrl || postUrl} target="_blank" rel="noopener noreferrer" class="block mb-2">
+                          <img src={post.embedImageUrl} alt={post.embedLinkTitle || 'Bluesky Embed Image'} class="max-w-full h-auto rounded-md border border-gray-200" loading="lazy"/>
+                         </a>
+                      )}
+                      {post.text && (
+                        <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                           {post.text}
+                        </p>
+                      )}
+                      {!post.text && post.embedLinkTitle && post.embedLinkUrl && (
+                         <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                            <em class="text-gray-500">[Shared Link]:</em> {post.embedLinkTitle}
+                         </p>
+                      )}
+                      <a href={postUrl} target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-xs">
+                         View on Bluesky <span aria-hidden="true">→</span>
+                      </a>
+                    </div>
+                 )
+              })}
             </div>
-         ) : ( <p class="italic text-gray-400 flex-grow">(No recent watched history found or failed to fetch...)</p> )} {/* English Fallback */}
-           <a href={TRAKT_PROFILE_URL} target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-lavender mt-4 flex-shrink-0 self-start">
-              My Trakt Profile &rarr; {/* English Link Text */}
-           </a>
+         ) : (
+            <EmptyState 
+              message="No recent posts found"
+              icon="simple-icons:bluesky"
+              locale="en"
+            />
+         )}
        </section>
 
        {/* Section 4: GitHub Latest Events - Compact Card */}
        <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
-           From GitHub
-         </h2>
+         <a href="https://github.com/l3b" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0"/>
+             From GitHub
+           </h2>
+         </a>
          <div class="flex-grow">
            {latestGitHubEvents.length > 0 ? (
               <ul class="space-y-2">
@@ -330,10 +345,12 @@ try {
 
        {/* Section 5: Goodreads Currently Reading - Compact Card */}
        <section class="card card-compact card-accent-reading md:col-span-1 lg:col-span-4">
-         <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0">
-           <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
-           Currently Reading
-         </h2>
+         <a href="https://www.goodreads.com/user/show/4693662-abdullah-althani" target="_blank" rel="noopener noreferrer" class="block">
+           <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+             <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0"/>
+             Currently Reading
+           </h2>
+         </a>
          <div class="flex-grow">
            {currentlyReadingBooks.length > 0 ? (
               <div class="space-y-2">
