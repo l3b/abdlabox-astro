@@ -1,10 +1,11 @@
 ---
-// src/pages/en/index.astro - English Homepage Mirroring Arabic v14
+// src/pages/en/index.astro - English Homepage v15 (With Strava API Integration)
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
 import OptimizedImage from '../../components/OptimizedImage.astro';
+import StravaStats from '../../components/StravaStats.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { enUS } from 'date-fns/locale'; // For English relative time
 
@@ -327,13 +328,15 @@ try {
          ) : ( <p class="italic text-gray-400 flex-grow">(No recent English posts found or failed to fetch...)</p> )} {/* English Fallback */}
        </section>
 
-       {/* Section 5: Strava Activity Widget (iframe src is language-agnostic) */}
+       {/* Section 5: Strava Activity - Using API Integration */}
        <section class="card">
-         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 self-start">
+         <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0">
            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0"/>
            Latest Activity {/* English Heading */}
          </h2>
-         <iframe height='454' width='300' frameborder='0' allowtransparency='true' scrolling='no' src='https://www.strava.com/athletes/7746516/latest-rides/930be949cf2c3e5601bb81846be00cc7f1fd01ac' class="mt-2"></iframe>
+         <div class="flex-grow">
+           <StravaStats />
+         </div>
        </section>
 
       {/* Section 6: GitHub Latest Events (Display logic is language-agnostic, but time uses locale) */}
