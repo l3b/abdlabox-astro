@@ -1,6 +1,7 @@
 ---
 // src/layouts/BaseLayout.astro - Final Version with Theme Base Colors
 import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import '@/styles/tailwind.css'; // Using alias path - change to '../styles/tailwind.css' if preferred
 import { analyticsConfig } from '../data/analytics';
 import { generateWebsiteSchema } from '../utils/structuredData';
@@ -123,11 +124,12 @@ const websiteSchema = generateWebsiteSchema();
   <link href="/fonts/fonts.css" rel="stylesheet">
 </head>
 <!-- {/* UPDATED: Apply Near White background and Near Black text */} -->
-<body>
+<body class="min-h-screen flex flex-col">
     <Header />
     {/* Add some vertical padding to the main content area */}
-    <main class="py-8 md:py-12">
+    <main class="flex-grow py-8 md:py-12">
       <slot /> {/* Page content will be injected here */}
     </main>
+    <Footer />
 </body>
 </html>

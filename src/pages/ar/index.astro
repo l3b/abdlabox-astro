@@ -7,7 +7,6 @@ import { BskyAgent, type ComAtprotoLabelDefs } from '@atproto/api';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 import StravaStats from '../../components/StravaStats.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import Footer from '../../components/Footer.astro';
 import { formatDistanceToNow } from 'date-fns'; // For relative time
 import { arSA } from 'date-fns/locale'; // For Arabic relative time
 
@@ -452,5 +451,4 @@ try {
 
     </div> {/* End Grid */}
   </div> {/* End Container */}
-  <Footer />
 </BaseLayout>
