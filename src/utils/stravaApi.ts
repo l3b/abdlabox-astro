@@ -11,6 +11,7 @@ interface StravaActivity {
   average_speed: number;
   max_speed: number;
   total_elevation_gain: number;
+  private?: boolean;
 }
 
 interface StravaStats {
@@ -50,6 +51,7 @@ interface RunningStats {
     progress: number; // percentage of annual goal (500km)
   };
   recentActivities: Array<{
+    id: number;
     name: string;
     distance: number;
     time: string;
@@ -114,7 +116,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
       console.log('Strava credentials not configured');
       // Return mock data for development
       const mockYearDistance = 450.7;
-      const annualGoal = 500; // km
+      const annualGoal = 750; // km
       return {
         thisWeek: {
           distance: 24.5,
@@ -132,6 +134,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
         },
         recentActivities: [
           {
+            id: 12345678,
             name: 'جري صباحي',
             distance: 10.2,
             time: '52 min',
@@ -139,6 +142,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
             pace: '5:06'
           },
           {
+            id: 12345679,
             name: 'جري مسائي سريع',
             distance: 5.5,
             time: '25 min',
@@ -146,6 +150,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
             pace: '4:32'
           },
           {
+            id: 12345680,
             name: 'جري طويل نهاية الأسبوع',
             distance: 15.0,
             time: '1h 22m',
@@ -224,12 +229,15 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
       
       if (activitiesResponse.ok) {
         const activities: StravaActivity[] = await activitiesResponse.json();
-        // Filter only running activities
+        // Filter only public running activities
         runningActivities = activities.filter(a => 
-          a.type === 'Run' || a.type === 'VirtualRun' || a.type === 'Walk'
+          (a.type === 'Run' || a.type === 'VirtualRun' || a.type === 'Walk') &&
+          !a.private // Only include public activities
         ).slice(0, 3);
+        console.log(`Found ${runningActivities.length} public running activities`);
       } else {
-        console.warn('Could not fetch Strava activities, continuing without them');
+        const errorText = await activitiesResponse.text();
+        console.warn(`Could not fetch Strava activities (${activitiesResponse.status}): ${errorText}`);
       }
     } catch (activityError) {
       console.warn('Error fetching activities:', activityError);
@@ -239,7 +247,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
     // Calculate stats
     const weeklyDistance = metersToKm(stats.recent_run_totals.distance / 4); // Average of last 4 weeks
     const yearDistance = metersToKm(stats.ytd_run_totals.distance);
-    const annualGoal = 500; // km - Annual target
+    const annualGoal = 750; // km - Annual target (updated)
     const yearProgress = Math.min(100, Math.round((yearDistance / annualGoal) * 100));
     
     return {
@@ -258,6 +266,7 @@ export async function fetchStravaStats(): Promise<RunningStats | null> {
         progress: yearProgress
       },
       recentActivities: runningActivities.map(activity => ({
+        id: activity.id,
         name: activity.name,
         distance: metersToKm(activity.distance),
         time: secondsToTime(activity.moving_time),
