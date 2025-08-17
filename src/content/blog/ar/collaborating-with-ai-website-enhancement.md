@@ -2,12 +2,13 @@
 title: "التعاون مع Claude: كيف حوّل الذكاء الاصطناعي موقعي في 48 ساعة"
 description: "غوص عميق في تجربتي باستخدام Claude لتطوير موقعي الشخصي، من إصلاح الأخطاء إلى تنفيذ ميزات معقدة - دروس تعلمتها بعد كسر الحاجز الأول."
 pubDate: 2024-12-22
+language: "ar"
 tags: ["ذكاء-اصطناعي", "تطوير-ويب", "claude", "نمو-شخصي", "تقنية"]
 isDraft: true
+translationKey: "collaborating-with-ai-website-enhancement"
 featuredImage:
   url: "/images/claude-collaboration.jpg"
   alt: "تصور تجريدي للتعاون بين الإنسان والذكاء الاصطناعي في تطوير الويب"
-translationKey: "collaborating-with-ai-website-enhancement"
 ---
 
 قبل أسبوعين، نشرت أول تدوينة لي عن [كسر حاجز الكمالية بمساعدة الذكاء الاصطناعي](/ar/blog/ai-blogging-barrier-broken). كان ذلك مجرد البداية. ما حدث بعد ذلك كان 48 ساعة من التعاون المكثف مع Claude غيّرت موقعي بالكامل - وعلّمتني دروساً قيّمة عن الشراكة بين الإنسان والذكاء الاصطناعي في تطوير البرمجيات.

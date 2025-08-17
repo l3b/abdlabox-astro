@@ -2,8 +2,10 @@
 title: "Collaborating with Claude: How AI Transformed My Website in 48 Hours"
 description: "A deep dive into my experience using Claude to enhance my personal website, from fixing bugs to implementing complex features - lessons learned after breaking the first barrier."
 pubDate: 2024-12-22
+language: "en"
 tags: ["ai", "web-development", "claude", "personal-growth", "tech"]
 isDraft: true
+translationKey: "collaborating-with-ai-website-enhancement"
 featuredImage:
   url: "/images/claude-collaboration.jpg"
   alt: "Abstract visualization of human-AI collaboration in web development"
