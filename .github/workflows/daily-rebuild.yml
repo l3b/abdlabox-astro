@@ -6,33 +6,51 @@ on:
     - cron: '0 6 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
-permissions:
-  contents: write  # This gives the workflow permission to push
-
 jobs:
   trigger-rebuild:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Configure Git
+      - name: Trigger Cloudflare Pages Rebuild
         run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
+          echo "🚀 Triggering Cloudflare Pages rebuild..."
           
-      - name: Create empty commit to trigger rebuild
-        run: |
-          git commit --allow-empty -m "🔄 Daily rebuild trigger [skip ci]"
+          response=$(curl -X POST "${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s)
           
-      - name: Push to trigger Cloudflare Pages rebuild
-        run: |
-          git push origin main
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | head -n-1)
           
-      - name: Log rebuild trigger
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Successfully triggered rebuild at $(date)"
+            echo "Response: $body"
+            echo "Your site will be updated with fresh data from:"
+            echo "  • Strava activities"
+            echo "  • GitHub events"
+            echo "  • Bluesky posts"
+            echo "  • Goodreads reading list"
+            echo "  • Trakt watch history"
+          else
+            echo "❌ Failed to trigger rebuild"
+            echo "HTTP Status: $http_code"
+            echo "Response: $body"
+            exit 1
+          fi
+      
+      - name: Summary
+        if: success()
         run: |
-          echo "✅ Daily rebuild triggered at $(date)"
-          echo "This will update all API data (GitHub, Strava, Bluesky, etc.)"
+          echo "## 🎉 Daily Rebuild Triggered Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The Cloudflare Pages rebuild has been triggered. Your site will be updated with the latest data from all integrated APIs." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Updated Data Sources:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Strava running activities" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub repository events" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Bluesky social posts" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Goodreads currently reading" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Trakt recently watched" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check your [Cloudflare Pages dashboard](https://dash.cloudflare.com) to monitor the deployment." >> $GITHUB_STEP_SUMMARY
