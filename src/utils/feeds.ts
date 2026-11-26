@@ -4,9 +4,14 @@ import { formatDistanceToNow } from 'date-fns';
 import { arSA, enUS } from 'date-fns/locale';
 import { PROFILES } from '../data/socialLinks';
 
+const APP_USER_AGENT = 'AbdlaBox/1.0.0 (+https://abdla.box)';
+const BROWSER_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+
 export interface ReadingBook {
   title: string;
   link: string;
+  coverUrl?: string;
 }
 
 export interface WatchedItem {
@@ -45,36 +50,57 @@ export interface HomeFeeds {
   latestGitHubEvents: GitHubEvent[];
 }
 
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 // --- In-memory build-time caches ---
 let goodreadsCache: Promise<ReadingBook[]> | null = null;
 const traktCache: Partial<Record<'ar' | 'en', Promise<WatchedItem[]>>> = {};
 let blueskyRawFeedCache: Promise<any[] | null> | null = null;
 let githubRawEventsCache: Promise<any[]> | null = null;
 
-// --- Goodreads Currently Reading ---
+// --- Goodreads Currently Reading (via public grid_widget since Goodreads retired RSS) ---
 export function getGoodreadsReading(): Promise<ReadingBook[]> {
   if (!goodreadsCache) {
     goodreadsCache = (async () => {
       const books: ReadingBook[] = [];
       try {
-        const response = await fetch(PROFILES.goodreads.rssUrl, {
-          signal: AbortSignal.timeout(8000),
+        const response = await fetch(PROFILES.goodreads.widgetUrl, {
+          headers: { 'User-Agent': BROWSER_USER_AGENT },
+          signal: AbortSignal.timeout(10000),
         });
         if (!response.ok) {
-          console.error(`Goodreads RSS fetch failed: ${response.status}`);
+          console.error(`Goodreads widget fetch failed: ${response.status}`);
           return books;
         }
-        const xmlText = await response.text();
-        const itemMatches = xmlText.matchAll(/<item>(.*?)<\/item>/gs);
-        for (const match of itemMatches) {
-          const itemContent = match[1];
-          const titleMatch = itemContent.match(/<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?<\/title>/s);
-          const linkMatch = itemContent.match(/<link>(.*?)<\/link>/s);
-          const title = titleMatch ? titleMatch[1].trim() : null;
-          const link = linkMatch?.[1]
-            ? linkMatch[1].replace('<![CDATA[', '').replace(']]>', '').trim()
-            : null;
-          if (title && link) books.push({ title, link });
+        const rawJs = await response.text();
+        // Unescape JS string quotes/slashes inside var widget_code = '...'
+        const html = rawJs.replace(/\\"/g, '"').replace(/\\\//g, '/').replace(/\\'/g, "'");
+        const containerMatches = html.matchAll(
+          /<div class="gr_grid_book_container">(.*?)<\/div>/gs
+        );
+
+        for (const match of containerMatches) {
+          const block = match[1];
+          const titleMatch = block.match(/<a[^>]+title="([^"]+)"/i);
+          const hrefMatch = block.match(/<a[^>]+href="([^"]+)"/i);
+          const imgMatch = block.match(/<img[^>]+src="([^"]+)"/i);
+
+          const title = titleMatch ? decodeHtmlEntities(titleMatch[1].trim()) : null;
+          const link = hrefMatch ? decodeHtmlEntities(hrefMatch[1].trim()) : null;
+          const coverUrl = imgMatch
+            ? decodeHtmlEntities(imgMatch[1].trim()).replace(/\._SY75_\./, '._SY150_.')
+            : undefined;
+
+          if (title && link) {
+            books.push({ title, link, coverUrl });
+          }
           if (books.length >= 3) break;
         }
       } catch (error) {
@@ -101,6 +127,8 @@ export function getTraktRecentlyWatched(locale: 'ar' | 'en'): Promise<WatchedIte
         const traktUrl = `https://api.trakt.tv/users/${PROFILES.trakt.username}/history?limit=3&extended=full${langQuery}`;
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'User-Agent': APP_USER_AGENT,
           'trakt-api-version': '2',
           'trakt-api-key': TRAKT_API_KEY,
         };
@@ -111,7 +139,10 @@ export function getTraktRecentlyWatched(locale: 'ar' | 'en'): Promise<WatchedIte
           signal: AbortSignal.timeout(8000),
         });
         if (!traktResponse.ok) {
-          console.error(`Trakt fetch failed: ${traktResponse.status}`);
+          const errText = await traktResponse.text().catch(() => '');
+          console.error(
+            `Trakt fetch failed: ${traktResponse.status} ${errText.slice(0, 200)}`
+          );
           return [];
         }
 
@@ -163,7 +194,10 @@ export function getTraktRecentlyWatched(locale: 'ar' | 'en'): Promise<WatchedIte
               const mediaType = item.type === 'movie' ? 'movie' : 'tv';
               const langParam = locale === 'ar' ? '&language=ar' : '';
               const tmdbUrl = `https://api.themoviedb.org/3/${mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}${langParam}`;
-              const tmdbRes = await fetch(tmdbUrl, { signal: AbortSignal.timeout(6000) });
+              const tmdbRes = await fetch(tmdbUrl, {
+                headers: { 'User-Agent': APP_USER_AGENT },
+                signal: AbortSignal.timeout(6000),
+              });
               if (tmdbRes.ok) {
                 const tmdbData = await tmdbRes.json();
                 if (tmdbData.poster_path) {
@@ -267,7 +301,10 @@ function loadRawGitHubEvents(): Promise<any[]> {
       try {
         const url = `https://api.github.com/users/${PROFILES.github.username}/events/public?per_page=10`;
         const response = await fetch(url, {
-          headers: { Accept: 'application/vnd.github.v3+json' },
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': APP_USER_AGENT,
+          },
           signal: AbortSignal.timeout(8000),
         });
         if (!response.ok) {

@@ -15,7 +15,7 @@ export const PROFILES = {
   },
   goodreads: {
     userId: '4693662',
-    rssUrl: 'https://www.goodreads.com/review/list_rss/4693662?shelf=currently-reading',
+    widgetUrl: 'https://www.goodreads.com/review/grid_widget/4693662?shelf=currently-reading',
     url: 'https://www.goodreads.com/user/show/4693662-abdullah-althani',
   },
   trakt: {

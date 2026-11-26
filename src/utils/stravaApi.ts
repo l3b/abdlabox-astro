@@ -1,6 +1,8 @@
 // Strava API Integration — fetches running stats once per build with in-memory caching
+import { PROFILES } from '../data/socialLinks';
 
 export const ANNUAL_RUNNING_GOAL_KM = 750;
+const APP_USER_AGENT = 'AbdlaBox/1.0.0 (+https://abdla.box)';
 
 const RUNNING_TYPES = new Set(['Run', 'VirtualRun', 'TrailRun', 'Walk', 'Hike']);
 
@@ -192,7 +194,11 @@ async function loadRawStravaData(): Promise<RawStravaData | null> {
 
     const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'User-Agent': APP_USER_AGENT,
+      },
       signal: AbortSignal.timeout(8000),
       body: JSON.stringify({
         client_id: clientId,
@@ -203,22 +209,35 @@ async function loadRawStravaData(): Promise<RawStravaData | null> {
     });
 
     if (!tokenResponse.ok) {
-      throw new Error(`Failed to refresh Strava token (${tokenResponse.status})`);
+      const errBody = await tokenResponse.text().catch(() => '');
+      throw new Error(`Failed to refresh Strava token (${tokenResponse.status}): ${errBody.slice(0, 200)}`);
     }
 
     const tokenData = await tokenResponse.json();
     const accessToken: string = tokenData.access_token;
-    const authHeaders = { Authorization: `Bearer ${accessToken}` };
+    const authHeaders = {
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
+      'User-Agent': APP_USER_AGENT,
+    };
 
-    const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
-      headers: authHeaders,
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!athleteResponse.ok) {
-      throw new Error(`Failed to fetch athlete data (${athleteResponse.status})`);
+    // Resolve athleteId from /athlete, falling back to configured profile athleteId if /athlete fails
+    let athleteId = PROFILES.strava.athleteId;
+    try {
+      const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
+        headers: authHeaders,
+        signal: AbortSignal.timeout(8000),
+      });
+      if (athleteResponse.ok) {
+        const athleteData = await athleteResponse.json();
+        if (athleteData?.id) athleteId = String(athleteData.id);
+      } else {
+        const errBody = await athleteResponse.text().catch(() => '');
+        console.warn(`Strava /athlete returned ${athleteResponse.status}: ${errBody.slice(0, 200)}`);
+      }
+    } catch (e) {
+      console.warn('Strava /athlete request error, using fallback athleteId:', e);
     }
-    const athleteData = await athleteResponse.json();
-    const athleteId = athleteData.id;
 
     const now = new Date();
     const yearStart = Math.floor(new Date(now.getFullYear(), 0, 1).getTime() / 1000);
@@ -239,14 +258,29 @@ async function loadRawStravaData(): Promise<RawStravaData | null> {
     ]);
 
     let apiStats: StravaApiStats | null = null;
-    if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
-      apiStats = await statsRes.value.json();
+    if (statsRes.status === 'fulfilled') {
+      if (statsRes.value.ok) {
+        apiStats = await statsRes.value.json();
+      } else {
+        const errBody = await statsRes.value.text().catch(() => '');
+        console.warn(`Strava /stats returned ${statsRes.value.status}: ${errBody.slice(0, 200)}`);
+      }
     }
 
     let yearRunningActivities: StravaActivity[] = [];
-    if (yearActivitiesRes.status === 'fulfilled' && yearActivitiesRes.value.ok) {
-      const allActivities: StravaActivity[] = await yearActivitiesRes.value.json();
-      yearRunningActivities = allActivities.filter((a) => RUNNING_TYPES.has(a.type));
+    if (yearActivitiesRes.status === 'fulfilled') {
+      if (yearActivitiesRes.value.ok) {
+        const allActivities: StravaActivity[] = await yearActivitiesRes.value.json();
+        yearRunningActivities = allActivities.filter((a) => RUNNING_TYPES.has(a.type));
+      } else {
+        const errBody = await yearActivitiesRes.value.text().catch(() => '');
+        console.warn(`Strava /activities (YTD) returned ${yearActivitiesRes.value.status}: ${errBody.slice(0, 200)}`);
+      }
+    }
+
+    if (!apiStats && yearRunningActivities.length === 0) {
+      console.error('Strava returned neither stats nor activities — check OAuth scopes or API access');
+      return null;
     }
 
     // Calculate actual current week (Sunday-Saturday for KSA/standard) and calendar month

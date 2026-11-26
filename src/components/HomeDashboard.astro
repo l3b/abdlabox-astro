@@ -293,18 +293,40 @@ const {
         </a>
         <div class="flex-grow">
           {currentlyReadingBooks.length > 0 ? (
-            <div class="space-y-2">
+            <ul class="space-y-3">
               {currentlyReadingBooks.map((book) => (
-                <a
-                  href={book.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="hover:text-teal-600 transition-colors duration-200 block"
-                >
-                  <p class="text-soft-charcoal text-sm font-medium leading-snug">{book.title}</p>
-                </a>
+                <li class="flex items-start gap-3">
+                  {book.coverUrl && (
+                    <a
+                      href={book.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex-shrink-0"
+                    >
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        width="40"
+                        height="60"
+                        loading="lazy"
+                        decoding="async"
+                        class="w-10 h-[3.75rem] object-cover rounded shadow-sm hover:shadow-md transition-shadow"
+                      />
+                    </a>
+                  )}
+                  <a
+                    href={book.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex-grow hover:text-teal-600 transition-colors duration-200 block group"
+                  >
+                    <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600 line-clamp-2">
+                      {book.title}
+                    </p>
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <EmptyState message={copy.goodreadsEmpty} icon="simple-icons:goodreads" locale={locale} />
           )}
