@@ -61,6 +61,7 @@ function decodeHtmlEntities(str: string): string {
 
 // --- In-memory build-time caches ---
 let goodreadsCache: Promise<ReadingBook[]> | null = null;
+let traktRawHistoryCache: Promise<any[]> | null = null;
 const traktCache: Partial<Record<'ar' | 'en', Promise<WatchedItem[]>>> = {};
 let blueskyRawFeedCache: Promise<any[] | null> | null = null;
 let githubRawEventsCache: Promise<any[]> | null = null;
@@ -112,107 +113,129 @@ export function getGoodreadsReading(): Promise<ReadingBook[]> {
   return goodreadsCache;
 }
 
-// --- Trakt + TMDB Recently Watched ---
-export function getTraktRecentlyWatched(locale: 'ar' | 'en'): Promise<WatchedItem[]> {
-  if (!traktCache[locale]) {
-    traktCache[locale] = (async () => {
+// --- Trakt + TMDB Recently Watched (deduplicated by show/movie, no language filter) ---
+function loadRawTraktHistory(): Promise<any[]> {
+  if (!traktRawHistoryCache) {
+    traktRawHistoryCache = (async () => {
       const TRAKT_API_KEY = import.meta.env.TRAKT_API_KEY;
       if (!TRAKT_API_KEY) {
         console.warn('TRAKT_API_KEY not set');
         return [];
       }
-
       try {
-        const langQuery = locale === 'ar' ? '&languages=ar' : '';
-        const traktUrl = `https://api.trakt.tv/users/${PROFILES.trakt.username}/history?limit=3&extended=full${langQuery}`;
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'User-Agent': APP_USER_AGENT,
-          'trakt-api-version': '2',
-          'trakt-api-key': TRAKT_API_KEY,
-        };
-        if (locale === 'ar') headers['Accept-Language'] = 'ar';
-
+        const traktUrl = `https://api.trakt.tv/users/${PROFILES.trakt.username}/history?limit=25&extended=full`;
         const traktResponse = await fetch(traktUrl, {
-          headers,
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'User-Agent': APP_USER_AGENT,
+            'trakt-api-version': '2',
+            'trakt-api-key': TRAKT_API_KEY,
+          },
           signal: AbortSignal.timeout(8000),
         });
         if (!traktResponse.ok) {
           const errText = await traktResponse.text().catch(() => '');
-          console.error(
-            `Trakt fetch failed: ${traktResponse.status} ${errText.slice(0, 200)}`
-          );
+          console.error(`Trakt fetch failed: ${traktResponse.status} ${errText.slice(0, 200)}`);
           return [];
         }
-
         const historyData = await traktResponse.json();
-        if (!Array.isArray(historyData) || historyData.length === 0) return [];
-
-        const items = historyData
-          .map((item: any): WatchedItem | null => {
-            const type = item.type || 'unknown';
-            const id = item.id;
-            let title = '';
-            let link = '#';
-            let overview: string | null = null;
-            let tmdbId: number | undefined;
-
-            try {
-              if (type === 'movie' && item.movie?.ids?.slug) {
-                title = item.movie.title || (locale === 'ar' ? 'فيلم غير معروف' : 'Unknown Movie');
-                link = `https://trakt.tv/movies/${item.movie.ids.slug}`;
-                overview = item.movie.overview ?? null;
-                tmdbId = item.movie.ids?.tmdb;
-              } else if (type === 'episode' && item.show?.ids?.slug && item.episode) {
-                const showTitle =
-                  item.show.title || (locale === 'ar' ? 'مسلسل غير معروف' : 'Unknown Show');
-                const season = item.episode.season;
-                const number = item.episode.number;
-                const epTitle = item.episode.title ? ` - ${item.episode.title}` : '';
-                const epCode =
-                  locale === 'ar'
-                    ? `م${String(season).padStart(2, '0')}ح${String(number).padStart(2, '0')}`
-                    : `S${String(season).padStart(2, '0')}E${String(number).padStart(2, '0')}`;
-                title = `${showTitle} ${epCode}${epTitle}`;
-                link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`;
-                overview = item.episode.overview || item.show.overview || null;
-                tmdbId = item.show.ids?.tmdb;
-              }
-            } catch {
-              return null;
-            }
-            return title && id ? { id, title, link, type, overview, tmdbId } : null;
-          })
-          .filter((item): item is WatchedItem => item !== null);
-
-        const TMDB_API_KEY = import.meta.env.TMDB_API_KEY;
-        if (TMDB_API_KEY) {
-          await Promise.allSettled(
-            items.map(async (item) => {
-              if (!item.tmdbId) return;
-              const mediaType = item.type === 'movie' ? 'movie' : 'tv';
-              const langParam = locale === 'ar' ? '&language=ar' : '';
-              const tmdbUrl = `https://api.themoviedb.org/3/${mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}${langParam}`;
-              const tmdbRes = await fetch(tmdbUrl, {
-                headers: { 'User-Agent': APP_USER_AGENT },
-                signal: AbortSignal.timeout(6000),
-              });
-              if (tmdbRes.ok) {
-                const tmdbData = await tmdbRes.json();
-                if (tmdbData.poster_path) {
-                  item.posterUrl = `https://image.tmdb.org/t/p/w200${tmdbData.poster_path}`;
-                }
-              }
-            })
-          );
-        }
-
-        return items;
+        return Array.isArray(historyData) ? historyData : [];
       } catch (error) {
         console.error('Error fetching Trakt:', error);
         return [];
       }
+    })();
+  }
+  return traktRawHistoryCache;
+}
+
+export function getTraktRecentlyWatched(locale: 'ar' | 'en'): Promise<WatchedItem[]> {
+  if (!traktCache[locale]) {
+    traktCache[locale] = (async () => {
+      const historyData = await loadRawTraktHistory();
+      if (historyData.length === 0) return [];
+
+      // Keep only the most recent watch per distinct show or movie (top 3 distinct titles)
+      const seenKeys = new Set<string>();
+      const items: WatchedItem[] = [];
+
+      for (const item of historyData) {
+        const type = item.type || 'unknown';
+        const id = item.id;
+        let dedupeKey = '';
+        let title = '';
+        let link = '#';
+        let overview: string | null = null;
+        let tmdbId: number | undefined;
+
+        try {
+          if (type === 'movie' && item.movie?.ids?.slug) {
+            dedupeKey = `movie:${item.movie.ids.trakt || item.movie.ids.slug}`;
+            title = item.movie.title || (locale === 'ar' ? 'فيلم غير معروف' : 'Unknown Movie');
+            link = `https://trakt.tv/movies/${item.movie.ids.slug}`;
+            overview = item.movie.overview ?? null;
+            tmdbId = item.movie.ids?.tmdb;
+          } else if (type === 'episode' && item.show?.ids?.slug && item.episode) {
+            dedupeKey = `show:${item.show.ids.trakt || item.show.ids.slug}`;
+            const showTitle =
+              item.show.title || (locale === 'ar' ? 'مسلسل غير معروف' : 'Unknown Show');
+            const season = item.episode.season;
+            const number = item.episode.number;
+            const epTitle = item.episode.title ? ` - ${item.episode.title}` : '';
+            const epCode =
+              locale === 'ar'
+                ? `م${String(season).padStart(2, '0')}ح${String(number).padStart(2, '0')}`
+                : `S${String(season).padStart(2, '0')}E${String(number).padStart(2, '0')}`;
+            title = `${showTitle} ${epCode}${epTitle}`;
+            link = `https://trakt.tv/shows/${item.show.ids.slug}/seasons/${season}/episodes/${number}`;
+            overview = item.episode.overview || item.show.overview || null;
+            tmdbId = item.show.ids?.tmdb;
+          }
+        } catch {
+          continue;
+        }
+
+        if (!dedupeKey || seenKeys.has(dedupeKey) || !title || !id) continue;
+        seenKeys.add(dedupeKey);
+        items.push({ id, title, link, type, overview, tmdbId });
+        if (items.length >= 3) break;
+      }
+
+      const TMDB_API_KEY = import.meta.env.TMDB_API_KEY;
+      if (TMDB_API_KEY) {
+        await Promise.allSettled(
+          items.map(async (item) => {
+            if (!item.tmdbId) return;
+            const mediaType = item.type === 'movie' ? 'movie' : 'tv';
+            const langParam = locale === 'ar' ? '&language=ar' : '';
+            let tmdbRes = await fetch(
+              `https://api.themoviedb.org/3/${mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}${langParam}`,
+              { headers: { 'User-Agent': APP_USER_AGENT }, signal: AbortSignal.timeout(6000) }
+            );
+            let tmdbData = tmdbRes.ok ? await tmdbRes.json() : null;
+            // Fallback to default English TMDB record if Arabic poster/overview is missing
+            if (locale === 'ar' && (!tmdbData || !tmdbData.poster_path)) {
+              tmdbRes = await fetch(
+                `https://api.themoviedb.org/3/${mediaType}/${item.tmdbId}?api_key=${TMDB_API_KEY}`,
+                { headers: { 'User-Agent': APP_USER_AGENT }, signal: AbortSignal.timeout(6000) }
+              );
+              if (tmdbRes.ok) {
+                const enData = await tmdbRes.json();
+                tmdbData = { ...(enData || {}), ...(tmdbData || {}), poster_path: tmdbData?.poster_path || enData?.poster_path };
+              }
+            }
+            if (tmdbData?.poster_path) {
+              item.posterUrl = `https://image.tmdb.org/t/p/w200${tmdbData.poster_path}`;
+            }
+            if (locale === 'ar' && tmdbData?.overview) {
+              item.overview = tmdbData.overview;
+            }
+          })
+        );
+      }
+
+      return items;
     })();
   }
   return traktCache[locale]!;

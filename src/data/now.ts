@@ -12,8 +12,8 @@ export const nowData = {
     en: 'November 2026',
   },
   intro: {
-    ar: 'لقطة سريعة لما أركز عليه هذه الفترة — مستوحاة من فكرة صفحات /now في الويب المستقل.',
-    en: 'A snapshot of what I am focused on right now — inspired by the indie web /now movement.',
+    ar: 'لقطة سريعة لما أركز عليه هذه الفترة في العمل، الجري، القراءة، والمشاريع الشخصية.',
+    en: 'A quick snapshot of what I am currently focused on across work, running, reading, and side projects.',
   },
   sections: [
     {

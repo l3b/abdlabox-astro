@@ -53,9 +53,12 @@ const pageDescription = nowData.intro[locale];
     </div>
 
     <div class="mt-10 pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4 text-sm text-zinc-500 dark:text-zinc-400">
-      <span>
-        {isAr ? 'مستوحاة من مبادرة nownownow.com' : 'Inspired by nownownow.com'}
-      </span>
+      <a
+        href={`/${locale}/signals/`}
+        class="hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
+      >
+        {isAr ? 'تصفح الإشارات السريعة ←' : 'Browse quick Signals →'}
+      </a>
       <a
         href={`/${locale}/contact/`}
         class="font-semibold text-electric-blue dark:text-electric-blue-light hover:underline"
