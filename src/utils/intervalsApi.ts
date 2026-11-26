@@ -1,6 +1,6 @@
 // Intervals.icu Running Stats Integration
-// - Counts ALL runs in mileage, weekly rhythm & streak totals
-// - Verifies Strava public visibility so ONLY public runs appear in the public list
+// - Counts ALL runs in mileage, weekly rhythm, consistency heatmap & streak totals
+// - Verifies Strava public visibility so ONLY public runs appear in public feeds
 // - Resolves per-run shoe name cleanly from Intervals.icu gear
 import { PROFILES } from '../data/socialLinks';
 
@@ -42,6 +42,20 @@ export interface WeeklyBar {
   isCurrent: boolean;
 }
 
+export interface MonthlyBar {
+  key: string;
+  label: string;
+  distanceKm: number;
+  runs: number;
+  percent: number;
+}
+
+export interface HeatmapDay {
+  date: string;
+  distanceKm: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
 export interface RunActivity {
   id: string;
   name: string;
@@ -70,15 +84,24 @@ export interface RunningStats {
   };
   streakDays: number;
   weeklyBars: WeeklyBar[];
+  monthlyBars: MonthlyBar[];
+  heatmapDays: HeatmapDay[];
+  totalRecentKm: number;
+  totalRecentRuns: number;
   recentActivities: RunActivity[];
+  allPublicActivities: RunActivity[];
 }
 
 interface RawIntervalsData {
   thisWeek: { distance: number; timeMin: number; runs: number };
   thisMonth: { distance: number; runs: number; elevationM: number; monthIndex: number };
   streakDays: number;
-  weeklyTotalsKm: number[]; // oldest -> newest (4 weeks)
-  recentActivities: Array<{
+  weeklyTotalsKm: number[];
+  monthlyBuckets: Array<{ key: string; monthIndex: number; year: number; distanceKm: number; runs: number }>;
+  heatmapDays: HeatmapDay[];
+  totalRecentKm: number;
+  totalRecentRuns: number;
+  publicActivities: Array<{
     id: string;
     name: string;
     distance: number;
@@ -95,7 +118,6 @@ interface RawIntervalsData {
 
 const metersToKm = (meters: number): number => Math.round((meters / 1000) * 10) / 10;
 
-// Clean duplicated model strings like "Nike Pegasus 41 pegasus 41 blue" -> "Nike Pegasus 41"
 function cleanShoeName(raw: string): string {
   const trimmed = raw.trim().replace(/\s+/g, ' ');
   const words = trimmed.split(' ');
@@ -198,7 +220,6 @@ function calculateStreakDays(runDates: string[]): number {
   return streak;
 }
 
-// Verify whether a Strava activity is publicly viewable (200 OK vs 307 /register/free for private)
 async function isStravaActivityPublic(stravaId: string): Promise<boolean> {
   try {
     const res = await fetch(`https://www.strava.com/activities/${stravaId}`, {
@@ -208,7 +229,6 @@ async function isStravaActivityPublic(stravaId: string): Promise<boolean> {
       signal: AbortSignal.timeout(5000),
     });
     if (res.status === 200) return true;
-    // Some Strava edges reject HEAD with 405 — fall back to lightweight GET
     if (res.status === 405) {
       const getRes = await fetch(`https://www.strava.com/activities/${stravaId}`, {
         method: 'GET',
@@ -245,7 +265,7 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
 
     const nowKsa = new Date(Date.now() + 3 * 60 * 60 * 1000);
     const oldestDate = new Date(nowKsa);
-    oldestDate.setUTCDate(oldestDate.getUTCDate() - 90);
+    oldestDate.setUTCDate(oldestDate.getUTCDate() - 182); // ~26 weeks for consistency heatmap
     const oldest = oldestDate.toISOString().slice(0, 10);
     const newest = nowKsa.toISOString().slice(0, 10);
 
@@ -272,7 +292,6 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       .filter((a) => a.type && RUNNING_TYPES.has(a.type) && (a.distance || 0) > 0)
       .sort((a, b) => b.start_date_local.localeCompare(a.start_date_local));
 
-    // Build shoe ID -> clean name lookup
     const gearMap = new Map<string, string>();
     if (gearRes.status === 'fulfilled' && gearRes.value.ok) {
       const rawGear: IntervalsGear[] = await gearRes.value.json();
@@ -283,7 +302,6 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       }
     }
 
-    // Calendar boundaries in KSA time (Sunday start of week)
     const todayDate = new Date(
       Date.UTC(nowKsa.getUTCFullYear(), nowKsa.getUTCMonth(), nowKsa.getUTCDate())
     );
@@ -299,7 +317,7 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
     const sumElev = (arr: IntervalsActivity[]) =>
       Math.round(arr.reduce((s, r) => s + (r.total_elevation_gain || 0), 0));
 
-    // 4-week totals (oldest -> current week)
+    // 4-week totals
     const weeklyTotalsKm: number[] = [];
     let currentWeekRuns: IntervalsActivity[] = [];
     for (let w = 3; w >= 0; w--) {
@@ -307,7 +325,6 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       wStart.setUTCDate(wStart.getUTCDate() - w * 7);
       const wEnd = new Date(wStart);
       wEnd.setUTCDate(wEnd.getUTCDate() + 7);
-
       const startStr = wStart.toISOString().slice(0, 10);
       const endStr = wEnd.toISOString().slice(0, 10);
       const bucket = runs.filter((r) => {
@@ -318,10 +335,44 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       if (w === 0) currentWeekRuns = bucket;
     }
 
+    // Monthly buckets across fetched range (up to last 6 months, oldest -> newest)
+    const monthlyMap = new Map<string, { year: number; monthIndex: number; distanceKm: number; runs: number }>();
+    for (const r of runs) {
+      const key = r.start_date_local.slice(0, 7);
+      const [yy, mm] = key.split('-').map(Number);
+      const existing = monthlyMap.get(key) || { year: yy, monthIndex: mm - 1, distanceKm: 0, runs: 0 };
+      existing.distanceKm = Math.round((existing.distanceKm + (r.distance || 0) / 1000) * 10) / 10;
+      existing.runs += 1;
+      monthlyMap.set(key, existing);
+    }
+    const monthlyBuckets = Array.from(monthlyMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, v]) => ({ key, ...v }));
+
+    // Build 26-week daily heatmap (182 days aligned to Sunday start)
+    const dailyKm = new Map<string, number>();
+    for (const r of runs) {
+      const day = r.start_date_local.slice(0, 10);
+      dailyKm.set(day, Math.round(((dailyKm.get(day) || 0) + (r.distance || 0) / 1000) * 10) / 10);
+    }
+
+    const heatmapStart = new Date(startOfCurrentWeek);
+    heatmapStart.setUTCDate(heatmapStart.getUTCDate() - 25 * 7);
+    const heatmapDays: HeatmapDay[] = [];
+    const cursor = new Date(heatmapStart);
+    while (cursor <= todayDate) {
+      const iso = cursor.toISOString().slice(0, 10);
+      const km = dailyKm.get(iso) || 0;
+      const level: 0 | 1 | 2 | 3 | 4 =
+        km === 0 ? 0 : km < 4 ? 1 : km < 7 ? 2 : km < 10 ? 3 : 4;
+      heatmapDays.push({ date: iso, distanceKm: km, level });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
     const monthRuns = runs.filter((r) => r.start_date_local.startsWith(currentMonthPrefix));
     const streakDays = calculateStreakDays(runs.map((r) => r.start_date_local));
 
-    // Filter recent activities to ONLY public Strava runs (never leaking private runs)
+    // Verify public Strava visibility on up to 20 recent runs
     const candidates = runs
       .filter((r) => {
         if (!r.strava_id) return false;
@@ -329,7 +380,7 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
         if (lowerTags.includes('private') || lowerTags.includes('hidden')) return false;
         return true;
       })
-      .slice(0, 15);
+      .slice(0, 20);
 
     const visibilityResults = await Promise.all(
       candidates.map(async (r) => ({
@@ -338,33 +389,32 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       }))
     );
 
-    const publicRuns = visibilityResults
+    const publicActivities = visibilityResults
       .filter((x) => x.isPublic)
       .map((x) => x.run)
-      .slice(0, 3);
+      .slice(0, 8)
+      .map((r) => {
+        const shoeName =
+          (r.gear?.id ? gearMap.get(r.gear.id) : undefined) ||
+          (r.gear?.name ? cleanShoeName(r.gear.name) : undefined);
 
-    const recentActivities = publicRuns.map((r) => {
-      const shoeName =
-        (r.gear?.id ? gearMap.get(r.gear.id) : undefined) ||
-        (r.gear?.name ? cleanShoeName(r.gear.name) : undefined);
-
-      return {
-        id: r.id,
-        name: r.name || 'Run',
-        distance: metersToKm(r.distance || 0),
-        movingTimeSec: r.moving_time || 0,
-        pace: calculatePace(r.moving_time || 0, r.distance || 0),
-        startDateLocal: r.start_date_local,
-        avgHr: r.average_heartrate ? Math.round(r.average_heartrate) : undefined,
-        elevationM:
-          r.total_elevation_gain && r.total_elevation_gain >= 1
-            ? Math.round(r.total_elevation_gain)
-            : undefined,
-        feelEmoji: feelToEmoji(r.feel),
-        shoeName,
-        link: r.strava_id ? `https://www.strava.com/activities/${r.strava_id}` : PROFILES.strava.url,
-      };
-    });
+        return {
+          id: r.id,
+          name: r.name || 'Run',
+          distance: metersToKm(r.distance || 0),
+          movingTimeSec: r.moving_time || 0,
+          pace: calculatePace(r.moving_time || 0, r.distance || 0),
+          startDateLocal: r.start_date_local,
+          avgHr: r.average_heartrate ? Math.round(r.average_heartrate) : undefined,
+          elevationM:
+            r.total_elevation_gain && r.total_elevation_gain >= 1
+              ? Math.round(r.total_elevation_gain)
+              : undefined,
+          feelEmoji: feelToEmoji(r.feel),
+          shoeName,
+          link: r.strava_id ? `https://www.strava.com/activities/${r.strava_id}` : PROFILES.strava.url,
+        };
+      });
 
     return {
       thisWeek: {
@@ -380,7 +430,11 @@ async function loadRawIntervalsData(): Promise<RawIntervalsData | null> {
       },
       streakDays,
       weeklyTotalsKm,
-      recentActivities,
+      monthlyBuckets,
+      heatmapDays,
+      totalRecentKm: sumDist(runs),
+      totalRecentRuns: runs.length,
+      publicActivities,
     };
   } catch (error) {
     console.error('Error fetching Intervals.icu running stats:', error);
@@ -414,6 +468,37 @@ export async function fetchRunningStats(locale: 'ar' | 'en' = 'ar'): Promise<Run
     isCurrent: idx === 3,
   }));
 
+  const maxMonth = Math.max(...raw.monthlyBuckets.map((m) => m.distanceKm), 1);
+  const monthlyBars: MonthlyBar[] = raw.monthlyBuckets.map((m) => {
+    const dt = new Date(Date.UTC(m.year, m.monthIndex, 15));
+    const label = dt.toLocaleDateString(locale === 'ar' ? 'ar-SA' : 'en-US', {
+      month: 'short',
+      year: '2-digit',
+      timeZone: 'UTC',
+    });
+    return {
+      key: m.key,
+      label,
+      distanceKm: m.distanceKm,
+      runs: m.runs,
+      percent: Math.max(12, Math.round((m.distanceKm / maxMonth) * 100)),
+    };
+  });
+
+  const formattedPublic = raw.publicActivities.map((a) => ({
+    id: a.id,
+    name: a.name,
+    distance: a.distance,
+    time: secondsToTime(a.movingTimeSec, locale),
+    pace: a.pace,
+    date: formatRelativeDate(a.startDateLocal, locale),
+    avgHr: a.avgHr,
+    elevationM: a.elevationM,
+    feelEmoji: a.feelEmoji,
+    shoeName: a.shoeName,
+    link: a.link,
+  }));
+
   return {
     thisWeek: raw.thisWeek,
     thisMonth: {
@@ -424,18 +509,11 @@ export async function fetchRunningStats(locale: 'ar' | 'en' = 'ar'): Promise<Run
     },
     streakDays: raw.streakDays,
     weeklyBars,
-    recentActivities: raw.recentActivities.map((a) => ({
-      id: a.id,
-      name: a.name,
-      distance: a.distance,
-      time: secondsToTime(a.movingTimeSec, locale),
-      pace: a.pace,
-      date: formatRelativeDate(a.startDateLocal, locale),
-      avgHr: a.avgHr,
-      elevationM: a.elevationM,
-      feelEmoji: a.feelEmoji,
-      shoeName: a.shoeName,
-      link: a.link,
-    })),
+    monthlyBars,
+    heatmapDays: raw.heatmapDays,
+    totalRecentKm: raw.totalRecentKm,
+    totalRecentRuns: raw.totalRecentRuns,
+    recentActivities: formattedPublic.slice(0, 3),
+    allPublicActivities: formattedPublic,
   };
 }

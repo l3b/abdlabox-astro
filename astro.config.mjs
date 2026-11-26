@@ -30,6 +30,7 @@ export default defineConfig({
       }
     }),
     sitemap({
+      filter: (page) => !page.includes('/coach'),
       i18n: {
         defaultLocale: 'ar',
         locales: {

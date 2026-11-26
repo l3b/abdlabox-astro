@@ -1,0 +1,291 @@
+---
+import { getCollection } from 'astro:content';
+import { getAlternatePath, type Locale } from '../utils/i18n';
+
+export interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const isAr = lang === 'ar';
+const alternatePath = await getAlternatePath(Astro.url.pathname, lang);
+
+const [posts, signals] = await Promise.all([
+  getCollection('blog', ({ data }) => data.language === lang && data.isDraft !== true),
+  getCollection('signals', ({ data }) => data.language === lang && data.isDraft !== true),
+]);
+
+const items = [
+  // Pages
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'الواجهة' : 'The Base',
+    subtitle: isAr ? 'الصفحة الرئيسية' : 'Homepage dashboard',
+    href: `/${lang}/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'المدونة' : 'Blog',
+    subtitle: isAr ? 'جميع المقالات' : 'All articles',
+    href: `/${lang}/blog/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'إشارات' : 'Signals',
+    subtitle: isAr ? 'ملاحظات وأفكار سريعة' : 'Short notes & quick links',
+    href: `/${lang}/signals/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'الجري' : 'Running',
+    subtitle: isAr ? 'سجل الجري والسباقات وخريطة الاستمرارية' : 'Consistency heatmap, races & runs',
+    href: `/${lang}/running/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'الآن' : 'Now',
+    subtitle: isAr ? 'ما أركز عليه هذه الفترة' : 'What I am focused on right now',
+    href: `/${lang}/now/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'من وراء الكثبان؟' : 'Behind the Dunes?',
+    subtitle: isAr ? 'عن عبدالله' : 'About Abdullah',
+    href: `/${lang}/about/`,
+  },
+  {
+    group: isAr ? 'الصفحات' : 'Pages',
+    title: isAr ? 'أرسل إشارة' : 'Send a Signal',
+    subtitle: isAr ? 'التواصل وحجز موعد' : 'Contact & schedule a call',
+    href: `/${lang}/contact/`,
+  },
+  // Blog posts
+  ...posts
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    .map((p) => ({
+      group: isAr ? 'المقالات' : 'Articles',
+      title: p.data.title,
+      subtitle: p.data.description || '',
+      href: `/${lang}/blog/${p.slug.replace(new RegExp(`^${lang}/`), '')}`,
+    })),
+  // Signals
+  ...signals
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    .slice(0, 6)
+    .map((s) => ({
+      group: isAr ? 'إشارات' : 'Signals',
+      title: s.data.title || s.body.trim().slice(0, 60),
+      subtitle: s.data.category,
+      href: `/${lang}/signals/`,
+    })),
+  // Quick Actions
+  {
+    group: isAr ? 'إجراءات سريعة' : 'Actions',
+    title: isAr ? 'تبديل الوضع الداكن / الفاتح' : 'Toggle Dark / Light Mode',
+    subtitle: isAr ? 'تغيير مظهر الموقع' : 'Switch color theme',
+    action: 'toggle-theme',
+  },
+  {
+    group: isAr ? 'إجراءات سريعة' : 'Actions',
+    title: isAr ? 'Switch to English' : 'التبديل إلى العربية',
+    subtitle: isAr ? 'فتح النسخة الإنجليزية' : 'Switch site language',
+    href: alternatePath,
+  },
+  {
+    group: isAr ? 'إجراءات سريعة' : 'Actions',
+    title: isAr ? 'نسخ رابط الصفحة' : 'Copy Current Page URL',
+    subtitle: isAr ? 'نسخ الرابط إلى الحافظة' : 'Copy link to clipboard',
+    action: 'copy-url',
+  },
+];
+---
+
+<div
+  id="cmdk-backdrop"
+  class="fixed inset-0 z-50 hidden items-start justify-center bg-zinc-950/50 backdrop-blur-sm px-4 pt-[12vh]"
+  role="dialog"
+  aria-modal="true"
+  aria-label={isAr ? 'البحث السريع' : 'Quick Command Palette'}
+>
+  <div
+    id="cmdk-dialog"
+    class="w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden"
+  >
+    <div class="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+      <svg class="w-4 h-4 text-zinc-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+      </svg>
+      <input
+        id="cmdk-input"
+        type="text"
+        autocomplete="off"
+        placeholder={isAr ? 'ابحث في الصفحات، المقالات، والإجراءات...' : 'Search pages, articles, signals, actions...'}
+        class="w-full bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none border-0 p-0"
+      />
+      <kbd class="hidden sm:inline-flex px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700">
+        ESC
+      </kbd>
+    </div>
+
+    <div id="cmdk-list" class="max-h-80 overflow-y-auto p-2 space-y-1"></div>
+
+    <div class="px-4 py-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
+      <span>{isAr ? '↑↓ للتنقل • Enter للاختيار' : '↑↓ to navigate • Enter to select'}</span>
+      <span class="font-mono">abdla.box</span>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ cmdkItems: items, emptyText: isAr ? 'لا توجد نتائج مطابقة' : 'No matching results', copiedText: isAr ? 'تم نسخ الرابط ✓' : 'Link copied ✓' }}>
+  window.__abdlaCmdkItems = cmdkItems;
+  window.__abdlaCmdkEmpty = emptyText;
+  window.__abdlaCmdkCopied = copiedText;
+</script>
+
+<script>
+  function initCommandPalette() {
+    const backdrop = document.getElementById('cmdk-backdrop');
+    const input = document.getElementById('cmdk-input') as HTMLInputElement | null;
+    const list = document.getElementById('cmdk-list');
+    if (!backdrop || !input || !list) return;
+
+    const allItems: Array<{ group: string; title: string; subtitle?: string; href?: string; action?: string }> =
+      (window as any).__abdlaCmdkItems || [];
+    const emptyText: string = (window as any).__abdlaCmdkEmpty || 'No results';
+    const copiedText: string = (window as any).__abdlaCmdkCopied || 'Copied ✓';
+
+    let filtered = [...allItems];
+    let activeIdx = 0;
+
+    function close() {
+      backdrop!.classList.add('hidden');
+      backdrop!.classList.remove('flex');
+    }
+
+    function open() {
+      backdrop!.classList.remove('hidden');
+      backdrop!.classList.add('flex');
+      input!.value = '';
+      filtered = [...allItems];
+      activeIdx = 0;
+      render();
+      requestAnimationFrame(() => input!.focus());
+    }
+
+    function execute(item: (typeof allItems)[number]) {
+      if (item.action === 'toggle-theme') {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        close();
+      } else if (item.action === 'copy-url') {
+        navigator.clipboard?.writeText(window.location.href).catch(() => {});
+        input!.value = copiedText;
+        setTimeout(close, 500);
+      } else if (item.href) {
+        close();
+        window.location.href = item.href;
+      }
+    }
+
+    function render() {
+      if (filtered.length === 0) {
+        list!.innerHTML = `<div class="py-8 text-center text-xs text-zinc-400">${emptyText}</div>`;
+        return;
+      }
+
+      let html = '';
+      let lastGroup = '';
+      filtered.forEach((item, idx) => {
+        if (item.group !== lastGroup) {
+          lastGroup = item.group;
+          html += `<div class="px-2.5 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">${item.group}</div>`;
+        }
+        const isActive = idx === activeIdx;
+        html += `
+          <button
+            type="button"
+            data-cmdk-idx="${idx}"
+            class="w-full text-start px-3 py-2 rounded-xl flex items-center justify-between gap-3 transition-colors ${
+              isActive
+                ? 'bg-sky-50 dark:bg-sky-500/15 text-sky-900 dark:text-sky-200'
+                : 'text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            }"
+          >
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">${item.title}</div>
+              ${item.subtitle ? `<div class="text-[11px] text-zinc-400 truncate">${item.subtitle}</div>` : ''}
+            </div>
+            <span class="text-xs text-zinc-400 flex-shrink-0">↵</span>
+          </button>
+        `;
+      });
+      list!.innerHTML = html;
+
+      list!.querySelectorAll<HTMLButtonElement>('[data-cmdk-idx]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.cmdkIdx);
+          if (filtered[idx]) execute(filtered[idx]);
+        });
+      });
+    }
+
+    input.oninput = () => {
+      const q = input.value.trim().toLowerCase();
+      filtered = q
+        ? allItems.filter(
+            (i) =>
+              i.title.toLowerCase().includes(q) ||
+              (i.subtitle || '').toLowerCase().includes(q) ||
+              i.group.toLowerCase().includes(q)
+          )
+        : [...allItems];
+      activeIdx = 0;
+      render();
+    };
+
+    input.onkeydown = (e) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIdx = (activeIdx + 1) % Math.max(filtered.length, 1);
+        render();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIdx = (activeIdx - 1 + Math.max(filtered.length, 1)) % Math.max(filtered.length, 1);
+        render();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (filtered[activeIdx]) execute(filtered[activeIdx]);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+      }
+    };
+
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) close();
+    };
+
+    document.querySelectorAll('[data-open-cmdk]').forEach((trigger) => {
+      (trigger as HTMLElement).onclick = () => open();
+    });
+
+    if (!(window as any).__abdlaCmdkBound) {
+      (window as any).__abdlaCmdkBound = true;
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          const bd = document.getElementById('cmdk-backdrop');
+          if (!bd) return;
+          if (bd.classList.contains('hidden')) {
+            document.querySelector<HTMLElement>('[data-open-cmdk]')?.click();
+          } else {
+            bd.classList.add('hidden');
+            bd.classList.remove('flex');
+          }
+        }
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initCommandPalette);
+</script>

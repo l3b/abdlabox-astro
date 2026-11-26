@@ -1,29 +1,28 @@
-/* src/styles/tailwind.css */
+/* src/styles/tailwind.css — Electric Dunes v2.0 (Crisp Minimal) */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    @apply bg-cool-light-gray text-soft-charcoal transition-colors duration-200;
+    @apply bg-[#FAFAFA] text-zinc-900 transition-colors duration-200;
   }
 
   :root.dark {
-    @apply text-gray-100;
-    background: #0f0f0f;
+    @apply bg-[#09090B] text-zinc-100;
   }
 
   body {
     @apply bg-inherit text-inherit min-h-screen;
   }
 
-  /* Bento dashboard cards (homepage widgets) */
+  /* Bento dashboard cards (homepage & widgets) */
   .bento-card {
-    @apply bg-white dark:bg-zinc-900/90 p-5 md:p-6 border border-gray-200/80 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md dark:hover:border-zinc-700 transition-all duration-200 flex flex-col;
+    @apply bg-white dark:bg-zinc-900/90 p-5 md:p-6 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md dark:hover:border-zinc-700 transition-all duration-200 flex flex-col;
   }
 
   .bento-header {
-    @apply flex items-center justify-between gap-3 mb-5 pb-3.5 border-b border-gray-100 dark:border-zinc-800;
+    @apply flex items-center justify-between gap-3 mb-5 pb-3.5 border-b border-zinc-100 dark:border-zinc-800;
   }
 
   .bento-icon {
@@ -31,145 +30,91 @@
   }
 
   .bento-title {
-    @apply text-lg font-semibold text-soft-charcoal dark:text-gray-100 m-0 leading-tight;
+    @apply text-lg font-semibold text-zinc-900 dark:text-zinc-100 m-0 leading-tight;
   }
 
   .bento-action {
-    @apply text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue-light inline-flex items-center gap-1 transition-colors flex-shrink-0;
+    @apply text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-electric-blue dark:hover:text-electric-blue-light inline-flex items-center gap-1 transition-colors flex-shrink-0;
   }
 
-  /* Enhanced card styles (blog listings & tag pages) */
+  /* Unified surface card (Blog, Signals, Running, Now, Tags) */
   .card {
-    @apply bg-white block p-4 md:p-6 border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 ease-out transform hover:-translate-y-1;
+    @apply bg-white dark:bg-zinc-900/90 block p-5 md:p-6 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200;
   }
 
-  .dark .card {
-    @apply bg-gray-900/90 border-gray-700 hover:shadow-2xl hover:shadow-electric-blue/20 hover:border-gray-600;
-  }
-  
-  /* Card variations */
-  .card-featured {
-    @apply relative overflow-hidden;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%);
-  }
-  
-  .dark .card-featured {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(20, 184, 166, 0.15) 100%);
-    @apply border-electric-blue/40;
-  }
-  
-  .card-compact {
-    @apply p-3 md:p-4;
-  }
-  
-  /* Card top accent bars */
-  .card-accent-blog { @apply border-t-4 border-t-lavender; }
-  .card-accent-fitness { @apply border-t-4 border-t-lime; }
-  .card-accent-reading { @apply border-t-4 border-t-teal; }
-  .card-accent-social { @apply border-t-4 border-t-coral; }
-  .card-accent-code { @apply border-t-4 border-t-electric-blue; }
-  .card-accent-entertainment { @apply border-t-4 border-t-neon-yellow; }
-
-  /* Dark mode text styles - Enhanced contrast */
-  .dark h1,
-  .dark h3,
-  .dark h4 {
-    @apply text-gray-50;
-  }
-  
   .dark .text-soft-charcoal {
-    @apply text-gray-100;
-  }
-
-  .dark h2:not(.bento-title) {
-    @apply text-lavender;
-  }
-  
-  /* Dark mode card titles should use lavender */
-  .dark .card h2,
-  .dark .card h3 {
-    @apply text-lavender;
+    @apply text-zinc-100;
   }
 
   .dark .text-gray-600 {
-    @apply text-gray-400;
+    @apply text-zinc-400;
   }
-  
+
   .dark .text-gray-700 {
-    @apply text-gray-300;
+    @apply text-zinc-300;
   }
-  
+
   .dark .text-gray-500 {
-    @apply text-gray-400;
+    @apply text-zinc-400;
   }
 
   /* Dark mode form inputs */
   .dark input,
   .dark textarea {
-    @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500;
+    @apply bg-zinc-900 border-zinc-700 text-zinc-100 placeholder-zinc-500;
   }
 
-  /* Dark mode blog post styles - Better readability */
+  /* Dark mode blog prose readability */
   .dark .prose {
-    @apply text-gray-100;
+    @apply text-zinc-200;
   }
 
   .dark .prose h1,
   .dark .prose h2,
   .dark .prose h3,
   .dark .prose h4 {
-    @apply text-gray-50;
+    @apply text-zinc-50;
   }
 
   .dark .prose p,
   .dark .prose li {
-    @apply text-gray-200;
-  }
-  
-  .dark .prose strong {
-    @apply text-gray-50;
-  }
-  
-  .dark .prose a {
-    @apply text-lavender hover:text-teal;
+    @apply text-zinc-300;
   }
 
-  /* Footer dark mode - Better contrast */
-  .dark footer {
-    @apply bg-gray-900/80 border-gray-700 text-gray-300;
+  .dark .prose strong {
+    @apply text-zinc-50;
+  }
+
+  .dark .prose a {
+    @apply text-electric-blue-light hover:text-teal;
   }
 }
 
 /* Arabic Typography System */
 [dir="rtl"] body,
 [lang="ar"] body {
-  font-family: 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', 'Tajawal', sans-serif;
   font-weight: 400;
   letter-spacing: 0;
-  word-spacing: 0.05em;
-  line-height: 1.8;
+  word-spacing: 0.04em;
+  line-height: 1.85;
 }
 
-/* Main Page Titles Only - Using Year of Camel */
 [dir="rtl"] h1,
 [lang="ar"] h1 {
-  font-family: 'Year of Camel', 'AlNaseeb', 'Tajawal', sans-serif;
+  font-family: 'Year of Camel', 'Vazirmatn', sans-serif;
   font-weight: 700;
-  font-size: 3.5rem;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
+  line-height: 1.25;
 }
 
-/* Blog Post Titles (h2 in listings, h1 in post pages) - Keep Year of Camel but smaller */
 [dir="rtl"] article h1,
 [dir="rtl"] article h2,
 [lang="ar"] article h1,
 [lang="ar"] article h2 {
-  font-family: 'Year of Camel', 'AlNaseeb', 'Tajawal', sans-serif;
+  font-family: 'Year of Camel', 'Vazirmatn', sans-serif;
   font-weight: 600;
 }
 
-/* Card Section Titles (homepage boxes) - Use cleaner font */
 [dir="rtl"] .card h2,
 [dir="rtl"] .card h3,
 [dir="rtl"] .bento-card h2,
@@ -178,58 +123,34 @@
 [lang="ar"] .card h3,
 [lang="ar"] .bento-card h2,
 [lang="ar"] .bento-card h3 {
-  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', 'Tajawal', sans-serif !important;
+  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', sans-serif;
   font-weight: 600;
   line-height: 1.5;
 }
 
-/* Navigation Links - Clean font for better readability */
 [dir="rtl"] header,
 [dir="rtl"] nav,
 [lang="ar"] header,
 [lang="ar"] nav {
-  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', 'Readex Pro', 'Tajawal', sans-serif;
+  font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', sans-serif;
   font-weight: 500;
 }
 
-/* General h2 and h3 (non-card) - Medium display font */
-[dir="rtl"] h2:not(.card h2),
-[dir="rtl"] h3:not(.card h3),
-[lang="ar"] h2:not(.card h2),
-[lang="ar"] h3:not(.card h3) {
-  font-family: 'Year of Camel', 'Vazirmatn', 'Tajawal', sans-serif;
-  font-weight: 600;
-}
-
-[dir="rtl"] h2:not(.bento-title):not(.card h2),
-[lang="ar"] h2:not(.bento-title):not(.card h2) {
-  font-size: 2rem;
-  line-height: 1.4;
-}
-
-[dir="rtl"] h3:not(.bento-card h3):not(.card h3),
-[lang="ar"] h3:not(.bento-card h3):not(.card h3) {
-  font-size: 1.5rem;
-  line-height: 1.5;
-}
-
-/* English font application - Body text with more character */
+/* English Typography System */
 [dir="ltr"] body,
 [lang="en"] body {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: -0.01em;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-/* English Main Titles (H1) - Distinctive like Year of Camel */
 [dir="ltr"] h1,
 [lang="en"] h1 {
   font-family: 'Space Grotesk', 'Inter', sans-serif;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
-/* English Blog/Article Headings */
 [dir="ltr"] article h1,
 [dir="ltr"] article h2,
 [lang="en"] article h1,
@@ -238,7 +159,6 @@
   font-weight: 600;
 }
 
-/* English Card Titles - Clean like Vazirmatn */
 [dir="ltr"] .card h2,
 [dir="ltr"] .card h3,
 [dir="ltr"] .bento-card h2,
@@ -247,97 +167,99 @@
 [lang="en"] .card h3,
 [lang="en"] .bento-card h2,
 [lang="en"] .bento-card h3 {
-  font-family: 'Inter', 'IBM Plex Sans', sans-serif !important;
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
 }
 
-/* English Navigation - Clean and modern */
 [dir="ltr"] header,
 [dir="ltr"] nav,
 [lang="en"] header,
 [lang="en"] nav {
-  font-family: 'Inter', 'IBM Plex Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
-}
-
-/* English General Headings */
-[dir="ltr"] h2,
-[dir="ltr"] h3,
-[lang="en"] h2,
-[lang="en"] h3 {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 /* Preserve Shiki syntax highlighting inside code blocks */
 .prose pre {
   direction: ltr;
   text-align: left;
+  position: relative;
 }
 
-/* Remove previous main a, h1, h2 styles if they exist */
-/* Add this for social icons */
+.code-copy-btn {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.7rem;
+  font-family: 'Inter', sans-serif;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.code-copy-btn:hover {
+  background: rgba(14, 165, 233, 0.35);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #ffffff;
+}
+
 .social-icon-link svg {
   fill: currentColor;
-  /* Make SVG fill color inherit text color */
 }
 
-/* Base Heading Styles (within <main>, excluding bento headers) */
-main h1 {
-  @apply text-3xl font-bold mb-4 md:text-4xl;
+/* Floating Frosted-Glass Navbar */
+.header-glass {
+  @apply sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/70 dark:border-zinc-800/80 transition-colors;
 }
 
-main h2:not(.bento-title) {
-  @apply text-2xl font-semibold mt-8 mb-3;
-}
-
-main h3:not(.bento-card h3) {
-  @apply text-xl font-semibold mt-6 mb-2;
-}
-
-/* Base link style within main (outside bento cards) */
-main a:not(.bento-card a) {
-  @apply text-teal hover:text-lavender;
-}
-
-/* ... other custom base styles ... */
-
-.header-top {
-  @apply bg-electric-blue text-cool-light-gray shadow-lg sticky top-0 z-50;
-}
-
-.dark .header-top {
-  @apply bg-gray-900/95 text-gray-100 border-b border-gray-700 backdrop-blur-sm;
-}
-
-/* Logo Font - Simple but with personality */
+/* Wordmark Font */
 header .site-title,
 header .site-title a {
-  font-family: 'Comfortaa', 'Quicksand', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Comfortaa', 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 ::selection {
-  @apply bg-neon-yellow text-soft-charcoal;
-}
-.dark ::selection{
-  @apply bg-teal;
+  @apply bg-neon-yellow text-zinc-950;
 }
 
+.dark ::selection {
+  @apply bg-electric-blue text-zinc-950;
+}
+
+/* WCAG-safe high-contrast tags (light & dark mode) */
 .tag {
-  @apply inline-block bg-electric-blue text-cool-light-gray px-2.5 py-0.5 rounded-full text-xs font-semibold hover:bg-neon-yellow hover:text-soft-charcoal transition-colors duration-200 mr-2 mb-1;
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-800 border border-sky-200/90 hover:bg-electric-blue hover:text-white hover:border-electric-blue transition-colors duration-150;
 }
 
 .dark .tag {
-  @apply bg-lavender/90 text-gray-900 hover:bg-teal hover:text-gray-900;
+  @apply bg-sky-500/15 text-sky-200 border-sky-400/30 hover:bg-electric-blue-light hover:text-zinc-950 hover:border-electric-blue-light;
 }
 
+/* Primary Button */
 .button {
-  @apply px-6 py-2 bg-electric-blue text-cool-light-gray font-semibold rounded-md hover:bg-neon-yellow hover:text-soft-charcoal focus:outline-none focus:ring-2 focus:ring-neon-yellow focus:ring-offset-2 transition-colors duration-200;
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-electric-blue text-white font-semibold rounded-xl hover:bg-electric-blue-dark focus:outline-none focus:ring-2 focus:ring-electric-blue/50 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 transition-all duration-150 shadow-sm;
 }
 
 .dark .button {
-  @apply bg-electric-blue text-gray-900 hover:bg-teal;
+  @apply bg-electric-blue-light text-zinc-950 hover:bg-neon-yellow hover:text-zinc-950;
+}
+
+/* Subtle Electric Dunes ambient glow */
+.dunes-hero-bg {
+  background:
+    radial-gradient(60% 80% at 20% 0%, rgba(14, 165, 233, 0.12) 0%, transparent 65%),
+    radial-gradient(50% 70% at 85% 15%, rgba(255, 230, 0, 0.10) 0%, transparent 60%);
+}
+
+.dark .dunes-hero-bg {
+  background:
+    radial-gradient(60% 80% at 20% 0%, rgba(14, 165, 233, 0.18) 0%, transparent 65%),
+    radial-gradient(50% 70% at 85% 15%, rgba(255, 230, 0, 0.08) 0%, transparent 60%);
 }

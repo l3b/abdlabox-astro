@@ -1,0 +1,349 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getBlogTranslation, type Locale } from '../utils/i18n';
+import { generateBlogPostSchema } from '../utils/structuredData';
+import { imageManager } from '../utils/imageUpload';
+import { getReadingTime } from '../utils/readingTime';
+import { getOrCreateTag, normalizeTag } from '../data/tags';
+import OptimizedImage from './OptimizedImage.astro';
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  post: CollectionEntry<'blog'>;
+  locale: Locale;
+}
+
+const { post, locale } = Astro.props;
+const isAr = locale === 'ar';
+const { Content, headings } = await post.render();
+const translatedPost = await getBlogTranslation(post);
+
+const allPosts = await getCollection(
+  'blog',
+  ({ data }) => data.language === locale && !data.isDraft
+);
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+
+const readingTime = getReadingTime(post.body);
+const cleanSlug = post.slug.replace(new RegExp(`^${locale}/`), '');
+const resolvedFeaturedImage = post.data.featuredImage?.r2Path
+  ? imageManager.getR2ImageUrl(post.data.featuredImage.r2Path)
+  : post.data.featuredImage?.url;
+
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = tocHeadings.length >= 2;
+
+const blogPostSchema = generateBlogPostSchema(
+  post.data.title,
+  post.data.description,
+  post.data.pubDate,
+  post.data.updatedDate,
+  cleanSlug,
+  resolvedFeaturedImage,
+  locale
+);
+
+const postUrl = `https://abdla.box/${locale}/blog/${cleanSlug}/`;
+const shareText = encodeURIComponent(post.data.title);
+const shareUrl = encodeURIComponent(postUrl);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  lang={locale}
+  dir={isAr ? 'rtl' : 'ltr'}
+  ogImage={resolvedFeaturedImage}
+  ogType="article"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)}></script>
+
+  {/* Reading Progress Bar pinned under floating header */}
+  <div
+    class="fixed top-16 inset-x-0 h-[3px] z-30 bg-transparent pointer-events-none"
+    aria-hidden="true"
+  >
+    <div
+      id="reading-progress"
+      class="h-full bg-gradient-to-r from-electric-blue via-teal to-neon-yellow transition-[width] duration-75"
+      style="width: 0%"
+    />
+  </div>
+
+  <div class="container mx-auto max-w-6xl px-4 md:px-6 py-10 md:py-14">
+    {/* Back link */}
+    <div class="max-w-3xl mx-auto mb-6">
+      <a
+        href={`/${locale}/blog/`}
+        class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
+      >
+        <span aria-hidden="true">{isAr ? '→' : '←'}</span>
+        {isAr ? 'العودة إلى المدونة' : 'Back to Blog'}
+      </a>
+    </div>
+
+    <div class:list={['mx-auto', showToc ? 'grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-5xl' : 'max-w-3xl']}>
+      {/* Main Article */}
+      <article class:list={[showToc ? 'lg:col-span-8 min-w-0' : 'w-full']}>
+        <header class="mb-8 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+          <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+            <time>
+              {post.data.pubDate.toLocaleDateString(isAr ? 'ar-SA' : 'en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
+            <span>•</span>
+            <span>{isAr ? `${readingTime} دقيقة قراءة` : `${readingTime} min read`}</span>
+            {translatedPost && (
+              <>
+                <span>•</span>
+                <a
+                  href={`/${isAr ? 'en' : 'ar'}/blog/${translatedPost.slug.replace(/^(ar|en)\//, '')}`}
+                  class={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-400/30 hover:bg-electric-blue hover:text-white transition-colors font-medium ${!isAr ? 'font-arabic-body' : ''}`}
+                >
+                  {isAr ? 'Read in English →' : 'اقرأ بالعربية ←'}
+                </a>
+              </>
+            )}
+          </div>
+
+          <h1 class="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white leading-tight mb-4">
+            {post.data.title}
+          </h1>
+
+          {post.data.description && (
+            <p class="text-base md:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed mb-4">
+              {post.data.description}
+            </p>
+          )}
+
+          {post.data.tags && post.data.tags.length > 0 && (
+            <div class="flex items-center gap-2 flex-wrap">
+              {post.data.tags.map((tag) => {
+                const tagConfig = getOrCreateTag(tag);
+                return (
+                  <a href={`/${locale}/tags/${normalizeTag(tag)}`} class="tag">
+                    #{isAr ? tag : tagConfig.en}
+                  </a>
+                );
+              })}
+            </div>
+          )}
+
+          {post.data.featuredImage && (
+            <figure class="mt-6">
+              {post.data.featuredImage.r2Path ? (
+                <OptimizedImage
+                  src={`r2://${post.data.featuredImage.r2Path}`}
+                  alt={post.data.featuredImage.alt}
+                  width={900}
+                  height={480}
+                  loading="eager"
+                  class="w-full h-auto rounded-2xl shadow-md border border-zinc-200/70 dark:border-zinc-800"
+                />
+              ) : (
+                <img
+                  src={post.data.featuredImage.url}
+                  alt={post.data.featuredImage.alt}
+                  class="w-full h-auto rounded-2xl shadow-md border border-zinc-200/70 dark:border-zinc-800"
+                />
+              )}
+              {post.data.featuredImage.caption && (
+                <figcaption class="text-center text-zinc-500 dark:text-zinc-400 mt-2.5 text-xs">
+                  {post.data.featuredImage.caption}
+                </figcaption>
+              )}
+            </figure>
+          )}
+        </header>
+
+        {/* Mobile Collapsible TOC */}
+        {showToc && (
+          <details class="lg:hidden mb-8 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4">
+            <summary class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer flex items-center justify-between">
+              <span>{isAr ? 'محتويات المقال' : 'Table of Contents'}</span>
+              <Icon name="mdi:chevron-down" class="w-4 h-4 text-zinc-400" />
+            </summary>
+            <ul class="mt-3 space-y-1.5 text-sm">
+              {tocHeadings.map((h) => (
+                <li class={h.depth === 3 ? 'ps-4' : ''}>
+                  <a
+                    href={`#${h.slug}`}
+                    class="text-zinc-600 dark:text-zinc-400 hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+
+        {/* Article Body */}
+        <div
+          id="article-content"
+          class="prose prose-lg max-w-none prose-headings:font-semibold prose-headings:scroll-mt-24 prose-headings:text-zinc-900 prose-p:text-zinc-700 prose-p:leading-relaxed prose-a:text-electric-blue prose-a:underline hover:prose-a:text-teal prose-strong:text-zinc-900 prose-blockquote:border-electric-blue prose-blockquote:italic prose-li:marker:text-electric-blue prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-pre:p-4 prose-pre:rounded-xl prose-pre:overflow-x-auto dark:prose-invert dark:prose-headings:text-zinc-50 dark:prose-p:text-zinc-300 dark:prose-strong:text-white dark:prose-a:text-electric-blue-light dark:prose-blockquote:border-teal dark:prose-pre:bg-zinc-900 dark:prose-pre:border dark:prose-pre:border-zinc-800"
+        >
+          <Content />
+        </div>
+
+        {/* Share Bar */}
+        <div class="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4">
+          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            {isAr ? 'شارك المقال:' : 'Share this article:'}
+          </span>
+          <div class="flex items-center gap-2">
+            <a
+              href={`https://bsky.app/intent/compose?text=${shareText}%20${shareUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-sky-500 transition-colors"
+            >
+              Bluesky
+            </a>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-sky-500 transition-colors"
+            >
+              LinkedIn
+            </a>
+            <button
+              type="button"
+              id="copy-post-link"
+              data-copy-url={postUrl}
+              data-copied-label={isAr ? 'تم النسخ ✓' : 'Copied ✓'}
+              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-electric-blue transition-colors"
+            >
+              {isAr ? 'نسخ الرابط' : 'Copy Link'}
+            </button>
+          </div>
+        </div>
+
+        {/* Prev / Next Navigation */}
+        {(prevPost || nextPost) && (
+          <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+            {prevPost && (
+              <a
+                href={`/${locale}/blog/${prevPost.slug.replace(new RegExp(`^${locale}/`), '')}`}
+                class="card p-4 hover:border-electric-blue/50"
+              >
+                <span class="text-[11px] text-zinc-400 block mb-1">
+                  {isAr ? 'المقال السابق' : 'Previous'}
+                </span>
+                <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {prevPost.data.title}
+                </span>
+              </a>
+            )}
+            {nextPost && (
+              <a
+                href={`/${locale}/blog/${nextPost.slug.replace(new RegExp(`^${locale}/`), '')}`}
+                class="card p-4 hover:border-electric-blue/50 sm:text-end"
+              >
+                <span class="text-[11px] text-zinc-400 block mb-1">
+                  {isAr ? 'المقال التالي' : 'Next'}
+                </span>
+                <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  {nextPost.data.title}
+                </span>
+              </a>
+            )}
+          </nav>
+        )}
+      </article>
+
+      {/* Desktop Sticky TOC Sidebar */}
+      {showToc && (
+        <aside class="hidden lg:block lg:col-span-4">
+          <div class="sticky top-24 rounded-2xl bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800 p-5">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-3">
+              {isAr ? 'محتويات المقال' : 'On this page'}
+            </h2>
+            <ul class="space-y-2 text-sm">
+              {tocHeadings.map((h) => (
+                <li class={h.depth === 3 ? 'ps-3.5 text-xs' : ''}>
+                  <a
+                    href={`#${h.slug}`}
+                    class="text-zinc-600 dark:text-zinc-400 hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors leading-snug block"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ copyLabel: isAr ? 'نسخ' : 'Copy', copiedLabel: isAr ? 'تم النسخ ✓' : 'Copied ✓' }}>
+  window.__abdlaCopyLabel = copyLabel;
+  window.__abdlaCopiedLabel = copiedLabel;
+</script>
+
+<script>
+  function initArticleEnhancements() {
+    // 1. Reading progress bar
+    const progressBar = document.getElementById('reading-progress');
+    if (progressBar) {
+      const updateProgress = () => {
+        const doc = document.documentElement;
+        const scrollTop = window.scrollY || doc.scrollTop;
+        const scrollHeight = doc.scrollHeight - doc.clientHeight;
+        const pct = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
+        progressBar.style.width = `${pct}%`;
+      };
+      updateProgress();
+      window.addEventListener('scroll', updateProgress, { passive: true });
+    }
+
+    // 2. Copy code buttons inside .prose pre
+    const copyLabel = (window as any).__abdlaCopyLabel || 'Copy';
+    const copiedLabel = (window as any).__abdlaCopiedLabel || 'Copied ✓';
+    document.querySelectorAll('#article-content pre').forEach((pre) => {
+      if (pre.querySelector('.code-copy-btn')) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'code-copy-btn';
+      btn.textContent = copyLabel;
+      btn.addEventListener('click', async () => {
+        const code = pre.querySelector('code')?.textContent || pre.textContent || '';
+        try {
+          await navigator.clipboard.writeText(code);
+          btn.textContent = copiedLabel;
+          setTimeout(() => {
+            btn.textContent = copyLabel;
+          }, 1600);
+        } catch {}
+      });
+      pre.appendChild(btn);
+    });
+
+    // 3. Share copy-link button
+    const copyPostBtn = document.getElementById('copy-post-link') as HTMLButtonElement | null;
+    if (copyPostBtn) {
+      const orig = copyPostBtn.textContent || '';
+      copyPostBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(copyPostBtn.dataset.copyUrl || window.location.href);
+          copyPostBtn.textContent = copyPostBtn.dataset.copiedLabel || 'Copied ✓';
+          setTimeout(() => {
+            copyPostBtn.textContent = orig;
+          }, 1600);
+        } catch {}
+      };
+    }
+  }
+
+  document.addEventListener('astro:page-load', initArticleEnhancements);
+</script>

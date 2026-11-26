@@ -1,0 +1,183 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Coach Training Dashboard"
+  description="Private live running & wellness dashboard for coaching review."
+  lang="en"
+  dir="ltr"
+  noIndex={true}
+>
+  <div class="container mx-auto max-w-5xl px-4 md:px-6 py-10 md:py-14">
+    <header class="mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 mb-4">
+        <span>🔒</span>
+        <span>Private Live View</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-2">
+        Coach Training Dashboard
+      </h1>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">
+        Live training load, wellness, and full 60-day run log (including private runs).
+      </p>
+    </header>
+
+    {/* Passphrase Gate */}
+    <section id="coach-gate" class="bento-card max-w-md">
+      <form id="coach-form" class="space-y-4">
+        <div>
+          <label for="coach-key" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+            Coach Access Key
+          </label>
+          <input
+            id="coach-key"
+            type="password"
+            required
+            placeholder="Enter shared passphrase"
+            class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 focus:ring-2 focus:ring-electric-blue outline-none"
+          />
+        </div>
+        <button type="submit" class="button w-full text-sm">Unlock Live Dashboard</button>
+        <p id="coach-error" class="text-xs text-rose-500 hidden"></p>
+      </form>
+    </section>
+
+    {/* Live Data Container */}
+    <div id="coach-data" class="hidden space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="coach-fitness"></div>
+
+      <section class="bento-card">
+        <h2 class="bento-title mb-4">Recent 7-Day Wellness</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
+              <tr>
+                <th class="py-2 pr-4">Date</th>
+                <th class="py-2 pr-4">Resting HR</th>
+                <th class="py-2 pr-4">HRV</th>
+                <th class="py-2">Sleep</th>
+              </tr>
+            </thead>
+            <tbody id="coach-wellness" class="divide-y divide-zinc-100 dark:divide-zinc-800"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="bento-card">
+        <h2 class="bento-title mb-4">Full 60-Day Run Log</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-zinc-400 border-b border-zinc-200 dark:border-zinc-800">
+              <tr>
+                <th class="py-2 pr-3">Date</th>
+                <th class="py-2 pr-3">Run</th>
+                <th class="py-2 pr-3">Dist</th>
+                <th class="py-2 pr-3">Pace</th>
+                <th class="py-2 pr-3">Avg/Max HR</th>
+                <th class="py-2 pr-3">Cadence</th>
+                <th class="py-2 pr-3">Load</th>
+                <th class="py-2">Shoe</th>
+              </tr>
+            </thead>
+            <tbody id="coach-runs" class="divide-y divide-zinc-100 dark:divide-zinc-800"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function initCoachPage() {
+    const form = document.getElementById('coach-form') as HTMLFormElement | null;
+    const keyInput = document.getElementById('coach-key') as HTMLInputElement | null;
+    const errEl = document.getElementById('coach-error');
+    const gate = document.getElementById('coach-gate');
+    const dataWrap = document.getElementById('coach-data');
+    if (!form || !keyInput || !errEl || !gate || !dataWrap) return;
+
+    async function loadCoachData(key: string) {
+      errEl!.classList.add('hidden');
+      try {
+        const res = await fetch('/api/coach', { headers: { 'x-coach-key': key } });
+        const payload = await res.json();
+        if (!res.ok) {
+          errEl!.textContent = payload.error || 'Access denied';
+          errEl!.classList.remove('hidden');
+          return;
+        }
+
+        sessionStorage.setItem('coach_key', key);
+        gate!.classList.add('hidden');
+        dataWrap!.classList.remove('hidden');
+
+        const fitnessEl = document.getElementById('coach-fitness');
+        if (fitnessEl) {
+          const { ctl, atl, tsb } = payload.fitness || {};
+          fitnessEl.innerHTML = [
+            ['Fitness (CTL)', ctl ?? '—', 'text-electric-blue'],
+            ['Fatigue (ATL)', atl ?? '—', 'text-amber-500'],
+            ['Form (TSB)', tsb ?? '—', tsb >= 0 ? 'text-emerald-500' : 'text-rose-500'],
+          ]
+            .map(
+              ([label, val, color]) => `
+            <div class="bento-card p-4">
+              <span class="text-xs text-zinc-400">${label}</span>
+              <p class="text-3xl font-bold mt-1 ${color}">${val}</p>
+            </div>`
+            )
+            .join('');
+        }
+
+        const wellEl = document.getElementById('coach-wellness');
+        if (wellEl) {
+          wellEl.innerHTML = (payload.wellness || [])
+            .map(
+              (w: any) => `
+            <tr>
+              <td class="py-2 pr-4 font-mono text-xs">${w.date}</td>
+              <td class="py-2 pr-4">${w.restingHR ? `${w.restingHR} bpm` : '—'}</td>
+              <td class="py-2 pr-4">${w.hrv ? `${w.hrv} ms` : '—'}</td>
+              <td class="py-2">${w.sleepHours ? `${w.sleepHours}h` : '—'}</td>
+            </tr>`
+            )
+            .join('');
+        }
+
+        const runsEl = document.getElementById('coach-runs');
+        if (runsEl) {
+          runsEl.innerHTML = (payload.runs || [])
+            .map(
+              (r: any) => `
+            <tr>
+              <td class="py-2 pr-3 font-mono text-xs whitespace-nowrap">${r.date}</td>
+              <td class="py-2 pr-3 font-medium">${r.name}</td>
+              <td class="py-2 pr-3 whitespace-nowrap">${r.distanceKm} km</td>
+              <td class="py-2 pr-3 whitespace-nowrap">${r.pace}/km</td>
+              <td class="py-2 pr-3 whitespace-nowrap">${r.avgHr ?? '—'}${r.maxHr ? ` / ${r.maxHr}` : ''}</td>
+              <td class="py-2 pr-3 whitespace-nowrap">${r.cadenceSpm ? `${r.cadenceSpm} spm` : '—'}</td>
+              <td class="py-2 pr-3">${r.load ?? '—'}</td>
+              <td class="py-2 text-xs text-zinc-500">${r.shoe ?? '—'}</td>
+            </tr>`
+            )
+            .join('');
+        }
+      } catch {
+        errEl!.textContent = 'Could not reach /api/coach (live on Cloudflare Pages).';
+        errEl!.classList.remove('hidden');
+      }
+    }
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      loadCoachData(keyInput.value.trim());
+    };
+
+    const urlKey = new URLSearchParams(window.location.search).get('key');
+    const savedKey = urlKey || sessionStorage.getItem('coach_key');
+    if (savedKey) loadCoachData(savedKey);
+  }
+
+  document.addEventListener('astro:page-load', initCoachPage);
+</script>

@@ -7,6 +7,7 @@ import RunningStats from './RunningStats.astro';
 import EmptyState from './EmptyState.astro';
 import { getHomeFeeds } from '../utils/feeds';
 import { PROFILES } from '../data/socialLinks';
+import { siteStatus } from '../data/siteStatus';
 import type { Locale } from '../utils/i18n';
 
 export interface Props {
@@ -19,14 +20,16 @@ const arrow = isAr ? '←' : '→';
 
 const copy = isAr
   ? {
-      pageTitle: 'الواجهة',
-      pageSubtitle: 'لقطة حيّة من عالمي الرقمي',
+      pageTitle: siteStatus.heroTitle.ar,
+      pageSubtitle: siteStatus.heroSubtitle.ar,
       pageDescription: 'الواجهة الرقمية لـ عبدالله: استكشاف الأفكار والتجارب عبر مختلف الإشارات.',
       blogHeading: 'أحدث ما في المدونة',
       blogEmpty: 'لا توجد مقالات حديثة حالياً',
       allPosts: 'كل المقالات',
+      signalsHeading: 'آخر الإشارات',
+      allSignals: 'كل الإشارات',
       runHeading: 'الجري',
-      runProfile: 'Strava',
+      runMore: 'صفحة الجري',
       blueskyHeading: 'من Bluesky',
       blueskySharedLink: '[رابط مشترك]:',
       blueskyView: 'عرض المنشور',
@@ -41,17 +44,22 @@ const copy = isAr
       githubHeading: 'من GitHub',
       githubEmpty: 'لا يوجد نشاط حديث',
       githubProfile: 'GitHub',
+      nowBtn: 'ماذا أفعل الآن؟',
+      signalsBtn: 'إشارات سريعة',
+      runningBtn: 'سجل الجري',
     }
   : {
-      pageTitle: 'The Base',
-      pageSubtitle: 'A live snapshot from my digital world',
+      pageTitle: siteStatus.heroTitle.en,
+      pageSubtitle: siteStatus.heroSubtitle.en,
       pageDescription:
         "Abdullah's digital interface: Exploring ideas and experiences across various signals.",
       blogHeading: 'Latest from the Blog',
       blogEmpty: 'No recent posts available',
       allPosts: 'All Posts',
+      signalsHeading: 'Latest Signals',
+      allSignals: 'All Signals',
       runHeading: 'Running',
-      runProfile: 'Strava',
+      runMore: 'Full Log',
       blueskyHeading: 'From Bluesky',
       blueskySharedLink: '[Shared Link]:',
       blueskyView: 'View post',
@@ -66,9 +74,12 @@ const copy = isAr
       githubHeading: 'From GitHub',
       githubEmpty: 'No recent activity',
       githubProfile: 'GitHub',
+      nowBtn: "What I'm doing /now",
+      signalsBtn: 'Quick Signals',
+      runningBtn: 'Running Log',
     };
 
-const [latestPosts, feeds] = await Promise.all([
+const [latestPosts, latestSignals, feeds] = await Promise.all([
   getCollection('blog', ({ data, slug }) => slug.startsWith(`${locale}/`) && data.isDraft !== true)
     .then((posts) =>
       posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3)
@@ -77,6 +88,11 @@ const [latestPosts, feeds] = await Promise.all([
       console.error(`Error fetching ${locale} blog posts:`, e);
       return [];
     }),
+  getCollection('signals', ({ data }) => data.language === locale && data.isDraft !== true)
+    .then((sigs) =>
+      sigs.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 2)
+    )
+    .catch(() => []),
   getHomeFeeds(locale),
 ]);
 
@@ -93,6 +109,8 @@ const formatPostDate = (date: Date) =>
     month: 'short',
     day: 'numeric',
   });
+
+const cleanSignalPreview = (body: string) => body.replace(/[*_#`]/g, '').trim();
 ---
 
 <BaseLayout
@@ -101,107 +119,198 @@ const formatPostDate = (date: Date) =>
   lang={locale}
   dir={isAr ? 'rtl' : 'ltr'}
 >
-  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12 max-w-6xl">
-    {/* Page Header */}
-    <header class="text-center mb-10 md:mb-14">
-      <h1 class="text-4xl md:text-5xl font-bold mb-3 text-soft-charcoal dark:text-white tracking-tight">
+  {/* Atmospheric Electric Dunes Hero */}
+  <section class="relative overflow-hidden dunes-hero-bg border-b border-zinc-200/70 dark:border-zinc-800/70">
+    <div class="container mx-auto max-w-6xl px-4 md:px-6 pt-10 pb-12 md:pt-14 md:pb-16 relative z-10">
+      {/* Live Status Pill */}
+      <div class="flex flex-wrap items-center gap-2.5 mb-6">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span>{siteStatus.location[locale]}</span>
+          <span class="text-zinc-300 dark:text-zinc-700">•</span>
+          <span id="dammam-clock" class="font-mono text-[11px] text-zinc-500 dark:text-zinc-400">--:--</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-sky-50/90 dark:bg-sky-500/10 border border-sky-200/70 dark:border-sky-400/20 text-sky-800 dark:text-sky-200">
+          <span>📡</span>
+          <span>{siteStatus.signal[locale]}</span>
+        </span>
+      </div>
+
+      <h1 class="text-4xl md:text-6xl font-bold text-zinc-900 dark:text-white tracking-tight mb-4">
         {copy.pageTitle}
       </h1>
-      <p class="text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+      <p class="text-base md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed mb-7">
         {copy.pageSubtitle}
       </p>
-    </header>
 
-    {/* Bento Dashboard Grid */}
+      {/* Quick Jump Pills */}
+      <div class="flex flex-wrap items-center gap-2.5">
+        <a
+          href={`/${locale}/now/`}
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-electric-blue dark:hover:bg-neon-yellow transition-colors shadow-sm"
+        >
+          <span>✨</span>
+          {copy.nowBtn}
+        </a>
+        <a
+          href={`/${locale}/signals/`}
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 hover:border-electric-blue/60 transition-colors"
+        >
+          <span>📡</span>
+          {copy.signalsBtn}
+        </a>
+        <a
+          href={`/${locale}/running/`}
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-white/90 dark:bg-zinc-900/90 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 hover:border-electric-blue/60 transition-colors"
+        >
+          <span>🏃‍♂️</span>
+          {copy.runningBtn}
+        </a>
+      </div>
+    </div>
+
+    {/* Subtle Decorative Dune Horizon Curve */}
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 1440 72"
+      fill="none"
+      preserveAspectRatio="none"
+      class="w-full h-7 md:h-10 block text-[#FAFAFA] dark:text-[#09090B] -mb-px"
+    >
+      <path
+        d="M0 44C260 6 520 68 820 34C1080 4 1280 46 1440 24V72H0V44Z"
+        fill="currentColor"
+      />
+    </svg>
+  </section>
+
+  {/* Main Bento Grid */}
+  <div class="container mx-auto max-w-6xl px-4 md:px-6 py-8 md:py-12">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 md:gap-6 items-start">
-      {/* 1. Blog Widget (Featured) */}
-      <section class="bento-card md:col-span-2 lg:col-span-7">
-        <div class="bento-header">
-          <div class="flex items-center gap-3">
-            <span class="bento-icon bg-lavender/15 text-lavender">
-              <Icon name="mdi:post-outline" class="w-5 h-5" />
-            </span>
-            <h2 class="bento-title">{copy.blogHeading}</h2>
+      {/* Left Column Stack: Blog + Signals Preview */}
+      <div class="md:col-span-2 lg:col-span-7 space-y-5 md:space-y-6">
+        {/* 1. Blog Widget */}
+        <section class="bento-card">
+          <div class="bento-header">
+            <div class="flex items-center gap-3">
+              <span class="bento-icon bg-lavender/15 text-lavender">
+                <Icon name="mdi:post-outline" class="w-5 h-5" />
+              </span>
+              <h2 class="bento-title">{copy.blogHeading}</h2>
+            </div>
+            <a href={`/${locale}/blog/`} class="bento-action">
+              {copy.allPosts} <span aria-hidden="true">{arrow}</span>
+            </a>
           </div>
-          <a href={`/${locale}/blog/`} class="bento-action">
-            {copy.allPosts} <span aria-hidden="true">{arrow}</span>
-          </a>
-        </div>
 
-        {latestPosts.length > 0 ? (
-          <div class="space-y-5">
-            {latestPosts.map((post, idx) => {
-              const postHref = `/${locale}/blog/${post.slug.replace(new RegExp(`^${locale}/`), '')}`;
-              const isLead = idx === 0;
-              return (
-                <article class:list={[!isLead && 'pt-4 border-t border-gray-100 dark:border-gray-800']}>
-                  {isLead && post.data.featuredImage && (
-                    <a href={postHref} class="block mb-4 overflow-hidden rounded-xl group">
-                      {post.data.featuredImage.r2Path ? (
-                        <OptimizedImage
-                          src={`r2://${post.data.featuredImage.r2Path}`}
-                          alt={post.data.featuredImage.alt || post.data.title}
-                          width={720}
-                          height={360}
-                          class="w-full h-52 md:h-60 object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                        />
-                      ) : (
-                        <img
-                          src={post.data.featuredImage.url}
-                          alt={post.data.featuredImage.alt || post.data.title}
-                          loading="lazy"
-                          decoding="async"
-                          class="w-full h-52 md:h-60 object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                        />
-                      )}
-                    </a>
-                  )}
-                  <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-1.5">
-                    <time>{formatPostDate(post.data.pubDate)}</time>
-                    {post.data.tags && post.data.tags.slice(0, 2).map((tag) => (
-                      <span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[11px]">
-                        #{tag}
-                      </span>
-                    ))}
+          {latestPosts.length > 0 ? (
+            <div class="space-y-5">
+              {latestPosts.map((post, idx) => {
+                const postHref = `/${locale}/blog/${post.slug.replace(new RegExp(`^${locale}/`), '')}`;
+                const isLead = idx === 0;
+                return (
+                  <article class:list={[!isLead && 'pt-4 border-t border-zinc-100 dark:border-zinc-800']}>
+                    {isLead && post.data.featuredImage && (
+                      <a href={postHref} class="block mb-4 overflow-hidden rounded-xl group">
+                        {post.data.featuredImage.r2Path ? (
+                          <OptimizedImage
+                            src={`r2://${post.data.featuredImage.r2Path}`}
+                            alt={post.data.featuredImage.alt || post.data.title}
+                            width={720}
+                            height={360}
+                            class="w-full h-52 md:h-60 object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                        ) : (
+                          <img
+                            src={post.data.featuredImage.url}
+                            alt={post.data.featuredImage.alt || post.data.title}
+                            loading="lazy"
+                            decoding="async"
+                            class="w-full h-52 md:h-60 object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                        )}
+                      </a>
+                    )}
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+                      <time>{formatPostDate(post.data.pubDate)}</time>
+                      {post.data.tags && post.data.tags.slice(0, 3).map((tag) => (
+                        <a href={`/${locale}/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`} class="tag">
+                          #{tag}
+                        </a>
+                      ))}
+                    </div>
+                    <h3 class:list={['font-semibold leading-snug mb-1.5', isLead ? 'text-xl' : 'text-base']}>
+                      <a
+                        href={postHref}
+                        class="text-zinc-900 dark:text-zinc-100 hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
+                      >
+                        {post.data.title}
+                      </a>
+                    </h3>
+                    {post.data.description && (
+                      <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed line-clamp-2">
+                        {post.data.description}
+                      </p>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState message={copy.blogEmpty} icon="mdi:post-outline" locale={locale} />
+          )}
+        </section>
+
+        {/* 1b. Latest Signals Strip */}
+        {latestSignals.length > 0 && (
+          <section class="bento-card">
+            <div class="bento-header">
+              <div class="flex items-center gap-3">
+                <span class="bento-icon bg-amber-500/15 text-amber-600 dark:text-neon-yellow">
+                  <Icon name="mdi:broadcast" class="w-5 h-5" />
+                </span>
+                <h2 class="bento-title">{copy.signalsHeading}</h2>
+              </div>
+              <a href={`/${locale}/signals/`} class="bento-action">
+                {copy.allSignals} <span aria-hidden="true">{arrow}</span>
+              </a>
+            </div>
+            <div class="space-y-3">
+              {latestSignals.map((sig) => (
+                <a
+                  href={`/${locale}/signals/`}
+                  class="block p-3.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800 hover:border-electric-blue/40 transition-colors"
+                >
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    {sig.data.title && (
+                      <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{sig.data.title}</p>
+                    )}
+                    <time class="text-[11px] text-zinc-400 flex-shrink-0">{formatPostDate(sig.data.pubDate)}</time>
                   </div>
-                  <h3 class:list={['font-semibold leading-snug mb-1.5', isLead ? 'text-xl' : 'text-base']}>
-                    <a
-                      href={postHref}
-                      class="text-soft-charcoal dark:text-gray-100 hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
-                    >
-                      {post.data.title}
-                    </a>
-                  </h3>
-                  {post.data.description && (
-                    <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-2">
-                      {post.data.description}
-                    </p>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState message={copy.blogEmpty} icon="mdi:post-outline" locale={locale} />
+                  <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-2">
+                    {cleanSignalPreview(sig.body)}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </section>
         )}
-      </section>
+      </div>
 
       {/* 2. Running Widget */}
       <section class="bento-card md:col-span-2 lg:col-span-5">
         <div class="bento-header">
           <div class="flex items-center gap-3">
-            <span class="bento-icon bg-lime/15 text-lime-600 dark:text-lime">
+            <span class="bento-icon bg-lime/15 text-lime-700 dark:text-lime">
               <Icon name="mdi:run-fast" class="w-5 h-5" />
             </span>
             <h2 class="bento-title">{copy.runHeading}</h2>
           </div>
-          <a
-            href={PROFILES.strava.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="bento-action"
-          >
-            {copy.runProfile} <span aria-hidden="true">↗</span>
+          <a href={`/${locale}/running/`} class="bento-action">
+            {copy.runMore} <span aria-hidden="true">{arrow}</span>
           </a>
         </div>
         <RunningStats locale={locale} />
@@ -211,7 +320,7 @@ const formatPostDate = (date: Date) =>
       <section class="bento-card md:col-span-1 lg:col-span-6">
         <div class="bento-header">
           <div class="flex items-center gap-3">
-            <span class="bento-icon bg-sky-500/15 text-sky-500">
+            <span class="bento-icon bg-sky-500/15 text-sky-600 dark:text-sky-400">
               <Icon name="simple-icons:bluesky" class="w-5 h-5" />
             </span>
             <h2 class="bento-title">{copy.blueskyHeading}</h2>
@@ -227,9 +336,9 @@ const formatPostDate = (date: Date) =>
         </div>
 
         {latestBlueskyPosts.length > 0 ? (
-          <div class="space-y-4">
+          <div class="space-y-3.5">
             {latestBlueskyPosts.map((post) => (
-              <div class="p-3.5 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 hover:border-sky-500/30 transition-colors">
+              <div class="p-3.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800 hover:border-sky-500/30 transition-colors">
                 {post.embedImageUrl && (
                   <a
                     href={post.embedLinkUrl || post.postUrl}
@@ -240,27 +349,27 @@ const formatPostDate = (date: Date) =>
                     <img
                       src={post.embedImageUrl}
                       alt={post.embedLinkTitle || 'Bluesky Embed Image'}
-                      class="w-full max-h-48 object-cover border border-gray-200 dark:border-gray-700 rounded-lg"
+                      class="w-full max-h-48 object-cover border border-zinc-200 dark:border-zinc-700 rounded-lg"
                       loading="lazy"
                       decoding="async"
                     />
                   </a>
                 )}
                 {post.text && (
-                  <p class="text-soft-charcoal dark:text-gray-200 text-sm leading-relaxed mb-2 line-clamp-4">
+                  <p class="text-zinc-800 dark:text-zinc-200 text-sm leading-relaxed mb-2 line-clamp-4">
                     {post.text}
                   </p>
                 )}
                 {!post.text && post.embedLinkTitle && post.embedLinkUrl && (
-                  <p class="text-soft-charcoal dark:text-gray-200 text-sm leading-relaxed mb-2 line-clamp-3">
-                    <em class="text-gray-500">{copy.blueskySharedLink}</em> {post.embedLinkTitle}
+                  <p class="text-zinc-800 dark:text-zinc-200 text-sm leading-relaxed mb-2 line-clamp-3">
+                    <em class="text-zinc-500">{copy.blueskySharedLink}</em> {post.embedLinkTitle}
                   </p>
                 )}
                 <a
                   href={post.postUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-xs font-medium text-electric-blue dark:text-electric-blue-light hover:underline inline-flex items-center gap-1"
+                  class="text-xs font-medium text-sky-700 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
                 >
                   {copy.blueskyView} <span aria-hidden="true">{arrow}</span>
                 </a>
@@ -276,7 +385,7 @@ const formatPostDate = (date: Date) =>
       <section class="bento-card md:col-span-1 lg:col-span-6">
         <div class="bento-header">
           <div class="flex items-center gap-3">
-            <span class="bento-icon bg-rose-500/15 text-rose-500">
+            <span class="bento-icon bg-rose-500/15 text-rose-600 dark:text-rose-400">
               <Icon name="simple-icons:trakt" class="w-5 h-5" />
             </span>
             <h2 class="bento-title">{copy.traktHeading}</h2>
@@ -299,7 +408,7 @@ const formatPostDate = (date: Date) =>
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-start gap-3.5 p-2.5 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 hover:border-rose-500/30 transition-all group"
+                  class="flex items-start gap-3.5 p-2.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800 hover:border-rose-500/30 transition-all group"
                 >
                   {item.posterUrl && (
                     <img
@@ -313,14 +422,14 @@ const formatPostDate = (date: Date) =>
                     />
                   )}
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-soft-charcoal dark:text-gray-100 group-hover:text-electric-blue dark:group-hover:text-electric-blue-light leading-snug">
+                    <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-electric-blue dark:group-hover:text-electric-blue-light leading-snug">
                       <span class="me-1" aria-hidden="true">
                         {item.type === 'movie' ? '🎬' : '📺'}
                       </span>
                       {item.title}
                     </p>
                     {item.overview && (
-                      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mt-1 line-clamp-2">
+                      <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed mt-1 line-clamp-2">
                         {item.overview}
                       </p>
                     )}
@@ -338,7 +447,7 @@ const formatPostDate = (date: Date) =>
       <section class="bento-card md:col-span-1 lg:col-span-6">
         <div class="bento-header">
           <div class="flex items-center gap-3">
-            <span class="bento-icon bg-teal/15 text-teal">
+            <span class="bento-icon bg-teal/15 text-teal-700 dark:text-teal">
               <Icon name="simple-icons:goodreads" class="w-5 h-5" />
             </span>
             <h2 class="bento-title">{copy.goodreadsHeading}</h2>
@@ -361,7 +470,7 @@ const formatPostDate = (date: Date) =>
                   href={book.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="flex items-center gap-3.5 p-2.5 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 hover:border-teal/40 transition-all group"
+                  class="flex items-center gap-3.5 p-2.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800 hover:border-teal/40 transition-all group"
                 >
                   {book.coverUrl && (
                     <img
@@ -374,7 +483,7 @@ const formatPostDate = (date: Date) =>
                       class="w-11 h-16 object-cover rounded-md shadow-sm flex-shrink-0 group-hover:scale-[1.03] transition-transform"
                     />
                   )}
-                  <p class="text-sm font-medium text-soft-charcoal dark:text-gray-100 group-hover:text-teal transition-colors leading-snug line-clamp-2">
+                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-teal transition-colors leading-snug line-clamp-2">
                     {book.title}
                   </p>
                 </a>
@@ -415,10 +524,10 @@ const formatPostDate = (date: Date) =>
                   rel="noopener noreferrer"
                   class="block group"
                 >
-                  <p class="text-sm text-soft-charcoal dark:text-gray-200 group-hover:text-electric-blue dark:group-hover:text-electric-blue-light transition-colors leading-relaxed">
+                  <p class="text-sm text-zinc-800 dark:text-zinc-200 group-hover:text-electric-blue dark:group-hover:text-electric-blue-light transition-colors leading-relaxed">
                     {event.display}
                   </p>
-                  <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">{event.timeAgo}</p>
+                  <p class="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">{event.timeAgo}</p>
                 </a>
               </li>
             ))}
@@ -430,3 +539,27 @@ const formatPostDate = (date: Date) =>
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  function updateDammamClock() {
+    const el = document.getElementById('dammam-clock');
+    if (!el) return;
+    try {
+      const formatted = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Riyadh',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(new Date());
+      el.textContent = formatted;
+    } catch {
+      el.textContent = 'UTC+3';
+    }
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    updateDammamClock();
+    if ((window as any).__dammamTimer) clearInterval((window as any).__dammamTimer);
+    (window as any).__dammamTimer = setInterval(updateDammamClock, 30_000);
+  });
+</script>

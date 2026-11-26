@@ -1,0 +1,267 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import EmptyState from './EmptyState.astro';
+import { fetchRunningStats } from '../utils/intervalsApi';
+import { races } from '../data/races';
+import { PROFILES } from '../data/socialLinks';
+import type { Locale } from '../utils/i18n';
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isAr = locale === 'ar';
+const stats = await fetchRunningStats(locale);
+
+const formatDistance = (d: number) => (isAr ? `${d} كم` : `${d} km`);
+const pageTitle = isAr ? 'الجري' : 'Running';
+const pageSubtitle = isAr
+  ? 'سجل الاستمرارية، السباقات، وأحدث الجريات العامة.'
+  : 'Running consistency, race log, and recent public runs.';
+
+const levelClasses = [
+  'bg-zinc-100 dark:bg-zinc-800/80',
+  'bg-teal/35 dark:bg-teal/30',
+  'bg-electric-blue/55 dark:bg-electric-blue/50',
+  'bg-electric-blue dark:bg-electric-blue-light',
+  'bg-lime dark:bg-lime',
+];
+---
+
+<BaseLayout title={pageTitle} description={pageSubtitle} lang={locale} dir={isAr ? 'rtl' : 'ltr'}>
+  <div class="container mx-auto max-w-5xl px-4 md:px-6 py-10 md:py-14">
+    <header class="flex flex-wrap items-end justify-between gap-4 mb-10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-lime/15 text-lime-800 dark:text-lime border border-lime/30 mb-4">
+          <span>🏃‍♂️</span>
+          <span>{isAr ? 'سجل الجري' : 'Running Log'}</span>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-2">
+          {pageTitle}
+        </h1>
+        <p class="text-base md:text-lg text-zinc-600 dark:text-zinc-400">{pageSubtitle}</p>
+      </div>
+      <a
+        href={PROFILES.strava.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 hover:border-electric-blue transition-colors"
+      >
+        <Icon name="simple-icons:strava" class="w-4 h-4 text-orange-500" />
+        {isAr ? 'ملفي على Strava ↗' : 'Strava Profile ↗'}
+      </a>
+    </header>
+
+    {stats ? (
+      <div class="space-y-6">
+        {/* Top KPI Row */}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bento-card p-4">
+            <span class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              {stats.thisMonth.monthName}
+            </span>
+            <p class="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">
+              {formatDistance(stats.thisMonth.distance)}
+            </p>
+            <span class="text-xs text-zinc-400 mt-1">
+              {isAr ? `${stats.thisMonth.runs} جريات` : `${stats.thisMonth.runs} runs`}
+            </span>
+          </div>
+
+          <div class="bento-card p-4">
+            <span class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              {isAr ? 'هذا الأسبوع' : 'This Week'}
+            </span>
+            <p class="text-2xl md:text-3xl font-bold text-electric-blue dark:text-electric-blue-light">
+              {formatDistance(stats.thisWeek.distance)}
+            </p>
+            <span class="text-xs text-zinc-400 mt-1">
+              {isAr
+                ? `${stats.thisWeek.runs} جريات • ${stats.thisWeek.timeMin} د`
+                : `${stats.thisWeek.runs} runs • ${stats.thisWeek.timeMin} min`}
+            </span>
+          </div>
+
+          <div class="bento-card p-4">
+            <span class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              {isAr ? 'السلسلة الحالية' : 'Active Streak'}
+            </span>
+            <p class="text-2xl md:text-3xl font-bold text-amber-600 dark:text-amber-300">
+              {stats.streakDays > 0 ? `🔥 ${stats.streakDays}` : '0'}
+            </p>
+            <span class="text-xs text-zinc-400 mt-1">
+              {isAr ? 'أيام متتالية' : 'consecutive days'}
+            </span>
+          </div>
+
+          <div class="bento-card p-4">
+            <span class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+              {isAr ? 'صعود هذا الشهر' : 'Month Elevation'}
+            </span>
+            <p class="text-2xl md:text-3xl font-bold text-teal">
+              ↑ {stats.thisMonth.elevationM}m
+            </p>
+            <span class="text-xs text-zinc-400 mt-1">
+              {isAr ? `المسجل: ${formatDistance(stats.totalRecentKm)}` : `Logged: ${formatDistance(stats.totalRecentKm)}`}
+            </span>
+          </div>
+        </div>
+
+        {/* 26-Week Consistency Heatmap */}
+        <section class="bento-card">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 class="bento-title flex items-center gap-2">
+              <span>🗓️</span>
+              {isAr ? 'خريطة الاستمرارية (آخر 6 أشهر)' : 'Consistency Heatmap (Last 6 Months)'}
+            </h2>
+            <div class="flex items-center gap-1.5 text-[11px] text-zinc-400">
+              <span>{isAr ? 'أقل' : 'Less'}</span>
+              {levelClasses.map((cls) => (
+                <span class={`w-3 h-3 rounded-[3px] inline-block ${cls}`} />
+              ))}
+              <span>{isAr ? 'أكثر' : 'More'}</span>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto pb-2" dir="ltr">
+            <div class="grid grid-flow-col grid-rows-7 gap-1.5 min-w-[540px]">
+              {stats.heatmapDays.map((day) => (
+                <div
+                  class={`w-3.5 h-3.5 rounded-[3px] transition-transform hover:scale-125 ${levelClasses[day.level]}`}
+                  title={`${day.date}: ${day.distanceKm} km`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Monthly Volume + Race Log */}
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Monthly Volume */}
+          {stats.monthlyBars.length > 0 && (
+            <section class="bento-card md:col-span-6">
+              <h2 class="bento-title mb-4 flex items-center gap-2">
+                <span>📊</span>
+                {isAr ? 'المسافات الشهرية' : 'Monthly Volume'}
+              </h2>
+              <div class="space-y-3">
+                {stats.monthlyBars.map((m) => (
+                  <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                      <span class="font-medium text-zinc-700 dark:text-zinc-200">{m.label}</span>
+                      <span class="text-zinc-500 dark:text-zinc-400">
+                        {formatDistance(m.distanceKm)} • {isAr ? `${m.runs} جريات` : `${m.runs} runs`}
+                      </span>
+                    </div>
+                    <div class="h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        class="h-full rounded-full bg-gradient-to-r from-electric-blue to-teal"
+                        style={`width: ${m.percent}%`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Race Log */}
+          <section class="bento-card md:col-span-6">
+            <h2 class="bento-title mb-4 flex items-center gap-2">
+              <span>🏅</span>
+              {isAr ? 'سجل السباقات' : 'Race Log'}
+            </h2>
+            <div class="space-y-3">
+              {races.map((race) => (
+                <a
+                  href={race.stravaId ? `https://www.strava.com/activities/${race.stravaId}` : PROFILES.strava.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block p-3.5 rounded-xl bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-700/60 hover:border-electric-blue/50 transition-all group"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div>
+                      <p class="text-sm font-semibold text-zinc-900 dark:text-white group-hover:text-electric-blue dark:group-hover:text-electric-blue-light">
+                        {race.name[locale]}
+                      </p>
+                      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {race.location[locale]} • {race.date}
+                      </p>
+                    </div>
+                    <span class="tag">{formatDistance(race.distanceKm)}</span>
+                  </div>
+                  {(race.shoe || race.highlight) && (
+                    <div class="flex flex-wrap items-center gap-2 mt-2.5 text-[11px] text-zinc-600 dark:text-zinc-300">
+                      {race.highlight && (
+                        <span class="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/15 text-amber-800 dark:text-amber-200 border border-amber-200/70 dark:border-amber-400/20">
+                          {race.highlight[locale]}
+                        </span>
+                      )}
+                      {race.shoe && (
+                        <span class="px-2 py-0.5 rounded-full bg-white dark:bg-zinc-700/70 border border-zinc-200 dark:border-zinc-600/60">
+                          👟 {race.shoe}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Public Runs Feed */}
+        {stats.allPublicActivities.length > 0 && (
+          <section class="bento-card">
+            <h2 class="bento-title mb-5 flex items-center gap-2">
+              <span>⚡</span>
+              {isAr ? 'أحدث الجريات العامة' : 'Recent Public Runs'}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {stats.allPublicActivities.map((activity) => (
+                <a
+                  href={activity.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block rounded-xl p-4 bg-zinc-50/80 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-700/60 hover:border-electric-blue/50 transition-all group"
+                >
+                  <div class="flex items-start justify-between gap-2 mb-2">
+                    <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-electric-blue dark:group-hover:text-electric-blue-light">
+                      {activity.feelEmoji && <span class="me-1">{activity.feelEmoji}</span>}
+                      {activity.name}
+                    </p>
+                    <span class="text-[11px] text-zinc-400 flex-shrink-0">{activity.date} ↗</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    <span class="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {formatDistance(activity.distance)}
+                    </span>
+                    <span>• {activity.time}</span>
+                    <span>• {activity.pace}/km</span>
+                    {activity.avgHr && <span>• ❤️ {activity.avgHr}</span>}
+                    {activity.elevationM && <span>• ⛰️ {activity.elevationM}m</span>}
+                  </div>
+                  {activity.shoeName && (
+                    <div class="mt-2.5">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-white dark:bg-zinc-700/70 border border-zinc-200 dark:border-zinc-600/60 text-zinc-600 dark:text-zinc-300">
+                        👟 {activity.shoeName}
+                      </span>
+                    </div>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    ) : (
+      <EmptyState
+        message={isAr ? 'لا تتوفر بيانات الجري حالياً' : 'Running stats currently unavailable'}
+        icon="mdi:run-fast"
+        locale={locale}
+      />
+    )}
+  </div>
+</BaseLayout>

@@ -1,23 +1,15 @@
-
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
-  const allPosts = await getCollection('blog', ({ data }) => 
-    data.language === 'en' && !data.isDraft
-  );
-  
+  const allPosts = await getCollection('blog', ({ data }) => data.language === 'en' && !data.isDraft);
   const allTags = new Set<string>();
-  allPosts.forEach(post => {
-    if (post.data.tags) {
-      post.data.tags.forEach(tag => allTags.add(tag));
-    }
-  });
-  
-  return Array.from(allTags).map(tag => ({
+  allPosts.forEach((post) => post.data.tags?.forEach((tag) => allTags.add(tag)));
+
+  return Array.from(allTags).map((tag) => ({
     params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
-    props: { tag }
+    props: { tag },
   }));
 }
 
@@ -26,51 +18,52 @@ interface Props {
 }
 
 const { tag } = Astro.props;
-
 const posts = await getCollection('blog', ({ data }) => {
-  return data.language === 'en' && !data.isDraft && 
-         (data.tags || []).some(t => 
-           t.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase().replace(/\s+/g, '-')
-         );
+  return (
+    data.language === 'en' &&
+    !data.isDraft &&
+    (data.tags || []).some(
+      (t) => t.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase().replace(/\s+/g, '-')
+    )
+  );
 });
-
 const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-// Format tag for display (capitalize first letter of each word)
-const displayTag = tag.split('-').map(word => 
-  word.charAt(0).toUpperCase() + word.slice(1)
-).join(' ');
+const displayTag = tag
+  .split('-')
+  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+  .join(' ');
 ---
 
-<BaseLayout title={`Posts tagged with "${displayTag}"`} description={`All posts tagged with ${displayTag}`} lang="en" dir="ltr">
-  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
-    <div class="inline-block">
-      <h1 class="text-4xl md:text-5xl font-bold mb-2 text-soft-charcoal">
-        {displayTag}
-      </h1>
-      <div class="h-1 bg-neon-yellow"></div>
-    </div>
-    <p class="text-lg text-gray-600 mb-8">
-      Browse all posts tagged with {displayTag}
-    </p>
+<BaseLayout title={`Posts tagged "${displayTag}"`} description={`All posts tagged with ${displayTag}`} lang="en" dir="ltr">
+  <div class="container mx-auto max-w-4xl px-4 md:px-6 py-10 md:py-14">
+    <a href="/en/blog/" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-electric-blue mb-6">
+      ← Back to Blog
+    </a>
+    <header class="mb-10">
+      <span class="tag mb-3">Tag</span>
+      <h1 class="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-2">#{displayTag}</h1>
+      <p class="text-base text-zinc-600 dark:text-zinc-400">Browse all posts tagged with {displayTag}</p>
+    </header>
 
-    <div class="space-y-6">
-      {sortedPosts.map(post => (
-        <article class="card">
-          <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`} class="no-underline">
-            <h2 class="text-xl font-semibold text-electric-blue hover:text-teal-600">
+    <div class="space-y-5">
+      {sortedPosts.map((post) => (
+        <article class="card group">
+          <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`} class="block">
+            <h2 class="text-xl font-semibold text-zinc-900 dark:text-white group-hover:text-electric-blue dark:group-hover:text-electric-blue-light transition-colors">
               {post.data.title}
             </h2>
           </a>
           {post.data.description && (
-            <p class="text-gray-600 mt-2">{post.data.description}</p>
+            <p class="text-zinc-600 dark:text-zinc-400 text-sm mt-2 leading-relaxed">{post.data.description}</p>
           )}
-          <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
-            <time>{new Date(post.data.pubDate).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</time>
+          <div class="mt-3 text-xs text-zinc-400">
+            <time>
+              {new Date(post.data.pubDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </time>
           </div>
         </article>
       ))}

@@ -10,92 +10,158 @@ const currentPath = Astro.url.pathname;
 const currentLocale: Locale =
   Astro.props.lang ||
   (Astro.currentLocale === 'en' ? 'en' : currentPath.startsWith('/en') ? 'en' : 'ar');
+const isAr = currentLocale === 'ar';
 
-const siteTitle = 'Abdla';
-const alternateLocaleName = currentLocale === 'en' ? 'العربية' : 'English';
+const alternateLocaleName = isAr ? 'English' : 'العربية';
 const alternatePath = await getAlternatePath(currentPath, currentLocale);
 
 const navLinks = [
-  { name: currentLocale === 'en' ? 'Base' : 'الواجهة', href: `/${currentLocale}/`, isHome: true },
-  { name: currentLocale === 'en' ? 'Blog' : 'المدونة', href: `/${currentLocale}/blog/`, isHome: false },
-  { name: currentLocale === 'en' ? 'Behind the Dunes?' : 'من وراء الكثبان؟', href: `/${currentLocale}/about/`, isHome: false },
-  { name: currentLocale === 'en' ? 'Send a Signal' : 'أرسل إشارة', href: `/${currentLocale}/contact/`, isHome: false },
+  { name: isAr ? 'الواجهة' : 'Base', href: `/${currentLocale}/`, isHome: true },
+  { name: isAr ? 'المدونة' : 'Blog', href: `/${currentLocale}/blog/`, isHome: false },
+  { name: isAr ? 'إشارات' : 'Signals', href: `/${currentLocale}/signals/`, isHome: false },
+  { name: isAr ? 'الجري' : 'Running', href: `/${currentLocale}/running/`, isHome: false },
+  { name: isAr ? 'الآن' : 'Now', href: `/${currentLocale}/now/`, isHome: false },
+  { name: isAr ? 'عنّي' : 'About', href: `/${currentLocale}/about/`, isHome: false },
+  { name: isAr ? 'تواصل' : 'Contact', href: `/${currentLocale}/contact/`, isHome: false },
 ];
 
 const normalizedPath = currentPath.replace(/\/+$/, '') || '/';
 ---
-<header class="header-top">
-  <div class="container mx-auto flex flex-wrap items-center justify-between p-4 gap-x-6 gap-y-2">
-    <div class="site-title text-2xl font-bold tracking-tight">
-      <a href={`/${currentLocale}/`} class="hover:text-neon-yellow transition-colors duration-200">{siteTitle}</a>
+
+<header class="header-glass">
+  <div class="container mx-auto max-w-6xl px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+    {/* Wordmark */}
+    <div class="site-title text-xl md:text-2xl font-bold tracking-tight flex-shrink-0">
+      <a
+        href={`/${currentLocale}/`}
+        class="inline-flex items-baseline text-zinc-900 dark:text-white hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors"
+      >
+        Abdla<span class="text-electric-blue dark:text-neon-yellow">.</span>
+      </a>
     </div>
 
-    <button
-      id="menuButton"
-      type="button"
-      aria-label={currentLocale === 'en' ? 'Toggle navigation menu' : 'فتح القائمة'}
-      aria-expanded="false"
-      aria-controls="navMenu"
-      class="md:hidden text-cool-light-gray hover:text-neon-yellow"
-    >
-      <Icon name="mdi:menu" class="w-6 h-6" />
-    </button>
-
-    <nav id="navMenu" class="hidden w-full md:flex md:w-auto md:gap-8 text-base items-center">
-      <div class="flex flex-col md:flex-row gap-4 md:gap-8 mt-4 md:mt-0 md:items-center">
-        {navLinks.map((link) => {
-          const normalizedHref = link.href.replace(/\/+$/, '') || '/';
-          const isActive = link.isHome
-            ? normalizedPath === normalizedHref || (currentLocale === 'ar' && normalizedPath === '/')
-            : normalizedPath === normalizedHref || normalizedPath.startsWith(`${normalizedHref}/`);
-          return (
-            <a
-              href={link.href}
-              aria-current={isActive ? 'page' : undefined}
-              class:list={[
-                'pb-1 border-b-2 transition-colors duration-200',
-                isActive
-                  ? 'border-neon-yellow text-neon-yellow'
-                  : 'border-transparent hover:border-neon-yellow/70 hover:text-cool-light-gray/80',
-              ]}
-            >
-              {link.name}
-            </a>
-          );
-        })}
-        {!currentPath.includes('/tags/') && (
+    {/* Desktop Nav */}
+    <nav class="hidden lg:flex items-center gap-1" aria-label={isAr ? 'التنقل الرئيسي' : 'Main Navigation'}>
+      {navLinks.map((link) => {
+        const normalizedHref = link.href.replace(/\/+$/, '') || '/';
+        const isActive = link.isHome
+          ? normalizedPath === normalizedHref || (isAr && normalizedPath === '/')
+          : normalizedPath === normalizedHref || normalizedPath.startsWith(`${normalizedHref}/`);
+        return (
           <a
-            href={alternatePath}
-            class={`px-3 py-1 rounded-full border border-white/30 text-white hover:bg-white hover:text-electric-blue transition-all duration-200 text-sm font-medium self-start md:self-auto ${currentLocale === 'en' ? 'font-arabic-body' : ''}`}
-            title={alternateLocaleName}
+            href={link.href}
+            aria-current={isActive ? 'page' : undefined}
+            class:list={[
+              'px-3 py-1.5 rounded-lg text-sm transition-colors',
+              isActive
+                ? 'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold'
+                : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-zinc-800/70',
+            ]}
           >
-            {currentLocale === 'en' ? 'عربي' : 'EN'}
+            {link.name}
           </a>
-        )}
-        <button
-          id="themeToggle"
-          type="button"
-          aria-label={currentLocale === 'en' ? 'Toggle dark mode' : 'تبديل الوضع الداكن'}
-          class="md:ms-2 self-start md:self-auto hover:text-neon-yellow transition-colors"
-        >
-          <Icon name="mdi:theme-light-dark" class="w-6 h-6" />
-        </button>
-      </div>
+        );
+      })}
     </nav>
+
+    {/* Right Actions: ⌘K, Language, Theme, Mobile Menu */}
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        data-open-cmdk
+        aria-label={isAr ? 'بحث سريع' : 'Quick search'}
+        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/80 text-zinc-500 dark:text-zinc-400 hover:border-electric-blue/50 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs"
+      >
+        <Icon name="mdi:magnify" class="w-4 h-4" />
+        <span class="hidden sm:inline">{isAr ? 'بحث' : 'Search'}</span>
+        <kbd class="hidden md:inline-flex px-1 py-0.2 rounded bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono text-[10px]">
+          ⌘K
+        </kbd>
+      </button>
+
+      {!currentPath.includes('/tags/') && (
+        <a
+          href={alternatePath}
+          class={`px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-electric-blue hover:text-electric-blue dark:hover:text-electric-blue-light transition-colors text-xs font-medium ${!isAr ? 'font-arabic-body' : ''}`}
+          title={alternateLocaleName}
+        >
+          {isAr ? 'EN' : 'عربي'}
+        </a>
+      )}
+
+      <button
+        id="themeToggle"
+        type="button"
+        aria-label={isAr ? 'تبديل الوضع الداكن' : 'Toggle dark mode'}
+        class="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
+      >
+        <Icon name="mdi:theme-light-dark" class="w-5 h-5" />
+      </button>
+
+      <button
+        id="menuButton"
+        type="button"
+        aria-label={isAr ? 'فتح القائمة' : 'Toggle navigation menu'}
+        aria-expanded="false"
+        aria-controls="mobileMenu"
+        class="lg:hidden p-2 rounded-lg text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+      >
+        <Icon name="mdi:menu" class="w-5 h-5" />
+      </button>
+    </div>
   </div>
+
+  {/* Mobile Dropdown Drawer */}
+  <nav
+    id="mobileMenu"
+    class="hidden lg:hidden border-t border-zinc-200/70 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl px-4 py-3"
+    aria-label={isAr ? 'قائمة الجوال' : 'Mobile Navigation'}
+  >
+    <div class="grid grid-cols-2 gap-1.5">
+      {navLinks.map((link) => {
+        const normalizedHref = link.href.replace(/\/+$/, '') || '/';
+        const isActive = link.isHome
+          ? normalizedPath === normalizedHref || (isAr && normalizedPath === '/')
+          : normalizedPath === normalizedHref || normalizedPath.startsWith(`${normalizedHref}/`);
+        return (
+          <a
+            href={link.href}
+            aria-current={isActive ? 'page' : undefined}
+            class:list={[
+              'px-3 py-2 rounded-xl text-sm transition-colors',
+              isActive
+                ? 'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold'
+                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800',
+            ]}
+          >
+            {link.name}
+          </a>
+        );
+      })}
+    </div>
+  </nav>
 </header>
 
 <script>
-  const menuButton = document.getElementById('menuButton');
-  const navMenu = document.getElementById('navMenu');
+  function initHeader() {
+    const menuButton = document.getElementById('menuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const themeToggle = document.getElementById('themeToggle');
 
-  menuButton?.addEventListener('click', () => {
-    const isHidden = navMenu?.classList.toggle('hidden');
-    menuButton.setAttribute('aria-expanded', String(!isHidden));
-  });
+    if (menuButton && mobileMenu) {
+      menuButton.onclick = () => {
+        const isHidden = mobileMenu.classList.toggle('hidden');
+        menuButton.setAttribute('aria-expanded', String(!isHidden));
+      };
+    }
 
-  document.getElementById('themeToggle')?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
+    if (themeToggle) {
+      themeToggle.onclick = () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      };
+    }
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
 </script>

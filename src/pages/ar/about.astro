@@ -1,31 +1,26 @@
 ---
-// src/pages/ar/about.astro - Larger Font, Subtitle Removed
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { generatePersonSchema } from '../../utils/structuredData';
 
-const pageTitle = "من وراء الكثبان؟";
-const pageDescription = "في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.";
+const pageTitle = 'من وراء الكثبان؟';
+const pageDescription = 'في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.';
 const personSchema = generatePersonSchema();
 ---
+
 <BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
-  {/* Centered container with vertical padding */}
-  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
 
-    {/* Page Title - Adjusted margin */}
-    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow"> {/* Adjusted mb-4 to mb-8 */}
-      {pageTitle}
-    </h1>
-    {/* English subtitle <p> tag REMOVED */}
+  <div class="container mx-auto max-w-3xl px-4 md:px-6 py-10 md:py-14">
+    <header class="mb-8">
+      <h1 class="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-4">
+        {pageTitle}
+      </h1>
+      <div class="w-16 h-1 rounded-full bg-gradient-to-l from-electric-blue to-neon-yellow"></div>
+    </header>
 
-    {/* Main content area - Added text-lg for larger paragraphs */}
-    <div class="space-y-6 max-w-prose leading-relaxed text-lg"> {/* <-- Added text-lg */}
-      <p>
-        في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.
-      </p>
-      <p>
-        لستُ هنا لأتحدث عن الاسم، بل عن الأفكار، والتجارب، والرؤية.
-      </p>
+    <div class="card space-y-6 text-base md:text-lg leading-relaxed text-zinc-700 dark:text-zinc-300">
+      <p>في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.</p>
+      <p>لستُ هنا لأتحدث عن الاسم، بل عن الأفكار، والتجارب، والرؤية.</p>
       <p>
         من خلف الشاشة وداخل أسطر الكود، أسافر عبر المعرفة، أبحث عن الحلول، وأشارك ما يملأ فراغي ويشعل شغفي.
         أكتب لأنني أحتاج أحيانًا للبوح، ولأن بعض الأفكار لا تحتمل البقاء في رأسي وحدي. أشارك تجاربي وأدوّن ما أراه يستحق التدوين. لا أنتمي إلى مجال واحد، بل أتنقل بين اهتماماتي، فقد تجدني أكتب عن التقنية وآخر أخبارها، أو أروي قصةً بطلها ذكاءٌ اصطناعي، أو أتأمل في تجربة ريادية وتجارية.
@@ -34,9 +29,18 @@ const personSchema = generatePersonSchema();
         أحيانًا أركض في الماراثونات بحذائي الحديث وأوثّق الرحلة، وأحيانًا أخرى أبحر في عالم جديد تمامًا لم يسبقني إليه أحدٌ أعرفه.
       </p>
       <p>
-        إن شعرت أن ما تقرأه هنا يلامسك، فربما يمكن أن نكون أصدقاء في هذا العالم الرقمي — على واحدة من وسائل التواصل المختلفة. {/* Links to profiles can be added here later */}
+        إن شعرت أن ما تقرأه هنا يلامسك، فربما يمكن أن نكون أصدقاء في هذا العالم الرقمي — على واحدة من وسائل التواصل المختلفة.
       </p>
-    </div>
 
+      <div class="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-3">
+        <a href="/ar/now/" class="button text-sm">ماذا أفعل الآن؟</a>
+        <a
+          href="/ar/contact/"
+          class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:border-electric-blue transition-colors"
+        >
+          أرسل إشارة ←
+        </a>
+      </div>
+    </div>
   </div>
 </BaseLayout>

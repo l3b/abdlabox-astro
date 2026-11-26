@@ -1,63 +1,49 @@
 ---
-// src/pages/en/about.astro - Styled with Content
-import BaseLayout from "../../layouts/BaseLayout.astro"; // Verify path is correct
-import { generatePersonSchema } from "../../utils/structuredData";
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { generatePersonSchema } from '../../utils/structuredData';
 
 const pageTitle = "Who's Behind the Dunes?";
-// Optional: Use a description for meta tags
 const pageDescription =
-  "In a world where technology intersects with identity, I choose to be the voice behind the dunes.";
-
-// Generate structured data for person
+  'In a world where technology intersects with identity, I choose to be the voice behind the dunes.';
 const personSchema = generatePersonSchema();
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
-  <script
-    slot="head"
-    type="application/ld+json"
-    set:html={JSON.stringify(personSchema)}
-  ></script>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
 
-  {/* Centered container with vertical padding */}
-  <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
-    {/* Page Title - Near Black text, Neon Yellow bottom border */}
-    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-8 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
-      {pageTitle}
-    </h1>
+  <div class="container mx-auto max-w-3xl px-4 md:px-6 py-10 md:py-14">
+    <header class="mb-8">
+      <h1 class="text-3xl md:text-5xl font-bold text-zinc-900 dark:text-white mb-4">
+        {pageTitle}
+      </h1>
+      <div class="w-16 h-1 rounded-full bg-gradient-to-r from-electric-blue to-neon-yellow"></div>
+    </header>
 
-    {/* Main content area - Added text-lg for larger paragraphs */}
-    <div class="space-y-6 max-w-prose leading-relaxed text-lg">
-      {/* Added text-lg */}
+    <div class="card space-y-6 text-base md:text-lg leading-relaxed text-zinc-700 dark:text-zinc-300">
       <p>
-        In a world where technology intersects with identity, I choose to be the
-        voice behind the dunes.
+        In a world where technology intersects with identity, I choose to be the voice behind the dunes.
+      </p>
+      <p>This space isn’t about a name — it’s about thoughts, experiences, and vision.</p>
+      <p>
+        From behind a screen and within lines of code, I travel through knowledge, search for meaning, and share what fills my curiosity and passion.
+        I write because some thoughts are too loud to keep inside. I document fragments of my journey — stories, reflections, and ideas I believe are worth capturing.
       </p>
       <p>
-        This space isn’t about a name — it’s about thoughts, experiences, and
-        vision.
+        In this vast digital space, I don't stick to one subject. You might find me exploring the latest tech trends or telling a story where artificial intelligence plays the lead. I may reflect on entrepreneurial ventures or document a marathon journey in my newest pair of running shoes. Sometimes, I dive into something completely different — a new experience that I may not even be the best person to go through, but one that’s worth the try.
       </p>
       <p>
-        From behind a screen and within lines of code, I travel through
-        knowledge, search for meaning, and share what fills my curiosity and
-        passion. I write because some thoughts are too loud to keep inside. I
-        document fragments of my journey — stories, reflections, and ideas I
-        believe are worth capturing.
+        And if something you read here resonates with you, maybe we could be digital friends — somewhere across this web of signals.
       </p>
-      <p>
-        In this vast digital space, I don't stick to one subject. You might find
-        me exploring the latest tech trends or telling a story where artificial
-        intelligence plays the lead. I may reflect on entrepreneurial ventures
-        or document a marathon journey in my newest pair of running shoes.
-        Sometimes, I dive into something completely different — a new experience
-        that I may not even be the best person to go through, but one that’s
-        worth the try.
-      </p>
-      <p>
-        And if something you read here resonates with you, maybe we could be
-        digital friends — somewhere across this web of signals.{" "}
-        {/* Links to profiles can be added here later */}
-      </p>
+
+      <div class="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap gap-3">
+        <a href="/en/now/" class="button text-sm">What I'm doing /now</a>
+        <a
+          href="/en/contact/"
+          class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:border-electric-blue transition-colors"
+        >
+          Send a Signal →
+        </a>
+      </div>
     </div>
   </div>
 </BaseLayout>

@@ -25,17 +25,14 @@ export async function getAlternatePath(
   const alternateLocale: Locale = currentLocale === 'en' ? 'ar' : 'en';
   const cleanPath = currentPath.replace(/\/+$/, '') || '/';
 
-  // Root Arabic homepage "/"
   if (cleanPath === '/' || cleanPath === `/${currentLocale}`) {
     return `/${alternateLocale}/`;
   }
 
-  // Tag pages → alternate blog index
   if (cleanPath.includes('/tags/')) {
     return `/${alternateLocale}/blog/`;
   }
 
-  // Blog post pages → linked translation or alternate blog index
   const blogPostMatch = cleanPath.match(new RegExp(`^/${currentLocale}/blog/([^/]+)$`));
   if (blogPostMatch) {
     const slug = `${currentLocale}/${blogPostMatch[1]}`;
@@ -51,7 +48,6 @@ export async function getAlternatePath(
     return `/${alternateLocale}/blog/`;
   }
 
-  // Standard localized routes (/ar/about -> /en/about, etc.)
   if (cleanPath.startsWith(`/${currentLocale}/`)) {
     return cleanPath.replace(new RegExp(`^/${currentLocale}`), `/${alternateLocale}`);
   }
