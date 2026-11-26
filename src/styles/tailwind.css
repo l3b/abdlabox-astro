@@ -17,7 +17,28 @@
     @apply bg-inherit text-inherit min-h-screen;
   }
 
-  /* Enhanced card styles with variations */
+  /* Bento dashboard cards (homepage widgets) */
+  .bento-card {
+    @apply bg-white dark:bg-zinc-900/90 p-5 md:p-6 border border-gray-200/80 dark:border-zinc-800 rounded-2xl shadow-sm hover:shadow-md dark:hover:border-zinc-700 transition-all duration-200 flex flex-col;
+  }
+
+  .bento-header {
+    @apply flex items-center justify-between gap-3 mb-5 pb-3.5 border-b border-gray-100 dark:border-zinc-800;
+  }
+
+  .bento-icon {
+    @apply w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0;
+  }
+
+  .bento-title {
+    @apply text-lg font-semibold text-soft-charcoal dark:text-gray-100 m-0 leading-tight;
+  }
+
+  .bento-action {
+    @apply text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue-light inline-flex items-center gap-1 transition-colors flex-shrink-0;
+  }
+
+  /* Enhanced card styles (blog listings & tag pages) */
   .card {
     @apply bg-white block p-4 md:p-6 border border-gray-200 rounded-xl hover:shadow-xl transition-all duration-300 ease-out transform hover:-translate-y-1;
   }
@@ -60,7 +81,7 @@
     @apply text-gray-100;
   }
 
-  .dark h2 {
+  .dark h2:not(.bento-title) {
     @apply text-lavender;
   }
   
@@ -68,11 +89,6 @@
   .dark .card h2,
   .dark .card h3 {
     @apply text-lavender;
-  }
-  
-  /* Override electric-blue text to lavender in dark mode */
-  .dark .text-electric-blue {
-    color: #A78BFA !important;
   }
 
   .dark .text-gray-600 {
@@ -156,11 +172,14 @@
 /* Card Section Titles (homepage boxes) - Use cleaner font */
 [dir="rtl"] .card h2,
 [dir="rtl"] .card h3,
+[dir="rtl"] .bento-card h2,
+[dir="rtl"] .bento-card h3,
 [lang="ar"] .card h2,
-[lang="ar"] .card h3 {
+[lang="ar"] .card h3,
+[lang="ar"] .bento-card h2,
+[lang="ar"] .bento-card h3 {
   font-family: 'Vazirmatn', 'IBM Plex Sans Arabic', 'Tajawal', sans-serif !important;
   font-weight: 600;
-  font-size: 1.25rem; /* Smaller size for card titles */
   line-height: 1.5;
 }
 
@@ -182,14 +201,14 @@
   font-weight: 600;
 }
 
-[dir="rtl"] h2,
-[lang="ar"] h2 {
+[dir="rtl"] h2:not(.bento-title):not(.card h2),
+[lang="ar"] h2:not(.bento-title):not(.card h2) {
   font-size: 2rem;
   line-height: 1.4;
 }
 
-[dir="rtl"] h3,
-[lang="ar"] h3 {
+[dir="rtl"] h3:not(.bento-card h3):not(.card h3),
+[lang="ar"] h3:not(.bento-card h3):not(.card h3) {
   font-size: 1.5rem;
   line-height: 1.5;
 }
@@ -222,8 +241,12 @@
 /* English Card Titles - Clean like Vazirmatn */
 [dir="ltr"] .card h2,
 [dir="ltr"] .card h3,
+[dir="ltr"] .bento-card h2,
+[dir="ltr"] .bento-card h3,
 [lang="en"] .card h2,
-[lang="en"] .card h3 {
+[lang="en"] .card h3,
+[lang="en"] .bento-card h2,
+[lang="en"] .bento-card h3 {
   font-family: 'Inter', 'IBM Plex Sans', sans-serif !important;
   font-weight: 600;
 }
@@ -260,30 +283,22 @@
   /* Make SVG fill color inherit text color */
 }
 
-/* NEW Base Heading Styles (within <main>) */
+/* Base Heading Styles (within <main>, excluding bento headers) */
 main h1 {
   @apply text-3xl font-bold mb-4 md:text-4xl;
-  /* Size, Weight, Margin */
-  /* Color will be applied via utility class, e.g., text-lavender */
 }
 
-main h2 {
+main h2:not(.bento-title) {
   @apply text-2xl font-semibold mt-8 mb-3;
-  /* Size, Weight, Margins */
-  /* Color will be applied via utility class, e.g., text-electric-blue */
 }
 
-main h3 {
+main h3:not(.bento-card h3) {
   @apply text-xl font-semibold mt-6 mb-2;
-  /* Size, Weight, Margins */
-  /* Color will be applied via utility class */
 }
 
-/* You might want a base link style within main */
-main a {
+/* Base link style within main (outside bento cards) */
+main a:not(.bento-card a) {
   @apply text-teal hover:text-lavender;
-  /* Using our custom teal color */
-  /* Add underline preferences here if desired, e.g., hover:underline */
 }
 
 /* ... other custom base styles ... */
