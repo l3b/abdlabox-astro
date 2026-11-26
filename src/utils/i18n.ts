@@ -1,50 +1,60 @@
 import type { CollectionEntry } from 'astro:content';
 import { getCollection } from 'astro:content';
 
-export interface TranslationMapping {
-  en: string;
-  ar: string;
-}
+export type Locale = 'ar' | 'en';
 
-// Maps URLs between languages
-export const pageTranslations: Record<string, TranslationMapping> = {
-  'home': { en: '/en', ar: '/ar' },
-  'about': { en: '/en/about', ar: '/ar/about' },
-  'blog': { en: '/en/blog', ar: '/ar/blog' },
-  'contact': { en: '/en/contact', ar: '/ar/contact' }
-};
-
-// Function to get corresponding translation URL
-export function getTranslationUrl(currentPath: string, targetLang: 'en' | 'ar'): string | null {
-  console.log('Current path:', currentPath);
-  console.log('Target language:', targetLang);
-
-  // For tag pages, redirect to blog page
-  const tagPageRegex = /\/(en|ar)\/tags\/[^/]+$/;
-  if (tagPageRegex.test(currentPath)) {
-    console.log('Tag page detected, redirecting to:', `/${targetLang}/blog`);
-    return `/${targetLang}/blog`;
-  }
-
-  // Handle regular pages
-  const pageMappings = Object.values(pageTranslations);
-  const currentMapping = pageMappings.find(mapping => 
-    Object.values(mapping).includes(currentPath)
-  );
-  return currentMapping ? currentMapping[targetLang] : null;
-}
-
-// Function to get blog post translation
 export async function getBlogTranslation(post: CollectionEntry<'blog'>) {
   if (!post.data.translationKey) return null;
 
-  const otherLang = post.data.language === 'en' ? 'ar' : 'en';
-  const posts = await getCollection('blog');
+  const otherLang: Locale = post.data.language === 'en' ? 'ar' : 'en';
+  const posts = await getCollection('blog', ({ data }) => !data.isDraft);
 
-  const translatedPost = posts.find(entry => 
-    entry.data.language === otherLang && 
-    entry.data.translationKey === post.data.translationKey
+  return (
+    posts.find(
+      (entry) =>
+        entry.data.language === otherLang &&
+        entry.data.translationKey === post.data.translationKey
+    ) || null
   );
+}
 
-  return translatedPost || null;
+export async function getAlternatePath(
+  currentPath: string,
+  currentLocale: Locale
+): Promise<string> {
+  const alternateLocale: Locale = currentLocale === 'en' ? 'ar' : 'en';
+  const cleanPath = currentPath.replace(/\/+$/, '') || '/';
+
+  // Root Arabic homepage "/"
+  if (cleanPath === '/' || cleanPath === `/${currentLocale}`) {
+    return `/${alternateLocale}/`;
+  }
+
+  // Tag pages → alternate blog index
+  if (cleanPath.includes('/tags/')) {
+    return `/${alternateLocale}/blog/`;
+  }
+
+  // Blog post pages → linked translation or alternate blog index
+  const blogPostMatch = cleanPath.match(new RegExp(`^/${currentLocale}/blog/([^/]+)$`));
+  if (blogPostMatch) {
+    const slug = `${currentLocale}/${blogPostMatch[1]}`;
+    const allPosts = await getCollection('blog', ({ data }) => !data.isDraft);
+    const currentPost = allPosts.find((post) => post.slug === slug);
+
+    if (currentPost) {
+      const translatedPost = await getBlogTranslation(currentPost);
+      if (translatedPost) {
+        return `/${alternateLocale}/blog/${translatedPost.slug.replace(/^(en|ar)\//, '')}`;
+      }
+    }
+    return `/${alternateLocale}/blog/`;
+  }
+
+  // Standard localized routes (/ar/about -> /en/about, etc.)
+  if (cleanPath.startsWith(`/${currentLocale}/`)) {
+    return cleanPath.replace(new RegExp(`^/${currentLocale}`), `/${alternateLocale}`);
+  }
+
+  return `/${alternateLocale}/`;
 }

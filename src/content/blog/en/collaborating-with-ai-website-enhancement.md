@@ -11,7 +11,7 @@ featuredImage:
   alt: "Abstract visualization of human-AI collaboration in web development"
 ---
 
-Two weeks ago, I published my first blog post about [breaking the perfectionism barrier with AI](/en/blog/ai-blogging-barrier-broken). That was just the beginning. What happened next was an intense 48-hour collaboration with Claude that completely transformed my website - and taught me valuable lessons about human-AI partnership in software development.
+Two weeks ago, I published my first blog post about [breaking the perfectionism barrier with AI](/en/blog/ai-blogging-and-vibecoding). That was just the beginning. What happened next was an intense 48-hour collaboration with Claude that completely transformed my website - and taught me valuable lessons about human-AI partnership in software development.
 
 ## The Starting Point
 

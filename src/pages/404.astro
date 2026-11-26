@@ -62,16 +62,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
 
       <!-- Back to Home -->
-      <div class="text-center">
-        <a href="/en" class="inline-block bg-lavender hover:bg-coral text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200">
+      <div class="text-center flex flex-wrap justify-center gap-4">
+        <a href="/ar/" class="inline-block bg-electric-blue hover:bg-neon-yellow text-white hover:text-soft-charcoal px-6 py-3 rounded-lg font-semibold transition-all duration-200 font-arabic-body">
+          العودة للواجهة
+        </a>
+        <a href="/en/" class="inline-block bg-lavender hover:bg-coral text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200">
           Back to Home
         </a>
       </div>
     </div>
   </div>
-</BaseLayout>
 
-<script>
+<script is:inline>
 class EndlessRunnerGame {
   constructor() {
     this.canvas = document.getElementById('gameCanvas');
@@ -114,35 +116,44 @@ class EndlessRunnerGame {
     this.audioReady = false;
   }
 
-  // Create simple sound effects using Web Audio API
-  createSound(frequency, duration, type = 'sine') {
+  ensureAudioContext() {
     if (!this.audioContext) {
       try {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) this.audioContext = new AudioCtx();
       } catch (e) {
-        console.log('Audio not supported');
-        return;
+        return null;
       }
     }
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(() => {});
+    }
+    return this.audioContext;
+  }
 
-    const oscillator = this.audioContext.createOscillator();
-    const gainNode = this.audioContext.createGain();
+  // Create simple sound effects using Web Audio API
+  createSound(frequency, duration, type = 'sine') {
+    const ctx = this.ensureAudioContext();
+    if (!ctx) return;
+
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
     
     oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
+    gainNode.connect(ctx.destination);
     
-    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
     oscillator.type = type;
     
-    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
     
-    oscillator.start(this.audioContext.currentTime);
-    oscillator.stop(this.audioContext.currentTime + duration);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration);
   }
 
   playSound(soundType) {
-    if (!this.audioContext) return;
+    if (!this.ensureAudioContext()) return;
     
     switch(soundType) {
       case 'jump':
@@ -241,9 +252,8 @@ class EndlessRunnerGame {
   }
 
   handleInput() {
-    // Initialize audio context on first interaction
     if (!this.audioReady) {
-      this.setupAudio();
+      this.ensureAudioContext();
       this.audioReady = true;
     }
     

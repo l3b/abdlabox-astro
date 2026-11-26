@@ -1,9 +1,5 @@
-
 ---
-import { getCollection } from 'astro:content';
-import ArabicIndex from './ar/index.astro';
-
-const props = Astro.props;
+import HomeDashboard from "../components/HomeDashboard.astro";
 ---
 
-<ArabicIndex {...props} />
+<HomeDashboard locale="ar" />

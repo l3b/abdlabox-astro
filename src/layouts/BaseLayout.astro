@@ -1,37 +1,72 @@
 ---
-// src/layouts/BaseLayout.astro - Final Version with Theme Base Colors
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import '@/styles/tailwind.css'; // Using alias path - change to '../styles/tailwind.css' if preferred
+import '@/styles/tailwind.css';
 import { analyticsConfig } from '../data/analytics';
 import { generateWebsiteSchema } from '../utils/structuredData';
+import { getAlternatePath, type Locale } from '../utils/i18n';
 
 export interface Props {
   title: string;
   description?: string;
-  lang?: string;
+  lang?: Locale;
   dir?: 'ltr' | 'rtl';
+  ogImage?: string;
+  ogType?: 'website' | 'article';
 }
 
-const { title, description, lang = 'en', dir = 'ltr' } = Astro.props;
+const {
+  title,
+  description,
+  lang = 'ar',
+  dir = lang === 'ar' ? 'rtl' : 'ltr',
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
 
-// Construct page title format
-const siteName = "Abdla"; // Brand name
+const siteName = 'Abdla';
 const fullPageTitle = `${title} | ${siteName}`;
-
-// SEO Configuration
-const siteDescription = description || "Technology Consultant and Runner sharing insights on tech, productivity, and personal growth.";
-const siteUrl = "https://abdla.box";
+const siteUrl = 'https://abdla.box';
 const currentUrl = `${siteUrl}${Astro.url.pathname}`;
-const imageUrl = `${siteUrl}/favicon.svg`; // You can update this to a proper OG image later
 
-// Generate structured data
+const defaultDescription =
+  lang === 'ar'
+    ? 'الواجهة الرقمية لـ عبدالله: مقالات وتجارب في التقنية، الذكاء الاصطناعي، الجري، وإدارة المعرفة.'
+    : 'Technology Consultant and Runner sharing insights on tech, AI, productivity, and personal growth.';
+const siteDescription = description || defaultDescription;
+
+const resolvedOgImage = ogImage
+  ? ogImage.startsWith('http')
+    ? ogImage
+    : `${siteUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`
+  : `${siteUrl}/web-app-manifest-512x512.png`;
+
+const alternatePath = await getAlternatePath(Astro.url.pathname, lang);
+const enUrl = lang === 'en' ? currentUrl : `${siteUrl}${alternatePath}`;
+const arUrl = lang === 'ar' ? currentUrl : `${siteUrl}${alternatePath}`;
+
 const websiteSchema = generateWebsiteSchema();
 ---
+<!DOCTYPE html>
 <html lang={lang} dir={dir} class="font-sans antialiased">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Prevent dark-mode flash (FOUC) before first paint -->
+  <script is:inline>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Favicons -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -39,19 +74,7 @@ const websiteSchema = generateWebsiteSchema();
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
-
-  <!-- Apple Touch Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png" />
-  <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png" />
-  <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png" />
-  <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png" />
-  <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png" />
-  <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png" />
-  <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png" />
-  <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png" />
-
-  <!-- Web App Manifest -->
   <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Primary Meta Tags -->
@@ -60,51 +83,49 @@ const websiteSchema = generateWebsiteSchema();
   <meta name="description" content={siteDescription} />
   <meta name="author" content="Abdla" />
   <meta name="robots" content="index, follow" />
-
-  <!-- Canonical URL -->
   <link rel="canonical" href={currentUrl} />
 
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website" />
+  <!-- Open Graph -->
+  <meta property="og:type" content={ogType} />
   <meta property="og:url" content={currentUrl} />
   <meta property="og:title" content={fullPageTitle} />
   <meta property="og:description" content={siteDescription} />
-  <meta property="og:image" content={imageUrl} />
+  <meta property="og:image" content={resolvedOgImage} />
   <meta property="og:site_name" content={siteName} />
+  <meta property="og:locale" content={lang === 'ar' ? 'ar_SA' : 'en_US'} />
 
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content={currentUrl} />
-  <meta property="twitter:title" content={fullPageTitle} />
-  <meta property="twitter:description" content={siteDescription} />
-  <meta property="twitter:image" content={imageUrl} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content={currentUrl} />
+  <meta name="twitter:title" content={fullPageTitle} />
+  <meta name="twitter:description" content={siteDescription} />
+  <meta name="twitter:image" content={resolvedOgImage} />
 
-  <!-- Additional SEO -->
-  <meta name="theme-color" content="#007BC5" />
-  <meta name="msapplication-TileColor" content="#007BC5" />
+  <meta name="theme-color" content="#0EA5E9" />
+  <meta name="msapplication-TileColor" content="#0EA5E9" />
 
-  <!-- Language and Direction -->
-  <link rel="alternate" hreflang="en" href={`${siteUrl}/en`} />
-  <link rel="alternate" hreflang="ar" href={`${siteUrl}/ar`} />
-  <link rel="alternate" hreflang="x-default" href={siteUrl} />
+  <!-- Hreflang (per-page accurate links) -->
+  <link rel="alternate" hreflang="en" href={enUrl} />
+  <link rel="alternate" hreflang="ar" href={arUrl} />
+  <link rel="alternate" hreflang="x-default" href={arUrl} />
 
-  <!-- RSS Feed -->
-  <link rel="alternate" type="application/rss+xml" title={`${siteName} Blog`} href={`${siteUrl}/rss.xml`} />
+  <!-- RSS Feeds -->
+  <link rel="alternate" type="application/rss+xml" title={`${siteName} Blog (AR)`} href={`${siteUrl}/ar/rss.xml`} />
+  <link rel="alternate" type="application/rss+xml" title={`${siteName} Blog (EN)`} href={`${siteUrl}/rss.xml`} />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)}></script>
 
-  {/* Google Analytics */}
+  <!-- Google Analytics -->
   <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsConfig.googleAnalytics.id}`}></script>
-  <script define:vars={{ analyticsConfig }}>
+  <script define:vars={{ gaId: analyticsConfig.googleAnalytics.id }}>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', analyticsConfig.googleAnalytics.id);
+    gtag('config', gaId);
   </script>
 
-  {/* Google Font Links */}
-  {/* Microsoft Clarity */}
+  <!-- Microsoft Clarity -->
   <script type="text/javascript" define:vars={{ clarityId: analyticsConfig.clarity.projectId }}>
     (function(c,l,a,r,i,t,y){
       c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -113,23 +134,22 @@ const websiteSchema = generateWebsiteSchema();
     })(window, document, "clarity", "script", clarityId);
   </script>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <!-- Google Fonts: English and Arabic fonts with matching design philosophy -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&family=Comfortaa:wght@600;700&family=Quicksand:wght@600;700&family=Kalam:wght@700&family=Caveat:wght@700&family=Paytone+One&family=Fredoka:wght@600;700&family=Unbounded:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Readex+Pro:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Rubik:wght@400;600;700&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Local fonts CSS -->
-  <link href="/fonts/fonts.css" rel="stylesheet">
+  <!-- Fonts (trimmed to only active brand families) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Vazirmatn:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link href="/fonts/fonts.css" rel="stylesheet" />
+
+  <slot name="head" />
 </head>
-<!-- {/* UPDATED: Apply Near White background and Near Black text */} -->
 <body class="min-h-screen flex flex-col">
-    <Header />
-    {/* Add some vertical padding to the main content area */}
-    <main class="flex-grow py-8 md:py-12">
-      <slot /> {/* Page content will be injected here */}
-    </main>
-    <Footer />
+  <Header lang={lang} />
+  <main class="flex-grow py-8 md:py-12">
+    <slot />
+  </main>
+  <Footer lang={lang} />
 </body>
 </html>

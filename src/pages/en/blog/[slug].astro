@@ -1,16 +1,18 @@
 ---
-// src/pages/en/blog/[slug].astro - Code Block Readability Fix
 import { type CollectionEntry, getCollection } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getBlogTranslation } from '../../../utils/i18n';
 import { generateBlogPostSchema } from '../../../utils/structuredData';
+import { imageManager } from '../../../utils/imageUpload';
+import { getReadingTime } from '../../../utils/readingTime';
+import { getOrCreateTag, normalizeTag } from '../../../data/tags';
 import OptimizedImage from '../../../components/OptimizedImage.astro';
 
 export async function getStaticPaths() {
   const allEnglishPosts = await getCollection('blog', ({ data }) => {
     return data.language === 'en' && data.isDraft !== true;
   });
-  return allEnglishPosts.map(post => ({
+  return allEnglishPosts.map((post) => ({
     params: { slug: post.slug.replace(/^en\//, '') },
     props: { post },
   }));
@@ -21,82 +23,93 @@ const { post } = Astro.props;
 const { Content } = await post.render();
 const translatedPost = await getBlogTranslation(post);
 
-const pageTitle = post.data.title;
-const pageDescription = post.data.description;
+const allPosts = await getCollection('blog', ({ data }) => data.language === 'en' && !data.isDraft);
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
+const nextPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 
-// Generate structured data for blog post
+const readingTime = getReadingTime(post.body);
+const cleanSlug = post.slug.replace(/^en\//, '');
+const resolvedFeaturedImage = post.data.featuredImage?.r2Path
+  ? imageManager.getR2ImageUrl(post.data.featuredImage.r2Path)
+  : post.data.featuredImage?.url;
+
 const blogPostSchema = generateBlogPostSchema(
   post.data.title,
   post.data.description,
   post.data.pubDate,
   post.data.updatedDate,
-  post.slug.replace(/^en\//, ''),
-  post.data.featuredImage?.url
+  cleanSlug,
+  resolvedFeaturedImage,
+  'en'
 );
-
-// Assuming the existence of a tags object mapping tags to slugs.  This needs to be defined elsewhere.
-import { tags } from '../../../data/tags';
-
-// Use the readingTime utility
-import { getReadingTime } from '../../../utils/readingTime';
-const readingTime = getReadingTime(post.body);
-
-
-// Added to get previous and next posts.  This requires additional logic to determine order.
-const allPosts = await getCollection('blog', ({ data }) => data.language === 'en' && data.isDraft !== true);
-const currentIndex = allPosts.findIndex(p => p.slug === post.slug);
-const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
-const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
-
 ---
-<BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
-  <!-- JSON-LD Structured Data for Blog Post -->
-  <script type="application/ld+json" set:html={JSON.stringify(blogPostSchema)}></script>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  lang="en"
+  dir="ltr"
+  ogImage={resolvedFeaturedImage}
+  ogType="article"
+>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostSchema)}></script>
 
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
     <article>
-      {/* Post Header Section */}
-      <header class="mb-8 border-b border-gray-300 pb-6">
+      <header class="mb-8 border-b border-gray-300 dark:border-gray-700 pb-6">
         <h1 class="inline-block text-3xl md:text-4xl font-bold mb-3 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
           {post.data.title}
         </h1>
+
         <div class="text-sm text-gray-600 flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
           <span>
-            Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Published on:{' '}
+            {post.data.pubDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
           </span>
-          {post.data.tags && post.data.tags.length > 0 && (
-            <span class="flex items-center gap-x-1.5 flex-wrap">
-              Tags:
-              {post.data.tags.map(tag => {
-                const normalizedTag = tag.toLowerCase().replace(/\s+/g, '-');
-                const tagConfig = Object.entries(tags).find(([_, t]) => 
-                  t.slug.en === normalizedTag || t.slug.ar === normalizedTag
-                );
-                return tagConfig && (
-                  <a href={`/en/tags/${tagConfig[1].slug.en}`} class="tag">
-                    {tagConfig[1].en}
-                  </a>
-                );
-              })}
-            </span>
+          <span>• {readingTime} min read</span>
+          {translatedPost && (
+            <a
+              href={`/ar/blog/${translatedPost.slug.replace(/^ar\//, '')}`}
+              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-electric-blue/40 text-electric-blue hover:bg-electric-blue hover:text-white transition-colors text-xs font-medium font-arabic-body"
+            >
+              اقرأ بالعربية ←
+            </a>
           )}
-          <div class="text-sm text-gray-600 mt-2">
-            {readingTime} min read
-          </div>
         </div>
+
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="flex items-center gap-1.5 flex-wrap mt-3 text-sm text-gray-600">
+            <span>Tags:</span>
+            {post.data.tags.map((tag) => {
+              const tagConfig = getOrCreateTag(tag);
+              return (
+                <a href={`/en/tags/${normalizeTag(tag)}`} class="tag">
+                  {tagConfig.en}
+                </a>
+              );
+            })}
+          </div>
+        )}
+
         {post.data.featuredImage && (
           <figure class="mt-6">
             {post.data.featuredImage.r2Path ? (
-              <OptimizedImage 
+              <OptimizedImage
                 src={`r2://${post.data.featuredImage.r2Path}`}
                 alt={post.data.featuredImage.alt}
                 width={800}
                 height={400}
+                loading="eager"
                 class="w-full h-auto rounded-lg shadow-lg"
               />
             ) : (
-              <img 
-                src={post.data.featuredImage.url} 
+              <img
+                src={post.data.featuredImage.url}
                 alt={post.data.featuredImage.alt}
                 class="w-full h-auto rounded-lg shadow-lg"
               />
@@ -110,37 +123,26 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
         )}
       </header>
 
-      <nav class="flex justify-between mb-8 text-sm">
-        {prevPost && (
-          <a href={`/en/blog/${prevPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender">
-            ← {prevPost.data.title}
-          </a>
-        )}
-        {nextPost && (
-          <a href={`/en/blog/${nextPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender ml-auto">
-            {nextPost.data.title} →
-          </a>
-        )}
-      </nav>
+      {(prevPost || nextPost) && (
+        <nav class="flex justify-between mb-8 text-sm">
+          {prevPost && (
+            <a href={`/en/blog/${prevPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender">
+              ← {prevPost.data.title}
+            </a>
+          )}
+          {nextPost && (
+            <a href={`/en/blog/${nextPost.slug.replace(/^en\//, '')}`} class="text-teal-600 hover:text-lavender ml-auto">
+              {nextPost.data.title} →
+            </a>
+          )}
+        </nav>
+      )}
 
-      {/* Main Post Content - Apply 'prose' classes here */}
       <div
-        class="
-          prose prose-lg max-w-none mt-8
-          prose-headings:font-semibold prose-headings:text-soft-charcoal
-          prose-p:text-soft-charcoal !prose-p:text-soft-charcoal prose-p:leading-relaxed
-          prose-a:text-teal-600 prose-a:underline hover:prose-a:text-lavender
-          prose-strong:text-soft-charcoal prose-strong:font-semibold
-          prose-blockquote:border-l-electric-blue prose-blockquote:pl-4 prose-blockquote:italic
-          prose-li:marker:text-electric-blue
-          prose-pre:bg-soft-charcoal prose-pre:text-gray-200 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto
-          /* Removed prose-code:* utilities to avoid conflict with global CSS override */
-          dark:prose-invert dark:prose-headings:text-cool-light-gray dark:prose-p:text-gray-300 dark:prose-strong:text-cool-light-gray dark:prose-a:text-teal dark:hover:prose-a:text-lavender dark:prose-blockquote:border-l-teal dark:prose-li:marker:text-teal dark:prose-pre:bg-gray-800/80 dark:prose-pre:text-gray-200
-        "
+        class="prose prose-lg max-w-none mt-8 prose-headings:font-semibold prose-headings:text-soft-charcoal prose-p:text-soft-charcoal prose-p:leading-relaxed prose-a:text-teal-600 prose-a:underline hover:prose-a:text-lavender prose-strong:text-soft-charcoal prose-strong:font-semibold prose-blockquote:border-l-electric-blue prose-blockquote:pl-4 prose-blockquote:italic prose-li:marker:text-electric-blue prose-pre:bg-soft-charcoal prose-pre:text-gray-200 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto dark:prose-invert dark:prose-headings:text-cool-light-gray dark:prose-p:text-gray-300 dark:prose-strong:text-cool-light-gray dark:prose-a:text-teal dark:hover:prose-a:text-lavender dark:prose-blockquote:border-l-teal dark:prose-li:marker:text-teal dark:prose-pre:bg-gray-800/80 dark:prose-pre:text-gray-200"
       >
         <Content />
       </div>
-
     </article>
   </div>
 </BaseLayout>

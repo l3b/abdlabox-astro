@@ -1,13 +1,14 @@
 ---
 // src/pages/ar/about.astro - Larger Font, Subtitle Removed
-import BaseLayout from '../../layouts/BaseLayout.astro'; // Verify path is correct
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { generatePersonSchema } from '../../utils/structuredData';
 
 const pageTitle = "من وراء الكثبان؟";
-// Removed englishSubtitle variable
-// Optional: Use a description for meta tags
 const pageDescription = "في عالمٍ تتقاطع فيه التكنولوجيا مع الهوية، أختار أن أكون الصوت خلف الكثبان.";
+const personSchema = generatePersonSchema();
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="ar" dir="rtl">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
   {/* Centered container with vertical padding */}
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
 

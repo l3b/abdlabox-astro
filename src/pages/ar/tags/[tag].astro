@@ -8,8 +8,7 @@ export async function getStaticPaths() {
     data.language === 'ar' && !data.isDraft
   );
   
-  // Collect all unique tags from posts
-  const allTags = new Set();
+  const allTags = new Set<string>();
   allPosts.forEach(post => {
     if (post.data.tags) {
       post.data.tags.forEach(tag => allTags.add(tag));
@@ -18,8 +17,12 @@ export async function getStaticPaths() {
   
   return Array.from(allTags).map(tag => ({
     params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
-    props: { tag: tag }
+    props: { tag }
   }));
+}
+
+interface Props {
+  tag: string;
 }
 
 const { tag } = Astro.props;
@@ -58,7 +61,7 @@ const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDa
             <p class="text-gray-600 mt-2">{post.data.description}</p>
           )}
           <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
-            <time>{new Date(post.data.pubDate).toLocaleDateString('ar-EG', { 
+            <time>{new Date(post.data.pubDate).toLocaleDateString('ar-SA', { 
               year: 'numeric', 
               month: 'long', 
               day: 'numeric' 

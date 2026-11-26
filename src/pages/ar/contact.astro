@@ -16,7 +16,7 @@ const linkCategories = socialLinks.reduce((acc, link) => {
   return acc;
 }, {} as Record<string, typeof socialLinks>);
 
-const categoryOrder = ['Professional', 'Writing', 'Activity', 'Learning', 'Reading', 'Media', 'Other'];
+const categoryOrder = ['Professional', 'Social', 'Writing', 'Activity', 'Learning', 'Reading', 'Media', 'Other'];
 const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
     const indexA = categoryOrder.indexOf(a);
     const indexB = categoryOrder.indexOf(b);
@@ -95,9 +95,9 @@ const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
            {/* Cal.com Trigger Button */}
            <button
              type="button"
-             data-cal-link="abdla/30min"  /* Use your specific Cal link ID */
-             data-cal-namespace="30min" /* Optional namespace */
-             data-cal-config='{"layout":"month_view"}' /* Optional config */
+             data-cal-link="abdla/30min"
+             data-cal-namespace="30min"
+             data-cal-config='{"layout":"month_view"}'
              class="button"
            >
              احجز موعدًا {/* Button Text */}

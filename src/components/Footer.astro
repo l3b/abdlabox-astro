@@ -1,38 +1,41 @@
 ---
-const currentLocale = Astro.currentLocale || 'ar';
-
-const footerLinks = {
-  social: [
-    { name: 'GitHub', url: 'https://github.com/l3b', icon: 'simple-icons:github' },
-    { name: 'Bluesky', url: 'https://bsky.app/profile/abdla.box', icon: 'simple-icons:bluesky' },
-    { name: 'Strava', url: 'https://www.strava.com/athletes/7746516', icon: 'simple-icons:strava' },
-    { name: 'Goodreads', url: 'https://www.goodreads.com/user/show/4693662-abdullah-althani', icon: 'simple-icons:goodreads' },
-    { name: 'Trakt', url: 'https://trakt.tv/users/althani', icon: 'simple-icons:trakt' },
-  ],
-  nav: currentLocale === 'ar' ? [
-    { name: 'الواجهة', url: '/ar/' },
-    { name: 'المدونة', url: '/ar/blog' },
-    { name: 'من وراء الكثبان؟', url: '/ar/about' },
-    { name: 'أرسل إشارة', url: '/ar/contact' },
-  ] : [
-    { name: 'Base', url: '/en/' },
-    { name: 'Blog', url: '/en/blog' },
-    { name: 'Behind the Dunes?', url: '/en/about' },
-    { name: 'Send a Signal', url: '/en/contact' },
-  ]
-};
-
 import { Icon } from 'astro-icon/components';
+import { footerSocialLinks } from '../data/socialLinks';
+import { getAlternatePath, type Locale } from '../utils/i18n';
+
+export interface Props {
+  lang?: Locale;
+}
+
+const currentPath = Astro.url.pathname;
+const currentLocale: Locale =
+  Astro.props.lang ||
+  (Astro.currentLocale === 'en' ? 'en' : currentPath.startsWith('/en') ? 'en' : 'ar');
+
+const alternatePath = await getAlternatePath(currentPath, currentLocale);
+
+const navLinks =
+  currentLocale === 'ar'
+    ? [
+        { name: 'الواجهة', url: '/ar/' },
+        { name: 'المدونة', url: '/ar/blog/' },
+        { name: 'من وراء الكثبان؟', url: '/ar/about/' },
+        { name: 'أرسل إشارة', url: '/ar/contact/' },
+      ]
+    : [
+        { name: 'Base', url: '/en/' },
+        { name: 'Blog', url: '/en/blog/' },
+        { name: 'Behind the Dunes?', url: '/en/about/' },
+        { name: 'Send a Signal', url: '/en/contact/' },
+      ];
 ---
 
 <footer class="mt-auto border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
   <div class="container mx-auto px-4 py-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
-      
-      {/* Left: Navigation Links */}
       <nav class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-        {footerLinks.nav.map(link => (
-          <a 
+        {navLinks.map((link) => (
+          <a
             href={link.url}
             class="text-gray-600 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue transition-colors"
           >
@@ -41,36 +44,36 @@ import { Icon } from 'astro-icon/components';
         ))}
       </nav>
 
-      {/* Center: Social Icons */}
       <div class="flex items-center gap-3">
-        {footerLinks.social.map(link => (
-          <a 
-            href={link.url} 
-            target="_blank" 
+        {footerSocialLinks.map((link) => (
+          <a
+            href={link.url}
+            target="_blank"
             rel="noopener noreferrer"
             class="text-gray-500 dark:text-gray-400 hover:text-electric-blue dark:hover:text-electric-blue transition-colors"
             title={link.name}
+            aria-label={link.name}
           >
             <Icon name={link.icon} class="w-5 h-5" />
           </a>
         ))}
       </div>
 
-      {/* Right: Theme & Language */}
       <div class="flex items-center gap-3">
-        <button 
-          id="theme-toggle-footer" 
+        <button
+          id="theme-toggle-footer"
+          type="button"
           class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400"
-          aria-label="Toggle theme"
+          aria-label={currentLocale === 'en' ? 'Toggle dark mode' : 'تبديل الوضع الداكن'}
         >
           <Icon name="mdi:theme-light-dark" class="w-5 h-5" />
         </button>
-        
-        <a 
-          href={currentLocale === 'ar' ? '/en/' : '/ar/'}
+
+        <a
+          href={alternatePath}
           class="px-3 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm text-gray-600 dark:text-gray-400"
         >
-          {currentLocale === 'ar' ? 'EN' : 'AR'}
+          {currentLocale === 'ar' ? 'EN' : 'عربي'}
         </a>
       </div>
     </div>
@@ -79,8 +82,7 @@ import { Icon } from 'astro-icon/components';
 
 <script>
   document.getElementById('theme-toggle-footer')?.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
+    const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
   });
 </script>

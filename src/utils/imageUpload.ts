@@ -1,10 +1,6 @@
-
 export interface ImageUploadConfig {
-  accountId: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  bucketName: string;
   bucketUrl: string;
+  enableCfTransform: boolean;
 }
 
 export class CloudflareImageManager {
@@ -14,9 +10,14 @@ export class CloudflareImageManager {
     this.config = config;
   }
 
-  // Generate optimized image URL with Cloudflare Image Resizing
+  get isTransformEnabled(): boolean {
+    return this.config.enableCfTransform;
+  }
+
+  // Generate R2 image URL, optionally using Cloudflare Image Transformations
+  // (comma-separated directives per Cloudflare's /cdn-cgi/image specification)
   getOptimizedImageUrl(
-    imagePath: string, 
+    imagePath: string,
     options: {
       width?: number;
       height?: number;
@@ -25,33 +26,44 @@ export class CloudflareImageManager {
       fit?: 'scale-down' | 'contain' | 'cover' | 'crop' | 'pad';
     } = {}
   ): string {
+    const cleanPath = imagePath.replace(/^\/+/, '');
+    const directUrl = this.getR2ImageUrl(cleanPath);
+
+    if (!this.config.enableCfTransform) {
+      return directUrl;
+    }
+
     const { width, height, quality = 85, format = 'auto', fit = 'scale-down' } = options;
-    
-    const baseUrl = `https://abdla.box/cdn-cgi/image`;
-    const params = new URLSearchParams();
-    
-    if (width) params.append('width', width.toString());
-    if (height) params.append('height', height.toString());
-    params.append('quality', quality.toString());
-    params.append('format', format);
-    params.append('fit', fit);
-    
-    return `${baseUrl}/${params.toString()}/${this.config.bucketUrl}/${imagePath}`;
+    const directives: string[] = [];
+
+    if (width) directives.push(`width=${width}`);
+    if (height) directives.push(`height=${height}`);
+    directives.push(`quality=${quality}`);
+    directives.push(`format=${format}`);
+    directives.push(`fit=${fit}`);
+
+    return `https://abdla.box/cdn-cgi/image/${directives.join(',')}/${directUrl}`;
   }
 
-  // For development - you can upload images manually to R2 via Cloudflare dashboard
   getR2ImageUrl(imagePath: string): string {
-    return `${this.config.bucketUrl}/${imagePath}`;
+    const base = this.config.bucketUrl.replace(/\/+$/, '');
+    const cleanPath = imagePath.replace(/^\/+/, '');
+    return `${base}/${cleanPath}`;
   }
 }
 
-// Configuration using environment variables
+const bucketUrl =
+  import.meta.env.R2_BUCKET_URL ||
+  (typeof process !== 'undefined' ? process.env.R2_BUCKET_URL : '') ||
+  'https://img.abdla.box';
+
+const enableCfTransform =
+  (import.meta.env.PUBLIC_CF_IMAGE_TRANSFORM ||
+    (typeof process !== 'undefined' ? process.env.PUBLIC_CF_IMAGE_TRANSFORM : '')) === 'true';
+
 export const imageConfig: ImageUploadConfig = {
-  accountId: process.env.CLOUDFLARE_ACCOUNT_ID || '',
-  accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-  secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-  bucketName: 'abdla-blog-images',
-  bucketUrl: process.env.R2_BUCKET_URL || ''
+  bucketUrl,
+  enableCfTransform,
 };
 
 export const imageManager = new CloudflareImageManager(imageConfig);

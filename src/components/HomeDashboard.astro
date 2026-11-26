@@ -1,0 +1,364 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Icon } from 'astro-icon/components';
+import OptimizedImage from './OptimizedImage.astro';
+import StravaStats from './StravaStats.astro';
+import EmptyState from './EmptyState.astro';
+import { getHomeFeeds } from '../utils/feeds';
+import { PROFILES } from '../data/socialLinks';
+import type { Locale } from '../utils/i18n';
+
+export interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isAr = locale === 'ar';
+const arrow = isAr ? '←' : '→';
+
+const copy = isAr
+  ? {
+      pageTitle: 'الواجهة',
+      pageSubtitle: 'لقطة حيّة من عالمي الرقمي',
+      pageDescription: 'الواجهة الرقمية لـ عبدالله: استكشاف الأفكار والتجارب عبر مختلف الإشارات.',
+      blogHeading: 'أحدث ما في المدونة',
+      blogEmpty: 'لا توجد مقالات حديثة حالياً',
+      allPosts: 'كل المقالات',
+      stravaHeading: 'آخر نشاط رياضي',
+      blueskyHeading: 'من Bluesky',
+      blueskySharedLink: '[رابط مشترك]:',
+      blueskyView: 'عرض على Bluesky',
+      blueskyEmpty: 'لم يتم العثور على منشورات حديثة باللغة العربية',
+      traktHeading: 'شاهدت مؤخرًا',
+      traktEmpty: 'لم يتم العثور على سجل مشاهدة حديث',
+      traktProfile: 'ملفي على Trakt',
+      goodreadsHeading: 'أقرأ الآن',
+      goodreadsEmpty: 'لا يوجد كتب حاليًا',
+      goodreadsProfile: 'ملفي على Goodreads',
+      githubHeading: 'من GitHub',
+      githubEmpty: 'لا يوجد نشاط حديث',
+      githubProfile: 'ملفي على GitHub',
+    }
+  : {
+      pageTitle: 'The Base',
+      pageSubtitle: 'A live snapshot from my digital world',
+      pageDescription:
+        "Abdullah's digital interface: Exploring ideas and experiences across various signals.",
+      blogHeading: 'Latest from the Blog',
+      blogEmpty: 'No recent posts available',
+      allPosts: 'All Posts',
+      stravaHeading: 'Latest Running Activities',
+      blueskyHeading: 'From Bluesky',
+      blueskySharedLink: '[Shared Link]:',
+      blueskyView: 'View on Bluesky',
+      blueskyEmpty: 'No recent posts found',
+      traktHeading: 'Recently Watched',
+      traktEmpty: 'No recent watched history',
+      traktProfile: 'My Trakt Profile',
+      goodreadsHeading: 'Currently Reading',
+      goodreadsEmpty: 'No books currently',
+      goodreadsProfile: 'My Goodreads Profile',
+      githubHeading: 'From GitHub',
+      githubEmpty: 'No recent activity',
+      githubProfile: 'My GitHub Profile',
+    };
+
+const [latestPosts, feeds] = await Promise.all([
+  getCollection('blog', ({ data, slug }) => slug.startsWith(`${locale}/`) && data.isDraft !== true)
+    .then((posts) =>
+      posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3)
+    )
+    .catch((e) => {
+      console.error(`Error fetching ${locale} blog posts:`, e);
+      return [];
+    }),
+  getHomeFeeds(locale),
+]);
+
+const {
+  currentlyReadingBooks,
+  recentlyWatchedItems,
+  latestBlueskyPosts,
+  latestGitHubEvents,
+} = feeds;
+---
+
+<BaseLayout
+  title={copy.pageTitle}
+  description={copy.pageDescription}
+  lang={locale}
+  dir={isAr ? 'rtl' : 'ltr'}
+>
+  <div class="container mx-auto px-4 py-12 md:px-6 md:py-16">
+    <h1 class="text-4xl md:text-5xl font-bold text-center mb-2 text-soft-charcoal">
+      {copy.pageTitle}
+    </h1>
+    <p class="text-lg text-gray-600 text-center mb-12 md:mb-16">{copy.pageSubtitle}</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 auto-rows-min">
+      {/* Section 1: Latest Blog Posts */}
+      <section class="card card-accent-blog md:col-span-2 lg:col-span-8 lg:row-span-2">
+        <a href={`/${locale}/blog/`} class="block">
+          <h2 class="text-2xl font-bold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="mdi:post-outline" class="w-7 h-7 flex-shrink-0" />
+            {copy.blogHeading}
+          </h2>
+        </a>
+        {latestPosts.length > 0 ? (
+          <div class="flex-grow space-y-4">
+            {latestPosts.map((post) => {
+              const postHref = `/${locale}/blog/${post.slug.replace(new RegExp(`^${locale}/`), '')}`;
+              return (
+                <div class="space-y-2">
+                  {post.data.featuredImage && (
+                    <a href={postHref} class="block mb-4">
+                      {post.data.featuredImage.r2Path ? (
+                        <OptimizedImage
+                          src={`r2://${post.data.featuredImage.r2Path}`}
+                          alt={post.data.featuredImage.alt || post.data.title}
+                          width={600}
+                          height={256}
+                          class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                        />
+                      ) : (
+                        <img
+                          src={post.data.featuredImage.url}
+                          alt={post.data.featuredImage.alt || post.data.title}
+                          loading="lazy"
+                          decoding="async"
+                          class="w-full h-32 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                        />
+                      )}
+                    </a>
+                  )}
+                  <h3 class="text-lg font-semibold">
+                    <a href={postHref} class="hover:text-teal-600 transition-colors duration-200">
+                      <span class="text-soft-charcoal">{post.data.title}</span>
+                    </a>
+                  </h3>
+                  {post.data.description && (
+                    <p class="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                      {post.data.description}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState message={copy.blogEmpty} icon="mdi:post-outline" locale={locale} />
+        )}
+        <a
+          href={`/${locale}/blog/`}
+          class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-sm mt-6 flex-shrink-0"
+        >
+          {copy.allPosts} <span aria-hidden="true">{arrow}</span>
+        </a>
+      </section>
+
+      {/* Section 2: Strava Activity */}
+      <section class="card card-accent-fitness md:col-span-1 lg:col-span-4 lg:row-span-2">
+        <a href={PROFILES.strava.url} target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0" />
+            {copy.stravaHeading}
+          </h2>
+        </a>
+        <div class="flex-grow">
+          <StravaStats locale={locale} />
+        </div>
+      </section>
+
+      {/* Section 3: Bluesky Posts */}
+      <section class="card card-accent-social md:col-span-1 lg:col-span-6">
+        <a href={PROFILES.bluesky.url} target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:bluesky" class="w-6 h-6 flex-shrink-0" />
+            {copy.blueskyHeading}
+          </h2>
+        </a>
+        {latestBlueskyPosts.length > 0 ? (
+          <div class="flex-grow space-y-5">
+            {latestBlueskyPosts.map((post) => (
+              <div class="pb-5 border-b border-gray-100 dark:border-gray-800 last:border-b-0 last:pb-0">
+                {post.embedImageUrl && (
+                  <a
+                    href={post.embedLinkUrl || post.postUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block mb-2"
+                  >
+                    <img
+                      src={post.embedImageUrl}
+                      alt={post.embedLinkTitle || 'Bluesky Embed Image'}
+                      class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-700"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </a>
+                )}
+                {post.text && (
+                  <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                    {post.text}
+                  </p>
+                )}
+                {!post.text && post.embedLinkTitle && post.embedLinkUrl && (
+                  <p class="text-soft-charcoal text-base leading-relaxed mb-2 line-clamp-4">
+                    <em class="text-gray-500">{copy.blueskySharedLink}</em> {post.embedLinkTitle}
+                  </p>
+                )}
+                <a
+                  href={post.postUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-teal-600 hover:text-lavender font-medium inline-flex items-center gap-1 text-xs"
+                >
+                  {copy.blueskyView} <span aria-hidden="true">{arrow}</span>
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState message={copy.blueskyEmpty} icon="simple-icons:bluesky" locale={locale} />
+        )}
+      </section>
+
+      {/* Section 4: Trakt Recently Watched */}
+      <section class="card card-compact card-accent-entertainment md:col-span-1 lg:col-span-6">
+        <a href={PROFILES.trakt.url} target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:trakt" class="w-5 h-5 flex-shrink-0" />
+            {copy.traktHeading}
+          </h2>
+        </a>
+        {recentlyWatchedItems.length > 0 ? (
+          <div class="flex-grow">
+            <ul class="space-y-3">
+              {recentlyWatchedItems.map((item) => (
+                <li class="flex gap-3">
+                  {item.posterUrl && (
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" class="flex-shrink-0">
+                      <img
+                        src={item.posterUrl}
+                        alt={item.title}
+                        width="48"
+                        height="72"
+                        class="w-12 h-[4.5rem] object-cover rounded shadow-sm hover:shadow-md transition-shadow"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </a>
+                  )}
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex-grow hover:text-teal-600 transition-colors duration-200 block group"
+                  >
+                    <p class="text-soft-charcoal text-sm font-medium leading-snug group-hover:text-teal-600">
+                      {item.type === 'movie' ? '🎬 ' : '📺 '}
+                      {item.title}
+                    </p>
+                    {item.overview && (
+                      <p class="text-xs text-gray-500 leading-normal mt-1 line-clamp-2">
+                        {item.overview}
+                      </p>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <EmptyState message={copy.traktEmpty} icon="simple-icons:trakt" locale={locale} />
+        )}
+        <a
+          href={PROFILES.trakt.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start"
+        >
+          {copy.traktProfile} {arrow}
+        </a>
+      </section>
+
+      {/* Section 5: Goodreads Currently Reading */}
+      <section class="card card-compact card-accent-reading md:col-span-1 lg:col-span-6">
+        <a href={PROFILES.goodreads.url} target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:goodreads" class="w-5 h-5 flex-shrink-0" />
+            {copy.goodreadsHeading}
+          </h2>
+        </a>
+        <div class="flex-grow">
+          {currentlyReadingBooks.length > 0 ? (
+            <div class="space-y-2">
+              {currentlyReadingBooks.map((book) => (
+                <a
+                  href={book.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:text-teal-600 transition-colors duration-200 block"
+                >
+                  <p class="text-soft-charcoal text-sm font-medium leading-snug">{book.title}</p>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <EmptyState message={copy.goodreadsEmpty} icon="simple-icons:goodreads" locale={locale} />
+          )}
+        </div>
+        <a
+          href={PROFILES.goodreads.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start"
+        >
+          {copy.goodreadsProfile} {arrow}
+        </a>
+      </section>
+
+      {/* Section 6: GitHub Latest Events */}
+      <section class="card card-compact card-accent-code md:col-span-1 lg:col-span-6">
+        <a href={PROFILES.github.url} target="_blank" rel="noopener noreferrer" class="block">
+          <h2 class="text-lg font-semibold text-electric-blue mb-3 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
+            <Icon name="simple-icons:github" class="w-5 h-5 flex-shrink-0" />
+            {copy.githubHeading}
+          </h2>
+        </a>
+        <div class="flex-grow">
+          {latestGitHubEvents.length > 0 ? (
+            <ul class="space-y-2">
+              {latestGitHubEvents.map((event) => (
+                <li>
+                  <a
+                    href={event.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-teal-600 transition-colors duration-200 group"
+                  >
+                    <p class="text-soft-charcoal text-sm leading-relaxed group-hover:text-teal-600">
+                      {event.display}
+                    </p>
+                  </a>
+                  <p class="text-xs text-gray-500 mt-1">{event.timeAgo}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState message={copy.githubEmpty} icon="simple-icons:github" locale={locale} />
+          )}
+        </div>
+        <a
+          href={PROFILES.github.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs text-gray-500 hover:text-lavender mt-3 flex-shrink-0 self-start"
+        >
+          {copy.githubProfile} {arrow}
+        </a>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

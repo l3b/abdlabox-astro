@@ -247,10 +247,10 @@
   letter-spacing: -0.01em;
 }
 
-/* Add this rule to force light text in code blocks */
-.prose pre code span {
-  color: theme('colors.cool-light-gray');
-  /* Or try theme('colors.white') */
+/* Preserve Shiki syntax highlighting inside code blocks */
+.prose pre {
+  direction: ltr;
+  text-align: left;
 }
 
 /* Remove previous main a, h1, h2 styles if they exist */

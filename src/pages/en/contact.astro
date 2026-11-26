@@ -16,7 +16,7 @@ const linkCategories = socialLinks.reduce((acc, link) => {
   return acc;
 }, {} as Record<string, typeof socialLinks>);
 
-const categoryOrder = ['Professional', 'Writing', 'Activity', 'Learning', 'Reading', 'Media', 'Other'];
+const categoryOrder = ['Professional', 'Social', 'Writing', 'Activity', 'Learning', 'Reading', 'Media', 'Other'];
 const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
     const indexA = categoryOrder.indexOf(a);
     const indexB = categoryOrder.indexOf(b);
@@ -25,8 +25,6 @@ const sortedCategories = Object.keys(linkCategories).sort((a, b) => {
     if (indexB === -1) return -1;
     return indexA - indexB;
 });
-
-const calComUrl = "https://cal.com/your-username"; // !! Replace with your actual Cal.com link !!
 ---
 {/* Ensure BaseLayout props are set for English */}
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
@@ -96,9 +94,9 @@ const calComUrl = "https://cal.com/your-username"; // !! Replace with your actua
            {/* Cal.com Trigger Button */}
            <button
              type="button"
-             data-cal-link="abdla/30min"  /* Use your specific Cal link ID */
-             data-cal-namespace="30min" /* Optional namespace */
-             data-cal-config='{"layout":"month_view"}' /* Optional config */
+             data-cal-link="abdla/30min"
+             data-cal-namespace="30min"
+             data-cal-config='{"layout":"month_view"}'
              class="button"
            >
              Book a Meeting

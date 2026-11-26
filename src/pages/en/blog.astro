@@ -1,102 +1,97 @@
 ---
-// src/pages/en/blog.astro - Styled Version 6 (Final Refinements)
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { normalizeTag } from '../../data/tags';
 import OptimizedImage from '../../components/OptimizedImage.astro';
 
-// 1. Fetch English posts, filter drafts
 const allEnglishPosts = await getCollection('blog', ({ data }) => {
   return data.language === 'en' && data.isDraft !== true;
 });
 
-// 2. Sort posts by date
 const sortedPosts = allEnglishPosts.sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const pageTitle = "Blog";
-const pageDescription = "Latest articles and thoughts on Technology, Knowledge Management, Running, and more.";
+const pageTitle = 'Blog';
+const pageDescription =
+  'Latest articles and thoughts on Technology, Knowledge Management, Running, and more.';
 ---
 <BaseLayout title={pageTitle} description={pageDescription} lang="en" dir="ltr">
-  {/* Centered container with vertical padding */}
   <div class="container mx-auto px-4 py-8 md:px-6 md:py-12">
-
-    {/* Page Title - With Neon Yellow bottom border */}
-    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-4 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">{pageTitle}</h1>
+    <h1 class="inline-block text-3xl md:text-4xl font-bold mb-4 text-soft-charcoal pb-2 border-b-2 border-b-neon-yellow">
+      {pageTitle}
+    </h1>
     <p class="text-lg text-gray-600 mb-10 md:mb-12">{pageDescription}</p>
 
-    {/* List of Blog Posts */}
     <div class="space-y-6 md:space-y-8 pt-4 md:pt-6">
-      {sortedPosts.map(post => (
-        <article class="card relative overflow-hidden">
-          <div class="flex flex-col md:flex-row gap-4">
-            {post.data.featuredImage && (
-              <div class="w-full md:w-1/4 md:max-w-[200px] md:pt-[5%]">
-                {post.data.featuredImage.r2Path ? (
-                  <OptimizedImage 
-                    src={`r2://${post.data.featuredImage.r2Path}`}
-                    alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
-                    width={200}
-                    height={128}
-                    class="w-full h-48 md:h-32 rounded-lg object-cover shadow-sm"
-                  />
-                ) : (
-                  <img 
-                    src={post.data.featuredImage.url} 
-                    alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`} 
-                    class="w-full h-48 md:h-32 rounded-lg object-cover shadow-sm"
-                  />
-                )}
-              </div>
-            )}
-            <div class="flex-1">
-              {/* Post Title as a Link - Reverted to hover underline only */}
-              <a href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
-                 class="block mb-2 no-underline" {/* No underline by default */}
-              >
-                <h2 class="text-xl md:text-2xl font-semibold text-electric-blue hover:text-teal-600 hover:underline transition-colors duration-200"> {/* Underline on hover */}
-                  {post.data.title}
-                </h2>
-              </a>
-
-              {/* Post Metadata */}
-              <div class="text-sm text-gray-600 mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span>
-                  Published on: {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </span>
-                {post.data.tags && post.data.tags.length > 0 && (
-                  <div class="flex gap-2 flex-wrap">
-                    {post.data.tags.map(tag => (
-                      <a 
-                        href={`/en/tags/${normalizeTag(tag)}`}
-                        class="tag"
-                      >
-                        {tag}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Post Description */}
-              {post.data.description && (
-                <p class="text-gray-700 leading-relaxed mt-2">
-                  {post.data.description}
-                </p>
+      {sortedPosts.map((post) => {
+        const postHref = `/en/blog/${post.slug.replace(/^en\//, '')}`;
+        return (
+          <article class="card relative overflow-hidden">
+            <div class="flex flex-col md:flex-row gap-4">
+              {post.data.featuredImage && (
+                <div class="w-full md:w-1/4 md:max-w-[200px] flex-shrink-0">
+                  {post.data.featuredImage.r2Path ? (
+                    <OptimizedImage
+                      src={`r2://${post.data.featuredImage.r2Path}`}
+                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
+                      width={400}
+                      height={256}
+                      class="w-full h-48 md:h-32 rounded-lg object-cover shadow-sm"
+                    />
+                  ) : (
+                    <img
+                      src={post.data.featuredImage.url}
+                      alt={post.data.featuredImage.alt || `Featured image for ${post.data.title}`}
+                      loading="lazy"
+                      decoding="async"
+                      class="w-full h-48 md:h-32 rounded-lg object-cover shadow-sm"
+                    />
+                  )}
+                </div>
               )}
+              <div class="flex-1">
+                <a href={postHref} class="block mb-2 no-underline">
+                  <h2 class="text-xl md:text-2xl font-semibold text-electric-blue hover:text-teal-600 hover:underline transition-colors duration-200">
+                    {post.data.title}
+                  </h2>
+                </a>
 
-              {/* Read More Link - Reverted to Teal underline default */}
-              <a
-                 href={`/en/blog/${post.slug.replace(/^en\//, '')}`}
-                 class="inline-block mt-4 text-teal-600 font-medium underline decoration-teal-600 hover:text-neon-yellow hover:decoration-neon-yellow transition-colors duration-200"
-              >
-                 Read more &rarr;
-              </a>
+                <div class="text-sm text-gray-600 mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span>
+                    Published on:{' '}
+                    {post.data.pubDate.toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <div class="flex gap-2 flex-wrap">
+                      {post.data.tags.map((tag) => (
+                        <a href={`/en/tags/${normalizeTag(tag)}`} class="tag">
+                          {tag}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {post.data.description && (
+                  <p class="text-gray-700 leading-relaxed mt-2">{post.data.description}</p>
+                )}
+
+                <a
+                  href={postHref}
+                  class="inline-block mt-4 text-teal-600 font-medium underline decoration-teal-600 hover:text-neon-yellow hover:decoration-neon-yellow transition-colors duration-200"
+                >
+                  Read more &rarr;
+                </a>
+              </div>
             </div>
-          </div>
-        </article>
-      ))}
-    </div> {/* End space-y div */}
-  </div> {/* End container div */}
+          </article>
+        );
+      })}
+    </div>
+  </div>
 </BaseLayout>
