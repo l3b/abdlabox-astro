@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Icon } from 'astro-icon/components';
 import OptimizedImage from './OptimizedImage.astro';
-import StravaStats from './StravaStats.astro';
+import RunningStats from './RunningStats.astro';
 import EmptyState from './EmptyState.astro';
 import { getHomeFeeds } from '../utils/feeds';
 import { PROFILES } from '../data/socialLinks';
@@ -157,16 +157,16 @@ const {
         </a>
       </section>
 
-      {/* Section 2: Strava Activity */}
+      {/* Section 2: Running Activity (Garmin + Intervals.icu -> Strava links) */}
       <section class="card card-accent-fitness md:col-span-1 lg:col-span-4 lg:row-span-2">
         <a href={PROFILES.strava.url} target="_blank" rel="noopener noreferrer" class="block">
           <h2 class="text-xl font-semibold text-electric-blue mb-4 flex items-center gap-2 flex-shrink-0 hover:text-teal transition-colors">
-            <Icon name="simple-icons:strava" class="w-6 h-6 flex-shrink-0" />
+            <Icon name="mdi:run-fast" class="w-6 h-6 flex-shrink-0" />
             {copy.stravaHeading}
           </h2>
         </a>
         <div class="flex-grow">
-          <StravaStats locale={locale} />
+          <RunningStats locale={locale} />
         </div>
       </section>
 
